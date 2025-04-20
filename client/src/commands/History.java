@@ -33,13 +33,13 @@ public class History extends Command{
             ArrayList<String> history = runner.commandManager.getCommandHistory();
             if (history.isEmpty()) {
                 ConsoleManager.println("История команд пуста.");
-                return Runner.ExitCode.OK;
+                return ExitCode.OK;
             }
             ConsoleManager.println("История команд (начиная с последней):");
             for (int i = 0; i < Math.min(numberOfCommands, history.size()); i++) {
                 ConsoleManager.println(history.get(history.size()-i-1));
             }
-            return Runner.ExitCode.OK;
+            return ExitCode.OK;
         } catch (Exception e) {
             ConsoleManager.printError("Непредвиденная ошибка!");
             return ExitCode.ERROR;

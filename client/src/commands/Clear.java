@@ -19,11 +19,11 @@ public class Clear extends Command{
      * Выполняет команду.
      */
     @Override
-    public Runner.ExitCode execute(String[] args) {
+    public ExitCode execute(String[] args) {
         Runner runner = Runner.getRunner();
         try {
             runner.collectionManager.clearCollection();
-            return Runner.ExitCode.OK;
+            return ExitCode.OK;
         } catch (Exception e) {
             ConsoleManager.printError("Непредвиденная ошибка!");
             return ExitCode.ERROR;

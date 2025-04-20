@@ -10,7 +10,6 @@ import exceptions.CanceledCommandException;
 import managers.CollectionManager;
 import managers.ConsoleManager;
 import utility.Command;
-import utility.Runner;
 import utility.Runner.ExitCode;
 
 /**
@@ -26,7 +25,7 @@ public class Update extends Command{
      * Выполняет команду.
      */
     @Override
-    public Runner.ExitCode execute(String[] args) {
+    public ExitCode execute(String[] args) {
         CollectionManager collectionManager = CollectionManager.getCollectionManager();
         Long id;
         try {
