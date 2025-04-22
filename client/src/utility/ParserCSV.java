@@ -9,15 +9,7 @@ import exceptions.WrongValueException;
 import managers.ConsoleManager;
 import utility.builders.AlbumBuilder;
 import utility.builders.CoordinatesBuilder;
-import utility.validators.stringvalidators.KeyValidator;
-import utility.validators.stringvalidators.musicband.CreationDateValidator;
-import utility.validators.stringvalidators.musicband.IdValidator;
-import utility.validators.stringvalidators.musicband.NameValidator;
-import utility.validators.stringvalidators.musicband.NumberOfParticipantsValidator;
-import utility.validators.stringvalidators.musicband.bestalbum.AlbumNameValidator;
-import utility.validators.stringvalidators.musicband.bestalbum.AlbumSalesValidator;
-import utility.validators.stringvalidators.musicband.coordinates.CoordXValidator;
-import utility.validators.stringvalidators.musicband.coordinates.CoordYValidator;
+import utility.validators.TypeValidator;
 
 import java.util.*;
 
@@ -71,7 +63,7 @@ public class ParserCSV {
                 }
 
                 Integer key;
-                if (new KeyValidator().validate(getText(columnList.get(0)))) {
+                if (TypeValidator.isInteger(getText(columnList.get(0)))) {
                     key = Integer.valueOf(getText(columnList.get(0)));
                 }
                 else {
@@ -79,7 +71,7 @@ public class ParserCSV {
                 }
 
                 Long id;
-                if (new IdValidator().validate(getText(columnList.get(1)))) {
+                if (TypeValidator.isLong(getText(columnList.get(1)))) {
                     id = Long.valueOf(getText(columnList.get(1)));
                 }
                 else {
@@ -94,7 +86,7 @@ public class ParserCSV {
                 }
 
                 String name;
-                if (new NameValidator().validate(getText(columnList.get(2)))) {
+                if (!getText(columnList.get(2)).isBlank()) {
                     name = getText(columnList.get(2));
                 }
                 else {
@@ -102,7 +94,7 @@ public class ParserCSV {
                 }
 
                 Integer x;
-                if (new CoordXValidator().validate(getText(columnList.get(3)))) {
+                if (TypeValidator.isInteger(getText(columnList.get(3)))) {
                     x = Integer.valueOf(getText(columnList.get(3)));
                 }
                 else {
@@ -110,7 +102,7 @@ public class ParserCSV {
                 }
 
                 long y;
-                if (new CoordYValidator().validate(getText(columnList.get(4)))) {
+                if (TypeValidator.isLongPrim(getText(columnList.get(4)))) {
                     y = Long.parseLong(getText(columnList.get(4)));
                 }
                 else {
@@ -118,7 +110,7 @@ public class ParserCSV {
                 }
 
                 Date creationDate;
-                if (new CreationDateValidator().validate(getText(columnList.get(5)))) {
+                if (TypeValidator.isDate(getText(columnList.get(5)))) {
                     creationDate = new Date(Long.parseLong(getText(columnList.get(5))));
                 }
                 else {
@@ -126,7 +118,7 @@ public class ParserCSV {
                 }
 
                 Integer numberOfParticipants;
-                if (new NumberOfParticipantsValidator().validate(getText(columnList.get(6)))) {
+                if (TypeValidator.isInteger(getText(columnList.get(6)))) {
                     numberOfParticipants = Integer.valueOf(getText(columnList.get(6)));
                 }
                 else {
@@ -153,14 +145,14 @@ public class ParserCSV {
                     bestAlbum = null;
                 }
                 else {
-                    if (new AlbumNameValidator().validate(getText(columnList.get(8)))) {
+                    if (!getText(columnList.get(8)).isBlank()) {
                         bestAlbumName = getText(columnList.get(8));
                     }
                     else {
                         throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное название музыкального альбома.");
                     }
                     Double bestAlbumSales;
-                    if (new AlbumSalesValidator().validate(getText(columnList.get(9)))) {
+                    if (TypeValidator.isDouble(columnList.get(9))) {
                         bestAlbumSales = Double.valueOf(getText(columnList.get(9)));
                     }
                     else {
