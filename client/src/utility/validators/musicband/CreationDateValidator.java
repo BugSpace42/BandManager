@@ -12,10 +12,7 @@ public class CreationDateValidator implements Validator<Date>{
     @Override
     public boolean validate(Date creationDate) {
         Date currentDate = new Date();
-        if (creationDate.after(currentDate)) {
-            // значение поля должно быть меньше текущего времени
-            return false;
-        }
-        return true;
+        // значение поля должно быть меньше текущего времени
+        return !creationDate.after(currentDate);
     }
 }

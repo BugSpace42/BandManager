@@ -6,7 +6,7 @@ import utility.validators.musicband.bestalbum.AlbumValidator;
 import utility.validators.musicband.coordinates.CoordinatesValidator;
 
 /**
- * Отвечает за правильность данных, введённных пользователем.
+ * Отвечает за правильность данных, введённых пользователем.
  * @author Alina
  */
 public class MusicBandValidator implements Validator<MusicBand>{

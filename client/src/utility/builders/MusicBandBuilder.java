@@ -14,7 +14,7 @@ import java.util.List;
  * @author Alina
  */
 public class MusicBandBuilder {
-    private static Long currentId = Long.valueOf(1);
+    private static Long currentId = 1L;
 
     /**
      * Увеличивает счётчик id музыкальных групп на 1.
@@ -41,7 +41,6 @@ public class MusicBandBuilder {
             id = nextId();
         }
         Date date = new Date();
-        MusicBand musicBand = new MusicBand(id, name, coordinates, date, numberOfParticipants, genre, bestAlbum);
-        return musicBand;
+        return new MusicBand(id, name, coordinates, date, numberOfParticipants, genre, bestAlbum);
     }
 }

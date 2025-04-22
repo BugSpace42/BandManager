@@ -9,10 +9,7 @@ import utility.validators.Validator;
 public class NumberOfParticipantsValidator  implements Validator<Integer>{
     @Override
     public boolean validate(Integer numberOfParticipants) {
-        if (numberOfParticipants <= 0) {
-            // значение поля должно быть больше 0
-            return false;
-        }
-        return true;
+        // значение поля должно быть больше 0
+        return numberOfParticipants > 0;
     }
 }

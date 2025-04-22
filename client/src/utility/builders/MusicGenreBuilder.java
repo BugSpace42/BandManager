@@ -14,7 +14,6 @@ public class MusicGenreBuilder {
      */
     public static MusicGenre build(String genre) {
         genre = genre.trim().toUpperCase();
-        MusicGenre musicGenre = MusicGenre.valueOf(genre);
-        return musicGenre;
+        return MusicGenre.valueOf(genre);
     }
 }

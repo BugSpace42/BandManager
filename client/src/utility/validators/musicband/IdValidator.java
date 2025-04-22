@@ -9,10 +9,7 @@ import utility.validators.Validator;
 public class IdValidator implements Validator<Long>{
     @Override
     public boolean validate(Long id) {
-        if (id <= 0) {
-            // значение поля должно быть больше 0
-            return false;
-        }
-        return true;
+        // значение поля должно быть больше 0
+        return id > 0;
     }
 }

@@ -14,7 +14,6 @@ public class AlbumBuilder {
      * @return объект класса Album
      */
     public static Album build(String name, Double sales) {
-        Album album = new Album(name, sales);
-        return album;
+        return new Album(name, sales);
     }
 }

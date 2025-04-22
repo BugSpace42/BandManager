@@ -14,7 +14,6 @@ public class CoordinatesBuilder {
      * @return объект класса Coordinates
      */
     public static Coordinates build(Integer x, long y) {
-        Coordinates coordinates = new Coordinates(x, y);
-        return coordinates;
+        return new Coordinates(x, y);
     }
 }
