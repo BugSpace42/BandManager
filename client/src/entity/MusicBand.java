@@ -66,9 +66,9 @@ public class MusicBand implements Comparable<MusicBand>{
     /**
      * Запрашивает у пользователя количество участников музыкальной группы.
      * @return введённое количество участников музыкальной группы.
-          * @throws CanceledCommandException 
-          */
-         public static Integer askMusicBandNumber() throws CanceledCommandException {
+     * @throws CanceledCommandException
+     */
+    public static Integer askMusicBandNumber() throws CanceledCommandException {
         ConsoleManager.println("Введите количество участников музыкальной группы.");
         ConsoleManager.println("Количество участников музыкальной группы должно быть числом типа Integer, большим чем 0.");
         Integer numberOfParticipants;
@@ -98,7 +98,7 @@ public class MusicBand implements Comparable<MusicBand>{
      * @return введённый объект класса MusicBand
      * @throws CanceledCommandException 
      */
-         public static MusicBand askMusicBand() throws CanceledCommandException {
+    public static MusicBand askMusicBand() throws CanceledCommandException {
         String name = askMusicBandName();
         Coordinates coordinates = Coordinates.askCoordinates();
         Integer numberOfParticipants = askMusicBandNumber();
