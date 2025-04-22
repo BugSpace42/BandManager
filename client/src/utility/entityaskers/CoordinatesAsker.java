@@ -1,5 +1,6 @@
-package entity;
+package utility.entityaskers;
 
+import entity.Coordinates;
 import exceptions.CanceledCommandException;
 import managers.ConsoleManager;
 import utility.builders.CoordinatesBuilder;
@@ -7,39 +8,25 @@ import utility.validators.musicband.coordinates.CoordXValidator;
 import utility.validators.musicband.coordinates.CoordYValidator;
 
 /**
- * Класс координат.
+ * Отвечает за запрос у пользователя местоположения.
  * @author Alina
  */
-public class Coordinates {
-    private final Integer x; //Поле не может быть null
-    private final long y; //Значение поля должно быть больше -973
-
-    /**
-     * Конструктор - создание нового объекта с заданными x и y.
-     * @param x - первая координата
-     * @param y - вторая координата
-     */
-    public Coordinates(Integer x, long y) {
-        this.x = x;
-        this.y = y;
-    }
-
+public class CoordinatesAsker {
     /**
      * Запрашивает у пользователя объект класса Coordinates.
      * @return введённый объект класса Coordinates
-     * @throws CanceledCommandException 
+     * @throws CanceledCommandException
      */
-         public static Coordinates askCoordinates() throws CanceledCommandException {
+    public static Coordinates askCoordinates() throws CanceledCommandException {
         Integer x = askCoordX();
         long y = askCoordY();
-        Coordinates coordinates = CoordinatesBuilder.build(x, y);
-        return coordinates;
+        return CoordinatesBuilder.build(x, y);
     }
 
     /**
      * Запрашивает у пользователя координату x.
      * @return введённая координата.
-     * @throws CanceledCommandException 
+     * @throws CanceledCommandException
      */
     public static Integer askCoordX() throws CanceledCommandException {
         ConsoleManager.println("Введите координату x.");
@@ -69,9 +56,9 @@ public class Coordinates {
     /**
      * Запрашивает у пользователя координату y.
      * @return введённая координата.
-          * @throws CanceledCommandException 
-          */
-         public static long askCoordY() throws CanceledCommandException {
+     * @throws CanceledCommandException
+     */
+    public static long askCoordY() throws CanceledCommandException {
         ConsoleManager.println("Введите координату y.");
         ConsoleManager.println("Координата y должна быть числом типа long, большим чем -973.");
         String yString = ConsoleManager.askObject();
@@ -94,31 +81,5 @@ public class Coordinates {
             y = askCoordY();
         }
         return y;
-    }
-
-    public Integer getX() {
-        return x;
-    }
-
-    public long getY() {
-        return y;
-    }
-
-    /**
-     * Проверка равенcтва двух координат.
-     * @param coordinates - координаты сравниваемого объекта
-     * @return true - если объекты одинаковые, false - если разные
-     */
-    public boolean equals(Coordinates coordinates) {
-        if (coordinates == this) return true;
-        return coordinates.x.equals(this.x) && coordinates.y == this.y;
-    }
-    
-    /**
-     * @return Строковое представление объекта класса.
-     */
-    @Override
-    public String toString() {
-        return "(" + x + ", " + y + ")";
     }
 }

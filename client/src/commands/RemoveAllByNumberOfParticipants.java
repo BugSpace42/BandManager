@@ -26,7 +26,7 @@ public class RemoveAllByNumberOfParticipants extends Command{
     public ExitCode execute(String[] args){
         CollectionManager collectionManager = CollectionManager.getCollectionManager();
         try {
-            Integer numberOfParticipants = MusicBand.askMusicBandNumber();
+            Integer numberOfParticipants = utility.entityaskers.MusicBandAsker.askMusicBandNumber();
 
             // ссылка на коллекцию, которую будем изменять
             HashMap<Integer, MusicBand> collection = collectionManager.getCollection();

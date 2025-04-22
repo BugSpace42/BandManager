@@ -8,6 +8,7 @@ import java.nio.file.Path;
 
 /**
  * Основной класс.
+ * @author Alina
  */
 public class Main {
     /**

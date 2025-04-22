@@ -29,7 +29,7 @@ public class RemoveAnyByBestAlbum extends Command{
         CollectionManager collectionManager = CollectionManager.getCollectionManager();
         Album album;
         try {
-            album = Album.askAlbum();
+            album = utility.entityaskers.AlbumAsker.askAlbum();
         } catch (CanceledCommandException e) {
             ConsoleManager.println(e.getMessage());
             return ExitCode.CANCEL;

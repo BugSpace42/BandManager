@@ -37,7 +37,7 @@ public class ReplaceIfGreater extends Command{
         }
         MusicBand musicBand;
         try {
-            musicBand = MusicBand.askMusicBand();
+            musicBand = utility.entityaskers.MusicBandAsker.askMusicBand();
         } catch (CanceledCommandException e) {
             ConsoleManager.println(e.getMessage());
             return ExitCode.CANCEL;

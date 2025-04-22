@@ -36,7 +36,7 @@ public class Insert extends Command{
         
         MusicBand element;
         try {
-            element = MusicBand.askMusicBand();
+            element = utility.entityaskers.MusicBandAsker.askMusicBand();
             runner.collectionManager.addToCollection(key, element);
             return ExitCode.OK;
         } catch (CanceledCommandException e) {

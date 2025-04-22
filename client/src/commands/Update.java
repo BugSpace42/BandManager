@@ -40,7 +40,7 @@ public class Update extends Command{
         }
         MusicBand element;
         try {
-            element = MusicBand.askMusicBand();
+            element = utility.entityaskers.MusicBandAsker.askMusicBand();
             collectionManager.updateElementById(id, element);
             return ExitCode.OK;
         } catch (CanceledCommandException e) {

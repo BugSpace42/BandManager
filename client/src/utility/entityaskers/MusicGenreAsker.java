@@ -1,20 +1,15 @@
-package entity;
+package utility.entityaskers;
 
+import entity.MusicGenre;
 import exceptions.CanceledCommandException;
 import managers.ConsoleManager;
 import utility.builders.MusicGenreBuilder;
 
 /**
- * Перечисление музыкальных жанров.
+ * Отвечает за запрос у пользователя музыкального жанра.
  * @author Alina
  */
-public enum MusicGenre {
-    ROCK,
-    HIP_HOP,
-    JAZZ,
-    POP,
-    PUNK_ROCK;
-
+public class MusicGenreAsker {
     /**
      * Запрашивает у пользователя музыкальный жанр.
      * @return введённый музыкальный жанр.
@@ -40,18 +35,6 @@ public enum MusicGenre {
                 genre = askMusicGenre();
             }
         }
-        
         return genre;
-    }
-
-    /**
-     * @return Строка со всеми элементами enum'а через запятую.
-     */
-    public static String names() {
-        StringBuilder nameList = new StringBuilder();
-        for (MusicGenre genre : values()) {
-            nameList.append(genre.name()).append(", ");
-        }
-        return nameList.substring(0, nameList.length()-2);
     }
 }
