@@ -33,22 +33,22 @@ public class Main {
         Runner.setFileManager(fileManager);
         Runner runner = Runner.getRunner();
 
-        commandManager.newCommand(new Help());
-        commandManager.newCommand(new Info());
-        commandManager.newCommand(new Show());
-        commandManager.newCommand(new Insert());
-        commandManager.newCommand(new Update());
-        commandManager.newCommand(new RemoveKey());
-        commandManager.newCommand(new Clear());
-        commandManager.newCommand(new Save());
-        commandManager.newCommand(new ExecuteScript());
-        commandManager.newCommand(new Exit());
-        commandManager.newCommand(new RemoveGreater());
-        commandManager.newCommand(new History());
-        commandManager.newCommand(new ReplaceIfGreater());
-        commandManager.newCommand(new RemoveAllByNumberOfParticipants());
-        commandManager.newCommand(new RemoveAnyByBestAlbum());
-        commandManager.newCommand(new PrintFieldDescendingNumberOfParticipants());
+        commandManager.newCommand(new ClientHelp());
+        commandManager.newCommand(new ClientInfo());
+        commandManager.newCommand(new ClientShow());
+        commandManager.newCommand(new ClientInsert());
+        commandManager.newCommand(new ClientUpdate());
+        commandManager.newCommand(new ClientRemoveKey());
+        commandManager.newCommand(new ClientClear());
+        commandManager.newCommand(new ClientSave());
+        commandManager.newCommand(new ClientExecuteScript());
+        commandManager.newCommand(new ClientExit());
+        commandManager.newCommand(new ClientRemoveGreater());
+        commandManager.newCommand(new ClientHistory());
+        commandManager.newCommand(new ClientReplaceIfGreater());
+        commandManager.newCommand(new ClientRemoveAllByNumberOfParticipants());
+        commandManager.newCommand(new ClientRemoveAnyByBestAlbum());
+        commandManager.newCommand(new ClientPrintFieldDescendingNumberOfParticipants());
         
         runner.run();
     }

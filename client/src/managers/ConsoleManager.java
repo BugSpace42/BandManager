@@ -86,7 +86,6 @@ public class ConsoleManager {
 
     /**
      * Запрашивает у пользователя и считывает объект.
-     * @param objectName название объекта
      * @return строка, введённая пользователем
      * @throws CanceledCommandException исключение, выбрасываемое, если пользователь отменил выполнение текущей команды
      */
@@ -111,7 +110,7 @@ public class ConsoleManager {
      * Считывает команду.
      * @return список, состоящий из названия команды и аргументов
      */
-         public static String[] readCommand() {
+    public static String[] readCommand() {
         try {
             String [] text = scanner.nextLine().trim().split(" ");
             return text;

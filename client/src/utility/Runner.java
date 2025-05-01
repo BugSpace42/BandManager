@@ -28,16 +28,6 @@ public class Runner {
     public HashSet<String> scripts = new HashSet<>();;
 
     /**
-     * Перечисление кодов завершения выполнения команды.
-     */
-    public enum ExitCode {
-        OK,
-        EXIT,
-        CANCEL,
-        ERROR
-    }
-
-    /**
      * Перечисление режимов работы программы.
      */
     public enum RunningMode {
@@ -89,47 +79,43 @@ public class Runner {
                 + commands.get(userCommand[0]).getNumberOfArguments() + " аргументов");
             }
 
-            ExitCode exitCode = commands.get(userCommand[0]).execute(userCommand);
+            int exitCode = commands.get(userCommand[0]).execute(userCommand);
             if (currentMode == RunningMode.INTERACTIVE) {
-                switch (exitCode) {
-                    case OK -> {
-                        ConsoleManager.println("Команда " + userCommand[0] + " выполнена.");
-                        commandManager.addToHistory(userCommand[0]);
-                    }
-                    case ERROR -> {
-                        ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
-                        ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                    }
-                    case CANCEL -> {
-                        ConsoleManager.println("Выполнение команды " + userCommand[0] + " было прервано.");
-                        ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                    }
-                    case EXIT -> {
-                        ConsoleManager.println("Получена команда выхода из программы.");
-                        ConsoleManager.println("Завершение работы программы.");
-                        running = false;
-                    }
+                if (exitCode == ExitCode.OK.code) {
+                    ConsoleManager.println("Команда " + userCommand[0] + " выполнена.");
+                    commandManager.addToHistory(userCommand[0]);
+                }
+                if (exitCode == ExitCode.ERROR.code) {
+                    ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
+                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
+                }
+                if (exitCode == ExitCode.CANCEL.code) {
+                    ConsoleManager.println("Выполнение команды " + userCommand[0] + " было прервано.");
+                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
+                }
+                if (exitCode == ExitCode.EXIT.code) {
+                    ConsoleManager.println("Получена команда выхода из программы.");
+                    ConsoleManager.println("Завершение работы программы.");
+                    running = false;
                 }
             }
             else {
-                switch (exitCode) {
-                    case OK -> {
-                        ConsoleManager.println("Команда " + userCommand[0] + " выполнена.");
-                        commandManager.addToHistory(userCommand[0]);
-                    }
-                    case ERROR -> {
-                        ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
-                        ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                    }
-                    case CANCEL -> {
-                        ConsoleManager.println("Выполнение команды " + userCommand[0] + " было прервано.");
-                        ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                    }
-                    case EXIT -> {
-                        ConsoleManager.println("Получена команда выхода из программы.");
-                        ConsoleManager.println("Завершение работы программы.");
-                        running = false;
-                    }
+                if (exitCode == ExitCode.OK.code) {
+                    ConsoleManager.println("Команда " + userCommand[0] + " выполнена.");
+                    commandManager.addToHistory(userCommand[0]);
+                }
+                if (exitCode == ExitCode.ERROR.code) {
+                    ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
+                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
+                }
+                if (exitCode == ExitCode.CANCEL.code) {
+                    ConsoleManager.println("Выполнение команды " + userCommand[0] + " было прервано.");
+                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
+                }
+                if (exitCode == ExitCode.EXIT.code) {
+                    ConsoleManager.println("Получена команда выхода из программы.");
+                    ConsoleManager.println("Завершение работы программы.");
+                    running = false;
                 }
             }
         } catch (UnknownCommandException e) {
