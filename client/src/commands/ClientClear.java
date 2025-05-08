@@ -1,8 +1,8 @@
 package commands;
 
 import managers.ConsoleManager;
-import utility.Runner;
 import utility.ExitCode;
+import utility.Runner;
 
 /**
  * Очищает коллекцию.

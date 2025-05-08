@@ -2,9 +2,8 @@ package commands;
 
 import exceptions.ScriptRecursionException;
 import managers.ConsoleManager;
-import utility.Runner;
 import utility.ExitCode;
-import utility.Runner.RunningMode;
+import utility.Runner;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,13 +25,13 @@ public class ClientExecuteScript extends ExecuteScriptCommand{
         for (int i = 2; i < args.length; i++) {
             scriptName += " " + args[i];
         }
-        RunningMode previousMode = runner.getCurrentMode();
+        Runner.RunningMode previousMode = runner.getCurrentMode();
         try {
             if (runner.scripts.contains(scriptName)) {
                 throw new ScriptRecursionException("Скрипт " + scriptName + " уже выполняется.");
             }
             runner.scripts.add(scriptName);
-            runner.setCurrentMode(RunningMode.SCRIPT);
+            runner.setCurrentMode(Runner.RunningMode.SCRIPT);
             InputStreamReader reader = new InputStreamReader(new FileInputStream(scriptName));
             Scanner oldScanner = runner.consoleManager.getScanner();
             Scanner newScanner = new Scanner(reader);

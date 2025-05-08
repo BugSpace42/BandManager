@@ -2,7 +2,7 @@ package connection.responses;
 
 import java.io.Serializable;
 
-public abstract class Response implements Serializable {
+public class Response implements Serializable {
     private final int code;
     private final String error;
 

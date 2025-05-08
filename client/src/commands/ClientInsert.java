@@ -3,8 +3,8 @@ package commands;
 import entity.MusicBand;
 import exceptions.CanceledCommandException;
 import managers.ConsoleManager;
-import utility.Runner;
 import utility.ExitCode;
+import utility.Runner;
 
 /**
  * Добавляет в коллекцию новый элемент с заданным ключом.

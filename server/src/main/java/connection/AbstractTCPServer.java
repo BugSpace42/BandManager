@@ -1,17 +1,16 @@
 package main.java.connection;
 
+import connection.requests.CommandRequest;
 import connection.requests.Request;
 import connection.responses.Response;
+import main.java.managers.CommandRequestManager;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
 
 public abstract class AbstractTCPServer {
@@ -27,9 +26,23 @@ public abstract class AbstractTCPServer {
         this.serverSocket = new ServerSocket(port);
     }
 
-    public abstract byte[] receiveData() throws IOException;
+    public byte[] receiveData(InputStream in) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int bytesRead;
 
-    public abstract void sendData(byte[] data, SocketAddress addr) throws IOException;
+        while ((bytesRead = in.read(buffer)) != -1) {
+            byteArrayOutputStream.write(buffer, 0, bytesRead);
+        }
+
+        byte[] dataByteArray = byteArrayOutputStream.toByteArray();
+        return dataByteArray;
+    }
+
+    public void sendData(byte[] data, SocketAddress addr) throws IOException {
+        OutputStream out = socket.getOutputStream();
+        out.write(data);
+    }
 
     public Socket connectToClient() throws IOException {
         return serverSocket.accept();
@@ -39,8 +52,8 @@ public abstract class AbstractTCPServer {
         socket.close();
     }
 
-    public Request deserializeData(byte[] data) {
-        Request request = SerializationUtils.deserialize(data);
+    public CommandRequest deserializeData(byte[] data) throws IOException {
+        CommandRequest request = SerializationUtils.deserialize(data);
         return request;
     }
 
@@ -49,11 +62,14 @@ public abstract class AbstractTCPServer {
         return data;
     }
 
-    public void handleRequest(Request request) {
-        // todo
+    public int handleRequest(CommandRequest request) {
+        return CommandRequestManager.directCommand(request);
     }
 
-    public abstract Response formResponse();
+    public Response formResponse(int code, String error) {
+        Response response = new Response(code, error);
+        return response;
+    }
 
     public void close() throws IOException {
         serverSocket.close();
@@ -76,15 +92,15 @@ public abstract class AbstractTCPServer {
             InputStream in = null;
             byte[] data = null;
             try {
-                in = new BufferedInputStream(socket.getInputStream());
-                data = receiveData();
+                in = socket.getInputStream();
+                data = receiveData(in);
                 logger.info("Данные успешно получены");
             } catch (Exception e) {
                 logger.error("Ошибка при получении данных от клиента", e);
                 continue;
             }
 
-            Request request = null;
+            CommandRequest request = null;
             try {
                 request = deserializeData(data);
                 logger.info("Данные десериализованы");
@@ -93,8 +109,9 @@ public abstract class AbstractTCPServer {
                 continue;
             }
 
+            int exitCode = -1;
             try {
-                handleRequest(request);
+                exitCode = handleRequest(request);
             } catch (Exception e) {
                 logger.error("Ошибка при обработке данных клиента", e);
                 continue;
@@ -102,8 +119,8 @@ public abstract class AbstractTCPServer {
 
             Response response = null;
             try {
-                response = formResponse();
-                // TODO
+                response = formResponse(0, null);
+                // TODO формирование ответа клиенту
                 logger.info("Сформирован ответ клиенту");
             } catch (Exception e) {
                 logger.error("Ошибка при формировании ответа клиенту", e);
@@ -122,7 +139,7 @@ public abstract class AbstractTCPServer {
             OutputStream out = null;
             try {
                 out = socket.getOutputStream();
-                //TODO sendData(responseData, addr);
+                sendData(responseData, addr);
                 logger.info("Данные отправлены клиенту");
             } catch (IOException e) {
                 logger.error("Ошибка при отправке данных клиенту", e);

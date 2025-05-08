@@ -2,8 +2,8 @@ package commands;
 
 import managers.CollectionManager;
 import managers.ConsoleManager;
-import utility.Runner;
 import utility.ExitCode;
+import utility.Runner;
 
 import java.io.IOException;
 

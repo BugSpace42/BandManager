@@ -2,8 +2,8 @@ package commands;
 
 import entity.MusicBand;
 import managers.ConsoleManager;
-import utility.Runner;
 import utility.ExitCode;
+import utility.Runner;
 
 import java.util.HashMap;
 
