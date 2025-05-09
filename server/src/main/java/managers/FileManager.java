@@ -1,4 +1,4 @@
-package managers;
+package main.java.managers;
 
 import entity.MusicBand;
 import utility.ParserCSV;
@@ -28,17 +28,6 @@ public class FileManager {
      * Читает коллекцию объектов класса MusicBand из файла.
      * @return коллекция объектов
      * @throws IOException исключение, возникающее, если невозможно прочитать файл
-     */
-    /*
-     * Объясню, почему я пробрасываю исключение, а не обрабатываю его здесь.
-     * Этот метод отвечает лишь за то, чтобы читать из коллекции. Он не знает, что делать, если не получилось.
-     * Взаимодействием с пользователем занимаются другие классы, в них и будет описана логика этих действий.
-     * Чтение коллекции может быть реализовано в разных частях программы, и исключения при чтении файла там могут быть
-     * реализованы по-разному. 
-     * Пока что мне кажется, что будет правильно предупредить пользователя о том, что прочитать файл не удалось, 
-     * и создать новую коллекцию. Однако можно и сказать пользователю, что мы не можем прочитать файл,
-     * и попросить ввести другое имя файла. 
-     * Аналогичная ситуация и с методом записи коллекции в файл.
      */
     public HashMap<Integer, MusicBand> readCollection() throws IOException {
         HashMap<Integer, MusicBand> collection;
@@ -73,9 +62,6 @@ public class FileManager {
      * Записывает в файл коллекцию объектов класса MusicBand.
      * @param collection коллекция объектов класса MusicBand
      * @throws IOException исключение, возникающее, если невозможно записать строку
-     */
-    /*
-     * Причины, по которым я пробрасываю исключение, описаны в комментарии к readCollection().
      */
     public void writeCollection(HashMap<Integer, MusicBand> collection) throws IOException {
         List<String> fileLines = ParserCSV.parseToCSV(collection);

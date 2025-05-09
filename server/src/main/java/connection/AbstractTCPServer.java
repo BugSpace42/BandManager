@@ -1,10 +1,8 @@
 package main.java.connection;
 
 import connection.requests.CommandRequest;
-import connection.requests.Request;
 import connection.responses.Response;
 import main.java.managers.CommandRequestManager;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +37,7 @@ public abstract class AbstractTCPServer {
         return dataByteArray;
     }
 
-    public void sendData(byte[] data, SocketAddress addr) throws IOException {
+    public void sendData(byte[] data) throws IOException {
         OutputStream out = socket.getOutputStream();
         out.write(data);
     }
@@ -139,7 +137,7 @@ public abstract class AbstractTCPServer {
             OutputStream out = null;
             try {
                 out = socket.getOutputStream();
-                sendData(responseData, addr);
+                sendData(responseData);
                 logger.info("Данные отправлены клиенту");
             } catch (IOException e) {
                 logger.error("Ошибка при отправке данных клиенту", e);

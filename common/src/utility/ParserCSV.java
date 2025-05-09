@@ -6,7 +6,6 @@ import entity.MusicBand;
 import entity.MusicGenre;
 import exceptions.IdExistsException;
 import exceptions.WrongValueException;
-import managers.ConsoleManager;
 import utility.builders.AlbumBuilder;
 import utility.builders.CoordinatesBuilder;
 import utility.validators.TypeValidator;
@@ -164,8 +163,8 @@ public class ParserCSV {
                 MusicBand musicBand = new MusicBand(id, name, coordinates, creationDate, numberOfParticipants, genre, bestAlbum);
                 collection.put(key, musicBand);
             } catch (WrongValueException | IdExistsException e) {
-                ConsoleManager.printError(e.getMessage());
-                ConsoleManager.println("Строка с ошибкой пропущена.");
+                // ConsoleManager.printError(e.getMessage());
+                // ConsoleManager.println("Строка с ошибкой пропущена.");
             }
             
         }

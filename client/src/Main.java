@@ -1,9 +1,15 @@
 import commands.*;
+import connection.TCPClient;
 import managers.CommandManager;
 import managers.ConsoleManager;
 import managers.FileManager;
 import utility.Runner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 
 /**
@@ -16,18 +22,12 @@ public class Main {
      * @param args название файла с загружаемой коллекцией
      */
     public static void main(String[] args) {
+        int port = 12345;
+
         CommandManager commandManager = CommandManager.getCommandManager();
         
         String defaultFilePath = "collection.csv";
-        Path filePath;
-        if (args.length == 0) {
-            ConsoleManager.println("Внимание! Не введено название файла с загружаемой коллекцией.");
-            ConsoleManager.println("Будет загружена коллекция по умолчанию из файла " + defaultFilePath);
-            filePath = Path.of(defaultFilePath);
-        }
-        else {
-            filePath = Path.of(args[0]);
-        }
+        Path filePath = Path.of(defaultFilePath);
 
         FileManager fileManager = new FileManager(filePath.toAbsolutePath());
         Runner.setFileManager(fileManager);
@@ -49,7 +49,14 @@ public class Main {
         commandManager.newCommand(new ClientRemoveAllByNumberOfParticipants());
         commandManager.newCommand(new ClientRemoveAnyByBestAlbum());
         commandManager.newCommand(new ClientPrintFieldDescendingNumberOfParticipants());
-        
-        runner.run();
+
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            TCPClient client = new TCPClient(addr, port);
+
+            runner.run();
+        } catch (IOException e) {
+            ConsoleManager.printError("Невозможно подключиться к серверу!");
+        }
     }
 }

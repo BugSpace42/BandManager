@@ -4,8 +4,8 @@ import entity.Album;
 import entity.Coordinates;
 import entity.MusicBand;
 import entity.MusicGenre;
-import managers.CollectionManager;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +36,9 @@ public class MusicBandBuilder {
     public static MusicBand build(String name, Coordinates coordinates, Integer numberOfParticipants, MusicGenre genre, Album bestAlbum) {
         Long id;
         id = nextId();
-        List<Long> idList = CollectionManager.getIdList();
+        // List<Long> idList = CollectionManager.getIdList();
+        List<Long> idList = new ArrayList<>();
+        // TODO
         while(idList.contains(id)) {
             id = nextId();
         }
