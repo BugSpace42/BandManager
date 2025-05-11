@@ -22,6 +22,7 @@ public abstract class AbstractTCPServer {
     private Socket socket;
 
     private boolean running = false;
+    private boolean connection = false;
 
     public AbstractTCPServer(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
@@ -54,11 +55,17 @@ public abstract class AbstractTCPServer {
     }
 
     public Socket connectToClient() throws IOException {
+        connection = true;
         return serverSocket.accept();
     }
 
-    public void disconnectFromClient() throws IOException {
-        socket.close();
+    public void disconnectFromClient() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        connection = false;
     }
 
     public CommandRequest deserializeCommandRequest(byte[] data) throws IOException {
@@ -82,6 +89,7 @@ public abstract class AbstractTCPServer {
     }
 
     public Report handleRequest(CommandRequest request) {
+        CommandManager.addToHistory(request.getName());
         return CommandRequestManager.directCommand(request);
     }
 
@@ -112,67 +120,73 @@ public abstract class AbstractTCPServer {
         running = true;
         logger.info("Сервер запущен по адресу " + addr);
 
-        logger.info("Ожидание подключения клиента на порт " + getPort());
-        try {
-            socket = connectToClient();
-            logger.info("Клиент успешно подключился на порт "  + getPort());
-        } catch (Exception e) {
-            logger.error("Ошибка при подключении клиента", e);
-            running = false;
-        }
-
-        try {
-            start();
-            logger.info("Произведены действия для начала работы с клиентом.");
-        }
-        catch (Exception e) {
-            logger.error("Ошибка при произведении действий для начала работы с клиентом", e);
-            running = false;
-        }
-
         while (running) {
-            CommandRequest request = null;
+            logger.info("Ожидание подключения клиента на порт " + getPort());
             try {
-                request = receiveCommandRequest();
-                logger.info("Запрос получен от клиента");
+                socket = connectToClient();
+                logger.info("Клиент успешно подключился на порт " + getPort());
             } catch (Exception e) {
-                logger.error("Ошибка при получении данных клиента", e);
-                continue;
-            }
-
-            Report report = null;
-            try {
-                report = handleRequest(request);
-                logger.info("Данные клиента обработаны.");
-            } catch (Exception e) {
-                logger.error("Ошибка при обработке данных клиента", e);
-                continue;
-            }
-
-            CommandResponse commandResponse = null;
-            try {
-                commandResponse = formCommandResponse(report);
-                logger.info("Сформирован ответ клиенту");
-            } catch (Exception e) {
-                logger.error("Ошибка при формировании ответа клиенту", e);
-                continue;
-            }
-
-            byte[] responseData = null;
-            try {
-                responseData = serializeCommandData(commandResponse);
-                logger.info("Данные десериализованы");
-            } catch (Exception e) {
-                logger.error("Ошибка сериализации ответа клиенту", e);
-                continue;
+                logger.error("Ошибка при подключении клиента", e);
+                disconnectFromClient();
             }
 
             try {
-                sendData(responseData);
-                logger.info("Данные отправлены клиенту");
-            } catch (IOException e) {
-                logger.error("Ошибка при отправке данных клиенту", e);
-                continue;
+                start();
+                logger.info("Произведены действия для начала работы с клиентом.");
+            } catch (Exception e) {
+                logger.error("Ошибка при произведении действий для начала работы с клиентом", e);
+                disconnectFromClient();
+            }
+
+            while (connection) {
+                CommandRequest request = null;
+                try {
+                    request = receiveCommandRequest();
+                    logger.info("Запрос получен от клиента");
+                } catch (Exception e) {
+                    logger.error("Ошибка при получении данных клиента", e);
+                    disconnectFromClient();
+                    continue;
+                }
+
+                Report report = null;
+                try {
+                    report = handleRequest(request);
+                    logger.info("Данные клиента обработаны.");
+                } catch (Exception e) {
+                    logger.error("Ошибка при обработке данных клиента", e);
+                    disconnectFromClient();
+                    continue;
+                }
+
+                CommandResponse commandResponse = null;
+                try {
+                    commandResponse = formCommandResponse(report);
+                    logger.info("Сформирован ответ клиенту");
+                } catch (Exception e) {
+                    logger.error("Ошибка при формировании ответа клиенту", e);
+                    disconnectFromClient();
+                    continue;
+                }
+
+                byte[] responseData = null;
+                try {
+                    responseData = serializeCommandData(commandResponse);
+                    logger.info("Данные десериализованы");
+                } catch (Exception e) {
+                    logger.error("Ошибка сериализации ответа клиенту", e);
+                    disconnectFromClient();
+                    continue;
+                }
+
+                try {
+                    sendData(responseData);
+                    logger.info("Данные отправлены клиенту");
+                } catch (IOException e) {
+                    logger.error("Ошибка при отправке данных клиенту", e);
+                    disconnectFromClient();
+                    continue;
+                }
             }
         }
     }

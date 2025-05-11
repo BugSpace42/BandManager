@@ -22,6 +22,7 @@ public class Main {
         }
 
         CommandManager commandManager = CommandManager.getCommandManager();
+        CollectionManager collectionManager = CollectionManager.getCollectionManager();
 
         CommandManager.newCommand(new Help());
         CommandManager.newCommand(new Info());
@@ -30,7 +31,6 @@ public class Main {
         CommandManager.newCommand(new Update());
         CommandManager.newCommand(new RemoveKey());
         CommandManager.newCommand(new Clear());
-        CommandManager.newCommand(new Save());
         CommandManager.newCommand(new ExecuteScript());
         CommandManager.newCommand(new Exit());
         CommandManager.newCommand(new RemoveGreater());

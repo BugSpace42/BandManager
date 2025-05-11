@@ -1,10 +1,12 @@
 package entity;
 
+import java.io.Serializable;
+
 /**
  * Класс альбома.
  * @author Alina
  */
-public class Album implements Comparable<Album>{
+public class Album implements Comparable<Album>, Serializable {
     private final String name; //Поле не может быть null, Строка не может быть пустой
     private final Double sales; //Поле может быть null, Значение поля должно быть больше 0
 

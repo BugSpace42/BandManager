@@ -1,10 +1,12 @@
 package entity;
 
+import java.io.Serializable;
+
 /**
  * Класс музыкальной группы.
  * @author Alina
  */
-public class MusicBand implements Comparable<MusicBand>{
+public class MusicBand implements Comparable<MusicBand>, Serializable {
     private final Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private final String name; //Поле не может быть null, Строка не может быть пустой
     private final Coordinates coordinates; //Поле не может быть null

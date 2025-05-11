@@ -1,8 +1,13 @@
 package main.java.commands;
 
 import main.java.utility.ExecutableCommand;
+import utility.ExitCode;
 import utility.Report;
 
+/**
+ * Завершает программу без сохранения в файл.
+ * @author Alina
+ */
 public class Exit extends ExecutableCommand {
     public Exit() {
         super("exit", "завершить программу (без сохранения в файл)",
@@ -16,8 +21,13 @@ public class Exit extends ExecutableCommand {
      */
     @Override
     public Report execute(String[] args){
-        // Очищаем коллекцию
-        Report report = new Report(0, null, "Коллекция не очищена, команды нету");
+        Report report = null;
+        try {
+            report = new Report(ExitCode.EXIT.code, null, null);
+        } catch (Exception e) {
+            String errorString = "Непредвиденная ошибка!";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
         return report;
     }
 }

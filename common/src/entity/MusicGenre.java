@@ -1,10 +1,14 @@
 package entity;
 
+import utility.validators.TypeValidator;
+
+import java.io.Serializable;
+
 /**
  * Перечисление музыкальных жанров.
  * @author Alina
  */
-public enum MusicGenre {
+public enum MusicGenre implements Serializable {
     ROCK,
     HIP_HOP,
     JAZZ,

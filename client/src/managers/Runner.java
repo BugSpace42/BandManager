@@ -3,14 +3,19 @@ package managers;
 import connection.TCPClient;
 import connection.requests.CommandRequest;
 import connection.responses.CommandResponse;
+import entity.MusicBand;
 import exceptions.CanceledCommandException;
 import exceptions.TooFewArgumentsException;
 import exceptions.TooManyArgumentsException;
 import exceptions.UnknownCommandException;
+import org.apache.commons.lang3.SerializationUtils;
 import utility.Command;
+import utility.ExitCode;
 import utility.entityaskers.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -69,12 +74,12 @@ public class Runner {
      * @return все аргументы, записанные в массив строк
      * @throws CanceledCommandException
      */
-    public String[] askArguments(Command command) throws CanceledCommandException {
+    public ArrayList<byte[]> askArguments(Command command) throws CanceledCommandException {
         String[] askingArguments = command.getArguments();
-        String[] arguments = new String[askingArguments.length];
+        ArrayList<byte[]> arguments = new ArrayList<>();
         for (int i = 0; i < askingArguments.length; i++) {
             String type = askingArguments[i];
-            arguments[i] = Asker.ask(type);
+            arguments.add(Asker.askSerialized(type));
         }
         return arguments;
     }
@@ -107,15 +112,16 @@ public class Runner {
     public void launchCommand(String[] userCommand) {
         try {
             checkCommand(userCommand);
-            //int exitCode = commands.get(userCommand[0]).execute(userCommand);
-            String[] arguments = askArguments(commands.get(userCommand[0]));
+            ArrayList<byte[]> arguments = askArguments(commands.get(userCommand[0]));
 
-            String[] strings = new String[userCommand.length + arguments.length];
+            String[] strings = new String[userCommand.length + arguments.size()];
             for (int i = 0; i < userCommand.length; i++) {
                 strings[i] = userCommand[i];
             }
-            for (int i = 0; i < arguments.length; i++) {
-                strings[userCommand.length + i] = arguments[i];
+            for (int i = 0; i < arguments.size(); i++) {
+                byte[] data = arguments.get(i);
+                String encodedData = Base64.getEncoder().encodeToString(data);
+                strings[userCommand.length + i] = encodedData;
             }
 
             CommandRequest request = client.formRequest(strings);
@@ -123,11 +129,20 @@ public class Runner {
             client.sendData(dataToSend);
 
             CommandResponse commandResponse = client.receiveCommandResponse();
-            // TODO что-то делать с ответом
-            ConsoleManager.println(commandResponse.getCode());
-            ConsoleManager.println(commandResponse.getError());
-            ConsoleManager.println(commandResponse.getMessage());
-
+            if (commandResponse.getCode() == ExitCode.OK.code) {
+                ConsoleManager.println(commandResponse.getMessage());
+                ConsoleManager.println("Команда " + userCommand[0] + " успешно выполнена.");
+            } else if (commandResponse.getCode() == ExitCode.CANCEL.code) {
+                ConsoleManager.println("Получен сигнал отмены команды.");
+            } else if (commandResponse.getCode() == ExitCode.ERROR.code) {
+                ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
+                ConsoleManager.println(commandResponse.getMessage());
+            } else if (commandResponse.getCode() == ExitCode.EXIT.code) {
+                ConsoleManager.println("Получен сигнал выхода из программы.");
+                this.running = false;
+            } else {
+                ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
+            }
         } catch (IOException | ClassNotFoundException e) {
             ConsoleManager.printError("Произошла ошибка при получении ответа от сервера.");
         } catch (CanceledCommandException e) {
@@ -160,7 +175,7 @@ public class Runner {
                 launchCommand(currentCommand);
             }
         }
-        ConsoleManager.println("конец");
+        ConsoleManager.println("Программа завершила свою работу.");
     }
 
     public boolean getRunning() {

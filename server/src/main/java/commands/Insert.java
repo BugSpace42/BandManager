@@ -1,7 +1,13 @@
 package main.java.commands;
 
+import entity.MusicBand;
+import main.java.managers.CollectionManager;
 import main.java.utility.ExecutableCommand;
+import org.apache.commons.lang3.SerializationUtils;
+import utility.ExitCode;
 import utility.Report;
+
+import java.util.Base64;
 
 /**
  * Добавляет в коллекцию новый элемент с заданным ключом.
@@ -19,8 +25,19 @@ public class Insert extends ExecutableCommand {
      * @return отчёт о выполнении команды
      */
     public Report execute(String[] args){
-        // Добавляем элемент
-        Report report = new Report(0, null, "Элемент не добавлен, команды нету");
+        Report report;
+        try {
+            byte[] data = Base64.getDecoder().decode(args[2]);
+            MusicBand musicBand = SerializationUtils.deserialize(data);
+
+            CollectionManager collectionManager = CollectionManager.getCollectionManager();
+            collectionManager.addToCollection(Integer.valueOf(args[1]), musicBand);
+            String message = "Элемент с ключом " + args[1] + " успешно добавлен в коллекцию.";
+            report = new Report(ExitCode.OK.code, null, message);
+        } catch (Exception e) {
+            String errorString = "Непредвиденная ошибка!";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
         return report;
     }
 }

@@ -1,13 +1,22 @@
 package main.java.commands;
 
+import main.java.managers.CommandManager;
 import main.java.utility.ExecutableCommand;
+import utility.Command;
+import utility.ExitCode;
 import utility.Report;
 
+import java.util.HashMap;
+
+/**
+ * Выводит справку по доступным командам.
+ * @author Alina
+ */
 public class Help extends ExecutableCommand {
     public Help(){
         super("help", "вывести справку по доступным командам", 0, new String[]{});
-
     }
+
     /**
      * Выполняет команду.
      * @param args аргументы команды
@@ -15,8 +24,33 @@ public class Help extends ExecutableCommand {
      */
     @Override
     public Report execute(String[] args){
-        // Очищаем коллекцию
-        Report report = new Report(0, null, "Коллекция не очищена, команды нету");
+        Report report = null;
+        try {
+            String helpString = "Доступные команды:\n";
+            HashMap<String, Command> commands = CommandManager.getCommands();
+            for (String commandName : commands.keySet()){
+                helpString = helpString + commandName + "\n";
+            }
+            report = new Report(ExitCode.OK.code, null, helpString);
+        } catch (Exception e) {
+            String errorString = "Непредвиденная ошибка!";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
         return report;
     }
 }
+
+/*
+Шаблон:
+
+        Report report;
+        try {
+            String message = "";
+            report = new Report(ExitCode.OK.code, null, message);
+        } catch (Exception e) {
+            String errorString = "Непредвиденная ошибка!";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
+        return report;
+
+*/

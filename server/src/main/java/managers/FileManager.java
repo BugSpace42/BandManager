@@ -34,7 +34,7 @@ public class FileManager {
         try (InputStreamReader collectionInputStreamReader = 
             new InputStreamReader(new FileInputStream(this.collectionFilePath.toAbsolutePath().toString()))) {
             ArrayList<String> fileLines = readAllLines(collectionInputStreamReader);
-            collection = ParserCSV.parseFromCSV(fileLines);
+            collection = ParserCSV.parseCollectionFromCSV(fileLines);
         }
         return collection;
     }
@@ -64,7 +64,7 @@ public class FileManager {
      * @throws IOException исключение, возникающее, если невозможно записать строку
      */
     public void writeCollection(HashMap<Integer, MusicBand> collection) throws IOException {
-        List<String> fileLines = ParserCSV.parseToCSV(collection);
+        List<String> fileLines = ParserCSV.parseCollectionToCSV(collection);
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(this.collectionFilePath.toAbsolutePath().toString()))) {
             writeAllLines(writer, fileLines);
             writer.flush();

@@ -1,10 +1,12 @@
 package entity;
 
+import java.io.Serializable;
+
 /**
  * Класс координат.
  * @author Alina
  */
-public class Coordinates {
+public class Coordinates implements Serializable {
     private final Integer x; //Поле не может быть null
     private final long y; //Значение поля должно быть больше -973
 

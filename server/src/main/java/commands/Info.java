@@ -1,8 +1,17 @@
 package main.java.commands;
 
+import entity.MusicBand;
+import main.java.managers.CollectionManager;
 import main.java.utility.ExecutableCommand;
+import utility.ExitCode;
 import utility.Report;
 
+import java.util.HashMap;
+
+/**
+ * Выводит в стандартный поток вывода информацию о коллекции (тип, дата инициализации, количество элементов и т.д.)
+ * @author Alina
+ */
 public class Info extends ExecutableCommand {
     public Info(){
         super("info", "вывести информацию о коллекции", 0, new String[]{});
@@ -15,8 +24,21 @@ public class Info extends ExecutableCommand {
      */
     @Override
     public Report execute(String[] args){
-        // Очищаем коллекцию
-        Report report = new Report(0, null, "Коллекция не очищена, команды нету");
+        Report report = null;
+        try {
+            CollectionManager collectionManager = CollectionManager.getCollectionManager();
+            HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
+            String infoString = "Информация о коллекции:\n";
+            infoString += " Тип коллекции: " + collection.getClass().getName() + "\n";
+            infoString += " Дата инициализации коллекции: " + collectionManager.getInitDate() + "\n";
+            infoString += " Количество элементов: " + collection.size() + "\n";
+
+            report = new Report(ExitCode.OK.code, null, infoString);
+        } catch (Exception e) {
+            String errorString = "Непредвиденная ошибка!";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
         return report;
+
     }
 }

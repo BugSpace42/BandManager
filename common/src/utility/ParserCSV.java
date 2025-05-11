@@ -22,7 +22,7 @@ public class ParserCSV {
      * @param fileLines строки файла в формате csv
      * @return полученная коллекция
      */
-    public static HashMap<Integer, MusicBand> parseFromCSV(List<String> fileLines) {
+    public static HashMap<Integer, MusicBand> parseCollectionFromCSV(List<String> fileLines) {
         HashMap<Integer, MusicBand> collection = new HashMap<>();
         List<Long> idList = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public class ParserCSV {
                         columnList.add(column);
                         continue;
                     }
-                    // Если последний добавленный столбец не полностью в кавычках, то добавляем к нему этот 
+                    // Если последний добавленный столбец не полностью в кавычках, то добавляем к нему этот
                     String lastColumn = columnList.getLast();
                     if (isColumnPart(lastColumn)) {
                         String newColumn = lastColumn + "," + column;
@@ -53,11 +53,11 @@ public class ParserCSV {
                 }
 
                 if (columnList.size() != numberOfColumns) {
-                    // если количество столбцов в текцщей строке не равно правильному количеству, то 
+                    // если количество столбцов в текцщей строке не равно правильному количеству, то
                     // пропускаем эту строку или
                     // выкидываем исключение и после его обрабатываем
                     // continue;
-                    throw new WrongValueException("В строке " + fileLineIndex +  " уканано неверное количество аргументов. Ожидалось: " + 
+                    throw new WrongValueException("В строке " + fileLineIndex +  " уканано неверное количество аргументов. Ожидалось: " +
                     numberOfColumns + ". Получено: " + columnList.size());
                 }
 
@@ -76,7 +76,7 @@ public class ParserCSV {
                 else {
                     throw new WrongValueException("В строке " + fileLineIndex +  " указан неверный id музыкальной группы.");
                 }
-                
+
                 if (idList.contains(id)) {
                     throw new IdExistsException("Музыкальная группа с id " + id + " ужже существует.");
                 }
@@ -123,7 +123,7 @@ public class ParserCSV {
                 else {
                     throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное количество участников музыкальной группы.");
                 }
-                
+
                 Coordinates coordinates = CoordinatesBuilder.build(x, y);
 
                 MusicGenre genre;
@@ -176,7 +176,7 @@ public class ParserCSV {
      * @param collection коллекция объектов класса MusicBand
      * @return строки файла в формате csv
      */
-    public static List<String> parseToCSV(HashMap<Integer, MusicBand> collection) {
+    public static List<String> parseCollectionToCSV(HashMap<Integer, MusicBand> collection) {
         List<String> fileLines = new ArrayList<>();
         String title = "\"key\",\"id\",\"name\",\"x\",\"y\",\"creationDate\",\"numberOfParticipants\",\"genre\",\"albumName\",\"albumSales\"";
         fileLines.add(title);
