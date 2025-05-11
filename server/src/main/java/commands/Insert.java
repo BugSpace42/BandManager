@@ -1,20 +1,14 @@
 package main.java.commands;
 
-import commands.InsertCommand;
 import main.java.utility.ExecutableCommand;
-import utility.Executable;
 import utility.Report;
-
-import java.io.Serializable;
 
 /**
  * Добавляет в коллекцию новый элемент с заданным ключом.
  * @author Alina
  */
-public class ServerInsert extends ExecutableCommand {
-    private String data;
-
-    public ServerInsert() {
+public class Insert extends ExecutableCommand {
+    public Insert() {
         super("insert", "добавить новый элемент с заданным ключом",
                 1, new String[]{"MusicBand"});
     }

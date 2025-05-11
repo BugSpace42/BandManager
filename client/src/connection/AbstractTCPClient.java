@@ -9,10 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.Command;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,18 +27,33 @@ public abstract class AbstractTCPClient {
 
     public byte[] receiveData() throws IOException {
         InputStream in = socket.getInputStream();
+        BufferedInputStream bis = new BufferedInputStream(in);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int bytesRead;
 
-        bytesRead = in.read(buffer);
-        if (bytesRead != -1) {
+        while (bis.available() > 0) {
+            bytesRead = bis.read(buffer);
             byteArrayOutputStream.write(buffer, 0, bytesRead);
         }
 
         byte[] dataByteArray = byteArrayOutputStream.toByteArray();
         logger.info("От сервера получены данные, длиной: " + dataByteArray.length);
         return dataByteArray;
+    }
+
+    public CommandResponse receiveCommandResponse() throws IOException, ClassNotFoundException {
+        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+        CommandResponse response = (CommandResponse) inputStream.readObject();
+        logger.info("От сервера получен ответ о выполнении команды.");
+        return response;
+    }
+
+    public ListOfCommandsResponse receiveListOfCommandResponse() throws IOException, ClassNotFoundException {
+        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+        ListOfCommandsResponse response = (ListOfCommandsResponse) inputStream.readObject();
+        logger.info("От сервера получены данные о доступных командах.");
+        return response;
     }
 
     public void sendData(byte[] data) throws IOException {
@@ -63,11 +75,10 @@ public abstract class AbstractTCPClient {
         return listOfCommandsResponse;
     }
 
-    public HashMap<String, Command> getCommandMap() throws IOException {
-        byte[] data = receiveData();
-        ListOfCommandsResponse listOfCommandsResponse = deserializeListOfCommandsData(data);
-        HashMap<String, Command> commands = listOfCommandsResponse.getCommands();
-        logger.info("Получен список команд от сервера.");
+    public HashMap<String, Command> getCommandMap() throws IOException, ClassNotFoundException {
+        ListOfCommandsResponse response = receiveListOfCommandResponse();
+        HashMap<String, Command> commands = response.getCommands();
+        logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
         return commands;
     }
 
@@ -92,5 +103,9 @@ public abstract class AbstractTCPClient {
 
     public int getPort() {
         return addr.getPort();
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

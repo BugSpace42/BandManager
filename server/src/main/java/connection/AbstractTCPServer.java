@@ -41,9 +41,16 @@ public abstract class AbstractTCPServer {
         return dataByteArray;
     }
 
+    public CommandRequest receiveCommandRequest() throws IOException, ClassNotFoundException {
+        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+        CommandRequest request = (CommandRequest) inputStream.readObject();
+        return request;
+    }
+
     public void sendData(byte[] data) throws IOException {
         OutputStream out = socket.getOutputStream();
         out.write(data);
+        out.flush();
     }
 
     public Socket connectToClient() throws IOException {
@@ -54,9 +61,14 @@ public abstract class AbstractTCPServer {
         socket.close();
     }
 
-    public CommandRequest deserializeData(byte[] data) throws IOException {
+    public CommandRequest deserializeCommandRequest(byte[] data) throws IOException {
         CommandRequest request = SerializationUtils.deserialize(data);
         return request;
+    }
+
+    public ListOfCommandsResponse deserializeCommandList(byte[] data) throws IOException {
+        ListOfCommandsResponse listOfCommandsResponse = SerializationUtils.deserialize(data);
+        return listOfCommandsResponse;
     }
 
     public byte[] serializeCommandData(CommandResponse response) {
@@ -90,6 +102,7 @@ public abstract class AbstractTCPServer {
         HashMap<String, Command> commands = CommandManager.getCommands();
         ListOfCommandsResponse listOfCommandsResponse = formListOfCommandsResponse(commands);
         byte[] data = serializeListOfCommandsData(listOfCommandsResponse);
+
         sendData(data);
         logger.info("Информация о доступных командах отправлена клиенту.");
         System.out.println("Информация о доступных командах отправлена клиенту");
@@ -99,42 +112,31 @@ public abstract class AbstractTCPServer {
         running = true;
         logger.info("Сервер запущен по адресу " + addr);
 
+        logger.info("Ожидание подключения клиента на порт " + getPort());
+        try {
+            socket = connectToClient();
+            logger.info("Клиент успешно подключился на порт "  + getPort());
+        } catch (Exception e) {
+            logger.error("Ошибка при подключении клиента", e);
+            running = false;
+        }
+
+        try {
+            start();
+            logger.info("Произведены действия для начала работы с клиентом.");
+        }
+        catch (Exception e) {
+            logger.error("Ошибка при произведении действий для начала работы с клиентом", e);
+            running = false;
+        }
+
         while (running) {
-            logger.info("Ожидание подключения клиента на порт " + getPort());
-            try {
-                socket = connectToClient();
-                logger.info("Клиент успешно подключился на порт "  + getPort());
-            } catch (Exception e) {
-                logger.error("Ошибка при подключении клиента", e);
-                continue;
-            }
-
-            try {
-                start();
-                logger.info("Произведены действия для начала работы с клиентом.");
-            }
-            catch (Exception e) {
-                logger.error("Ошибка при произведении действий для начала работы с клиентом", e);
-                continue;
-            }
-
-            InputStream in = null;
-            byte[] data = null;
-            try {
-                in = socket.getInputStream();
-                data = receiveData(in);
-                logger.info("Данные успешно получены");
-            } catch (Exception e) {
-                logger.error("Ошибка при получении данных от клиента", e);
-                continue;
-            }
-
             CommandRequest request = null;
             try {
-                request = deserializeData(data);
-                logger.info("Данные десериализованы");
+                request = receiveCommandRequest();
+                logger.info("Запрос получен от клиента");
             } catch (Exception e) {
-                logger.error("Ошибка при десериализации данных клиента", e);
+                logger.error("Ошибка при получении данных клиента", e);
                 continue;
             }
 

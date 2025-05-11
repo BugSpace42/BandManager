@@ -1,11 +1,9 @@
 import connection.TCPClient;
 import managers.ConsoleManager;
-import managers.FileManager;
-import utility.Runner;
+import managers.Runner;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.nio.file.Path;
 
 /**
  * Основной класс.
@@ -18,7 +16,6 @@ public class Main {
      */
     public static void main(String[] args) {
         int port = 12345;
-
         Runner runner = Runner.getRunner();
 
         try {

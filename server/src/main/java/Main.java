@@ -1,7 +1,6 @@
 package main.java;
 
-import main.java.commands.ServerClear;
-import main.java.commands.ServerInsert;
+import main.java.commands.*;
 import main.java.connection.TCPServer;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
@@ -24,28 +23,22 @@ public class Main {
 
         CommandManager commandManager = CommandManager.getCommandManager();
 
-        // TODO
-        /*
-        commandManager.newCommand(new Help());
-        commandManager.newCommand(new Info());
-        commandManager.newCommand(new Show());
-        commandManager.newCommand(new Insert());
-        commandManager.newCommand(new Update());
-        commandManager.newCommand(new RemoveKey());
-        commandManager.newCommand(new Clear());
-        commandManager.newCommand(new Save());
-        commandManager.newCommand(new ExecuteScript());
-        commandManager.newCommand(new Exit());
-        commandManager.newCommand(new RemoveGreater());
-        commandManager.newCommand(new History());
-        commandManager.newCommand(new ReplaceIfGreater());
-        commandManager.newCommand(new RemoveAllByNumberOfParticipants());
-        commandManager.newCommand(new RemoveAnyByBestAlbum());
-        commandManager.newCommand(new PrintFieldDescendingNumberOfParticipants());
-         */
-
-        CommandManager.newCommand(new ServerInsert());
-        CommandManager.newCommand(new ServerClear());
+        CommandManager.newCommand(new Help());
+        CommandManager.newCommand(new Info());
+        CommandManager.newCommand(new Show());
+        CommandManager.newCommand(new Insert());
+        CommandManager.newCommand(new Update());
+        CommandManager.newCommand(new RemoveKey());
+        CommandManager.newCommand(new Clear());
+        CommandManager.newCommand(new Save());
+        CommandManager.newCommand(new ExecuteScript());
+        CommandManager.newCommand(new Exit());
+        CommandManager.newCommand(new RemoveGreater());
+        CommandManager.newCommand(new History());
+        CommandManager.newCommand(new ReplaceIfGreater());
+        CommandManager.newCommand(new RemoveAllByNumberOfParticipants());
+        CommandManager.newCommand(new RemoveAnyByBestAlbum());
+        CommandManager.newCommand(new PrintFieldDescendingNumberOfParticipants());
 
         try {
             int port = 12345; // Порт, на котором будет работать сервер

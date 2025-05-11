@@ -1,4 +1,4 @@
-package utility;
+package managers;
 
 import connection.TCPClient;
 import connection.requests.CommandRequest;
@@ -7,16 +7,12 @@ import exceptions.CanceledCommandException;
 import exceptions.TooFewArgumentsException;
 import exceptions.TooManyArgumentsException;
 import exceptions.UnknownCommandException;
-import managers.CollectionManager;
-import managers.CommandManager;
-import managers.ConsoleManager;
-import managers.FileManager;
+import utility.Command;
 import utility.entityaskers.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 /**
  * Класс, который управляет работой программы.
@@ -59,7 +55,7 @@ public class Runner {
      * Производит действия, необходимые для начала работы.
      * @throws IOException исключение, если невозможно получить информацию о командах от сервера
      */
-    public void start() throws IOException {
+    public void start() throws IOException, ClassNotFoundException {
         this.commands = client.getCommandMap();
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
@@ -126,11 +122,14 @@ public class Runner {
             byte[] dataToSend = client.serializeData(request);
             client.sendData(dataToSend);
 
-            byte[] recievedData = client.receiveData();
-            CommandResponse commandResponse = client.deserializeCommandData(recievedData);
+            CommandResponse commandResponse = client.receiveCommandResponse();
             // TODO что-то делать с ответом
+            ConsoleManager.println(commandResponse.getCode());
+            ConsoleManager.println(commandResponse.getError());
+            ConsoleManager.println(commandResponse.getMessage());
 
-
+        } catch (IOException | ClassNotFoundException e) {
+            ConsoleManager.printError("Произошла ошибка при получении ответа от сервера.");
         } catch (CanceledCommandException e) {
             ConsoleManager.println("Получен сигнал отмены команды.");
         } catch (UnknownCommandException e) {
@@ -139,8 +138,6 @@ public class Runner {
                 ConsoleManager.println("Для получения списка команд введите help.");
             }
         } catch (TooManyArgumentsException | TooFewArgumentsException e) {
-            ConsoleManager.printError(e.getMessage());
-        } catch (IOException e) {
             ConsoleManager.printError(e.getMessage());
         }
     }
@@ -151,7 +148,7 @@ public class Runner {
     public void run() {
         try {
             start();
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             ConsoleManager.printError("Произошла ошибка при получении списка команд от сервера.");
             running = false;
         }
