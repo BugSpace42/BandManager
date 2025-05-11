@@ -1,5 +1,9 @@
 package utility;
 
+import connection.TCPClient;
+import connection.requests.CommandRequest;
+import connection.responses.CommandResponse;
+import exceptions.CanceledCommandException;
 import exceptions.TooFewArgumentsException;
 import exceptions.TooManyArgumentsException;
 import exceptions.UnknownCommandException;
@@ -7,8 +11,10 @@ import managers.CollectionManager;
 import managers.CommandManager;
 import managers.ConsoleManager;
 import managers.FileManager;
+import utility.entityaskers.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -18,14 +24,12 @@ import java.util.Map;
  */
 public class Runner {
     private static Runner runner;
-    public static CommandManager commandManager;
     public static ConsoleManager consoleManager;
-    public static CollectionManager collectionManager;
-    public static FileManager fileManager;
-    public Map<String, Command> commands;
+    public HashMap<String, Command> commands;
     private boolean running = false;
     private RunningMode currentMode;
-    public HashSet<String> scripts = new HashSet<>();;
+    public HashSet<String> scripts = new HashSet<>();
+    private TCPClient client;
 
     /**
      * Перечисление режимов работы программы.
@@ -36,9 +40,7 @@ public class Runner {
     }
 
     private Runner() {
-        this.commandManager = CommandManager.getCommandManager();
         this.consoleManager = ConsoleManager.getConsoleManager();
-        this.commands = commandManager.getCommands();
     }
 
     /**
@@ -54,11 +56,52 @@ public class Runner {
     }
 
     /**
-     * Устанавливает новое значение поля fileManager.
-     * @param fileManager новое значение поля fileManager
+     * Производит действия, необходимые для начала работы.
+     * @throws IOException исключение, если невозможно получить информацию о командах от сервера
      */
-    public static void setFileManager(FileManager fileManager) {
-        Runner.fileManager = fileManager;
+    public void start() throws IOException {
+        this.commands = client.getCommandMap();
+        this.running = true;
+        this.currentMode = RunningMode.INTERACTIVE;
+        ConsoleManager.greeting();
+        ConsoleManager.println(commands);
+    }
+
+    /**
+     * Спрашивает у пользователя все аргументы команды.
+     * @param command команда
+     * @return все аргументы, записанные в массив строк
+     * @throws CanceledCommandException
+     */
+    public String[] askArguments(Command command) throws CanceledCommandException {
+        String[] askingArguments = command.getArguments();
+        String[] arguments = new String[askingArguments.length];
+        for (int i = 0; i < askingArguments.length; i++) {
+            String type = askingArguments[i];
+            arguments[i] = Asker.ask(type);
+        }
+        return arguments;
+    }
+
+    /**
+     * Проверяет правильность ввода команды.
+     * @param userCommand введённая пользователем команда
+     * @return true - если команда введена верно, false или исключение - иначе
+     */
+    public boolean checkCommand(String[] userCommand)
+            throws UnknownCommandException, TooManyArgumentsException, TooFewArgumentsException {
+        if (!commands.containsKey(userCommand[0])){
+            throw new UnknownCommandException("Не найдена команда " + userCommand[0]);
+        }
+        if (commands.get(userCommand[0]).getNumberOfArguments() > userCommand.length-1) {
+            throw new TooManyArgumentsException("Команда " + userCommand[0] + " должна содержать "
+                    + commands.get(userCommand[0]).getNumberOfArguments() + " аргументов");
+        }
+        if (commands.get(userCommand[0]).getNumberOfArguments() < userCommand.length-1) {
+            throw new TooFewArgumentsException("Команда " + userCommand[0] + " должна содержать "
+                    + commands.get(userCommand[0]).getNumberOfArguments() + " аргументов");
+        }
+        return true;
     }
 
     /**
@@ -67,63 +110,37 @@ public class Runner {
      */
     public void launchCommand(String[] userCommand) {
         try {
-            if (!commands.containsKey(userCommand[0])){
-                throw new UnknownCommandException("Не найдена команда " + userCommand[0]);
+            checkCommand(userCommand);
+            //int exitCode = commands.get(userCommand[0]).execute(userCommand);
+            String[] arguments = askArguments(commands.get(userCommand[0]));
+
+            String[] strings = new String[userCommand.length + arguments.length];
+            for (int i = 0; i < userCommand.length; i++) {
+                strings[i] = userCommand[i];
             }
-            if (commands.get(userCommand[0]).getNumberOfArguments() > userCommand.length-1) {
-                throw new TooManyArgumentsException("Команда " + userCommand[0] + " должна содержать " 
-                + commands.get(userCommand[0]).getNumberOfArguments() + " аргументов");
-            }
-            if (commands.get(userCommand[0]).getNumberOfArguments() < userCommand.length-1) {
-                throw new TooFewArgumentsException("Команда " + userCommand[0] + " должна содержать " 
-                + commands.get(userCommand[0]).getNumberOfArguments() + " аргументов");
+            for (int i = 0; i < arguments.length; i++) {
+                strings[userCommand.length + i] = arguments[i];
             }
 
-            int exitCode = commands.get(userCommand[0]).execute(userCommand);
-            if (currentMode == RunningMode.INTERACTIVE) {
-                if (exitCode == ExitCode.OK.code) {
-                    ConsoleManager.println("Команда " + userCommand[0] + " выполнена.");
-                    commandManager.addToHistory(userCommand[0]);
-                }
-                if (exitCode == ExitCode.ERROR.code) {
-                    ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
-                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                }
-                if (exitCode == ExitCode.CANCEL.code) {
-                    ConsoleManager.println("Выполнение команды " + userCommand[0] + " было прервано.");
-                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                }
-                if (exitCode == ExitCode.EXIT.code) {
-                    ConsoleManager.println("Получена команда выхода из программы.");
-                    ConsoleManager.println("Завершение работы программы.");
-                    running = false;
-                }
-            }
-            else {
-                if (exitCode == ExitCode.OK.code) {
-                    ConsoleManager.println("Команда " + userCommand[0] + " выполнена.");
-                    commandManager.addToHistory(userCommand[0]);
-                }
-                if (exitCode == ExitCode.ERROR.code) {
-                    ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
-                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                }
-                if (exitCode == ExitCode.CANCEL.code) {
-                    ConsoleManager.println("Выполнение команды " + userCommand[0] + " было прервано.");
-                    ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-                }
-                if (exitCode == ExitCode.EXIT.code) {
-                    ConsoleManager.println("Получена команда выхода из программы.");
-                    ConsoleManager.println("Завершение работы программы.");
-                    running = false;
-                }
-            }
+            CommandRequest request = client.formRequest(strings);
+            byte[] dataToSend = client.serializeData(request);
+            client.sendData(dataToSend);
+
+            byte[] recievedData = client.receiveData();
+            CommandResponse commandResponse = client.deserializeCommandData(recievedData);
+            // TODO что-то делать с ответом
+
+
+        } catch (CanceledCommandException e) {
+            ConsoleManager.println("Получен сигнал отмены команды.");
         } catch (UnknownCommandException e) {
             if (currentMode == RunningMode.INTERACTIVE) {
                 ConsoleManager.printError(e.getMessage());
                 ConsoleManager.println("Для получения списка команд введите help.");
             }
         } catch (TooManyArgumentsException | TooFewArgumentsException e) {
+            ConsoleManager.printError(e.getMessage());
+        } catch (IOException e) {
             ConsoleManager.printError(e.getMessage());
         }
     }
@@ -132,23 +149,12 @@ public class Runner {
      * Управляет работой программы.
      */
     public void run() {
-        running = true;
-        currentMode = RunningMode.INTERACTIVE;
-        if (!fileManager.isFileExist(fileManager.getCollectionFilePath())) {
-            ConsoleManager.printError("Не найден файл " + fileManager.getCollectionFilePath());
-            ConsoleManager.println("Создана пустая коллекция.");
+        try {
+            start();
+        } catch (IOException e) {
+            ConsoleManager.printError("Произошла ошибка при получении списка команд от сервера.");
+            running = false;
         }
-        else {
-            try {
-                CollectionManager.setCollection(fileManager.readCollection());
-                
-            } catch (IOException e) {
-                ConsoleManager.printError("Невозможно прочитать коллекцию из файла " + fileManager.getCollectionFilePath());
-                ConsoleManager.println("Создана пустая коллекция.");
-            }
-        }
-        collectionManager = CollectionManager.getCollectionManager();
-        ConsoleManager.greeting();
 
         while(running) {
             String[] currentCommand;
@@ -157,6 +163,7 @@ public class Runner {
                 launchCommand(currentCommand);
             }
         }
+        ConsoleManager.println("конец");
     }
 
     public boolean getRunning() {
@@ -173,5 +180,13 @@ public class Runner {
 
     public void setCurrentMode(RunningMode currentMode) {
         this.currentMode = currentMode;
+    }
+
+    public TCPClient getClient() {
+        return client;
+    }
+
+    public void setClient(TCPClient client) {
+        this.client = client;
     }
 }

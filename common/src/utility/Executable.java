@@ -1,5 +1,5 @@
 package utility;
 
 public interface Executable {
-    public int execute(String[] args);
+    public Report execute(String[] args);
 }

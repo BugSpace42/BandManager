@@ -1,18 +1,21 @@
 package connection;
 
-import connection.requests.CommandRequest;
-import connection.requests.Request;
-import connection.responses.Response;
+import connection.requests.*;
+import connection.responses.*;
+import managers.ConsoleManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.apache.commons.lang3.SerializationUtils;
+import utility.Command;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
@@ -25,12 +28,14 @@ public abstract class AbstractTCPClient {
         logger.info("Клиент подключен к " + addr);
     }
 
-    public byte[] receiveData(InputStream in) throws IOException {
+    public byte[] receiveData() throws IOException {
+        InputStream in = socket.getInputStream();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int bytesRead;
 
-        while ((bytesRead = in.read(buffer)) != -1) {
+        bytesRead = in.read(buffer);
+        if (bytesRead != -1) {
             byteArrayOutputStream.write(buffer, 0, bytesRead);
         }
 
@@ -46,16 +51,35 @@ public abstract class AbstractTCPClient {
         logger.info("Данные отправлены на сервер.");
     }
 
-    public Response deserializeData(byte[] data) throws IOException {
-        Response response = SerializationUtils.deserialize(data);
+    public CommandResponse deserializeCommandData(byte[] data) throws IOException {
+        CommandResponse commandResponse = SerializationUtils.deserialize(data);
         logger.info("Ответ от сервера десериализован.");
-        return response;
+        return commandResponse;
+    }
+
+    public ListOfCommandsResponse deserializeListOfCommandsData(byte[] data) throws IOException {
+        ListOfCommandsResponse listOfCommandsResponse = SerializationUtils.deserialize(data);
+        logger.info("Список команд от сервера десериализован.");
+        return listOfCommandsResponse;
+    }
+
+    public HashMap<String, Command> getCommandMap() throws IOException {
+        byte[] data = receiveData();
+        ListOfCommandsResponse listOfCommandsResponse = deserializeListOfCommandsData(data);
+        HashMap<String, Command> commands = listOfCommandsResponse.getCommands();
+        logger.info("Получен список команд от сервера.");
+        return commands;
     }
 
     public byte[] serializeData(Request request) throws IOException {
         byte[] data = SerializationUtils.serialize(request);
         logger.info("Запрос к серверу сериализован.");
         return data;
+    }
+
+    public CommandRequest formRequest(String[] args) {
+        CommandRequest request = new CommandRequest(args[0], args);
+        return request;
     }
 
     public InetSocketAddress getSocketAddress() {

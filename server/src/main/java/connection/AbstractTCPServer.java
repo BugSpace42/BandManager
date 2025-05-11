@@ -1,15 +1,19 @@
 package main.java.connection;
 
-import connection.requests.CommandRequest;
-import connection.responses.Response;
+import connection.requests.*;
+import connection.responses.*;
+import main.java.managers.CommandManager;
 import main.java.managers.CommandRequestManager;
+import utility.Command;
+import utility.Report;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 
 public abstract class AbstractTCPServer {
     private final InetSocketAddress addr;
@@ -55,22 +59,40 @@ public abstract class AbstractTCPServer {
         return request;
     }
 
-    public byte[] serializeData(Response response) {
+    public byte[] serializeCommandData(CommandResponse response) {
         byte[] data = SerializationUtils.serialize(response);
         return data;
     }
 
-    public int handleRequest(CommandRequest request) {
+    public byte[] serializeListOfCommandsData(ListOfCommandsResponse response) {
+        byte[] data = SerializationUtils.serialize(response);
+        return data;
+    }
+
+    public Report handleRequest(CommandRequest request) {
         return CommandRequestManager.directCommand(request);
     }
 
-    public Response formResponse(int code, String error) {
-        Response response = new Response(code, error);
-        return response;
+    public CommandResponse formCommandResponse(Report report) {
+        return new CommandResponse(report.getCode(), report.getError(), report.getMessage());
+    }
+
+    public ListOfCommandsResponse formListOfCommandsResponse(HashMap<String, Command> commands) {
+        return new ListOfCommandsResponse(commands);
     }
 
     public void close() throws IOException {
         serverSocket.close();
+    }
+
+    public void start() throws IOException {
+        System.out.println("Информация о доступных командах ещё не отправлена клиенту");
+        HashMap<String, Command> commands = CommandManager.getCommands();
+        ListOfCommandsResponse listOfCommandsResponse = formListOfCommandsResponse(commands);
+        byte[] data = serializeListOfCommandsData(listOfCommandsResponse);
+        sendData(data);
+        logger.info("Информация о доступных командах отправлена клиенту.");
+        System.out.println("Информация о доступных командах отправлена клиенту");
     }
 
     public void run() {
@@ -84,6 +106,15 @@ public abstract class AbstractTCPServer {
                 logger.info("Клиент успешно подключился на порт "  + getPort());
             } catch (Exception e) {
                 logger.error("Ошибка при подключении клиента", e);
+                continue;
+            }
+
+            try {
+                start();
+                logger.info("Произведены действия для начала работы с клиентом.");
+            }
+            catch (Exception e) {
+                logger.error("Ошибка при произведении действий для начала работы с клиентом", e);
                 continue;
             }
 
@@ -107,18 +138,18 @@ public abstract class AbstractTCPServer {
                 continue;
             }
 
-            int exitCode = -1;
+            Report report = null;
             try {
-                exitCode = handleRequest(request);
+                report = handleRequest(request);
+                logger.info("Данные клиента обработаны.");
             } catch (Exception e) {
                 logger.error("Ошибка при обработке данных клиента", e);
                 continue;
             }
 
-            Response response = null;
+            CommandResponse commandResponse = null;
             try {
-                response = formResponse(0, null);
-                // TODO формирование ответа клиенту
+                commandResponse = formCommandResponse(report);
                 logger.info("Сформирован ответ клиенту");
             } catch (Exception e) {
                 logger.error("Ошибка при формировании ответа клиенту", e);
@@ -127,16 +158,14 @@ public abstract class AbstractTCPServer {
 
             byte[] responseData = null;
             try {
-                responseData = serializeData(response);
+                responseData = serializeCommandData(commandResponse);
                 logger.info("Данные десериализованы");
             } catch (Exception e) {
                 logger.error("Ошибка сериализации ответа клиенту", e);
                 continue;
             }
 
-            OutputStream out = null;
             try {
-                out = socket.getOutputStream();
                 sendData(responseData);
                 logger.info("Данные отправлены клиенту");
             } catch (IOException e) {

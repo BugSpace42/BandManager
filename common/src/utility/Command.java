@@ -1,21 +1,23 @@
 package utility;
 
+import java.io.Serializable;
+
 /**
  * Абстрактный класс команды.
  * @author Alina
  */
-public abstract class Command implements Executable {
+public class Command implements Serializable {
     private final String name;
     private final String description;
     private final int numberOfArguments;
+    private final String[] arguments;
 
-    public Command(String name, String description, int numberOfArguments) {
+    public Command(String name, String description, int numberOfArguments, String[] arguments) {
         this.name = name;
         this.description = description;
         this.numberOfArguments = numberOfArguments;
+        this.arguments = arguments;
     }
-
-    public abstract int execute(String[] args);
 
     /**
      * Возвращает название команды
@@ -39,6 +41,14 @@ public abstract class Command implements Executable {
      */
     public int getNumberOfArguments() {
         return numberOfArguments;
+    }
+
+    /**
+     * Возвращает список типов аргументов команды.
+     * @return список типов аргументов команды.
+     */
+    public String[] getArguments() {
+        return arguments;
     }
 }
 

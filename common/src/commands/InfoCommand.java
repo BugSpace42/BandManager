@@ -5,6 +5,6 @@ import utility.Command;
 
 public abstract class InfoCommand extends Command {
     public InfoCommand() {
-        super("info", "вывести информацию о коллекции", 0);
+        super("info", "вывести информацию о коллекции", 0, new String[]{});
     }
 }

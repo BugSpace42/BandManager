@@ -1,5 +1,6 @@
 package main.java.managers;
 
+import main.java.utility.ExecutableCommand;
 import utility.Command;
 
 import java.util.ArrayList;
@@ -7,16 +8,33 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class CommandManager {
+    private static CommandManager commandManager;
+    private static final HashMap<String, ExecutableCommand> executableCommands = new HashMap<>();
     private static final HashMap<String, Command> commands = new HashMap<>();
     private static final ArrayList<String> commandHistory = new ArrayList<>();
 
     private CommandManager() {}
 
     /**
-     * Добавляет новую команду.
-     * @param command команда
+     * Метод, использующийся для получения CommandManager.
+     * Создаёт новый объект, если текущий объект ещё не создан.
+     * @return commandManager
      */
-    public static void newCommand(Command command) {
+    public static CommandManager getCommandManager() {
+        if (commandManager == null) {
+            commandManager = new CommandManager();
+        }
+        return commandManager;
+    }
+
+    /**
+     * Добавляет новую команду.
+     * @param executableCommand команда
+     */
+    public static void newCommand(ExecutableCommand executableCommand) {
+        executableCommands.put(executableCommand.getName(), executableCommand);
+        Command command = new Command(executableCommand.getName(), executableCommand.getDescription(),
+                executableCommand.getNumberOfArguments(), executableCommand.getArguments());
         commands.put(command.getName(), command);
     }
 
@@ -32,6 +50,13 @@ public class CommandManager {
      */
     public static HashMap<String, Command> getCommands() {
         return commands;
+    }
+
+    /**
+     * @return словарь с доступными командами
+     */
+    public static HashMap<String, ExecutableCommand> getExecutableCommands() {
+        return executableCommands;
     }
 
     /**
