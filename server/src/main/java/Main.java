@@ -1,6 +1,7 @@
 package main.java;
 
 import main.java.commands.*;
+import main.java.commands.servercommands.ServerExecuteScript;
 import main.java.connection.TCPServer;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
@@ -31,7 +32,7 @@ public class Main {
         CommandManager.newCommand(new Update());
         CommandManager.newCommand(new RemoveKey());
         CommandManager.newCommand(new Clear());
-        CommandManager.newCommand(new ExecuteScript());
+        CommandManager.newCommand(new ServerExecuteScript());
         CommandManager.newCommand(new Exit());
         CommandManager.newCommand(new RemoveGreater());
         CommandManager.newCommand(new History());

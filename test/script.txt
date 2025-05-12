@@ -1,0 +1,17 @@
+help
+show
+info
+wrong_command
+insert 33
+name
+123
+321
+2025
+rock
+album name
+213254364
+info
+show
+execute_script test/script.txt
+show
+info

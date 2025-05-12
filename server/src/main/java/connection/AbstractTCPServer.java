@@ -1,11 +1,11 @@
 package main.java.connection;
 
-import connection.requests.*;
-import connection.responses.*;
+import main.java.connection.requests.*;
+import main.java.connection.responses.*;
 import main.java.managers.CommandManager;
 import main.java.managers.CommandRequestManager;
-import utility.Command;
-import utility.Report;
+import main.java.utility.Command;
+import main.java.utility.Report;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

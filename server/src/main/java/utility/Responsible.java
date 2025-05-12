@@ -1,6 +1,6 @@
 package main.java.utility;
 
-import connection.responses.CommandResponse;
+import main.java.connection.responses.CommandResponse;
 
 public interface Responsible {
     CommandResponse formResponse(String[] args);

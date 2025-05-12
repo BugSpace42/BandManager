@@ -2,8 +2,8 @@ package main.java.commands;
 
 import entity.MusicBand;
 import main.java.utility.ExecutableCommand;
-import utility.ExitCode;
-import utility.Report;
+import main.java.utility.ExitCode;
+import main.java.utility.Report;
 import main.java.managers.CollectionManager;
 
 import java.util.HashMap;

@@ -1,8 +1,8 @@
 package main.java.commands;
 
 import main.java.utility.ExecutableCommand;
-import utility.ExitCode;
-import utility.Report;
+import main.java.utility.ExitCode;
+import main.java.utility.Report;
 
 /**
  * Завершает программу без сохранения в файл.

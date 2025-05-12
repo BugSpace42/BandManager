@@ -1,7 +1,5 @@
 package entity;
 
-import utility.validators.TypeValidator;
-
 import java.io.Serializable;
 
 /**

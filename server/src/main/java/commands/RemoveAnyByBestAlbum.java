@@ -5,8 +5,8 @@ import entity.MusicBand;
 import main.java.managers.CollectionManager;
 import main.java.utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
-import utility.ExitCode;
-import utility.Report;
+import main.java.utility.ExitCode;
+import main.java.utility.Report;
 
 import java.util.Base64;
 import java.util.HashMap;

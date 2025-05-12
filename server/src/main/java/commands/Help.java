@@ -2,9 +2,9 @@ package main.java.commands;
 
 import main.java.managers.CommandManager;
 import main.java.utility.ExecutableCommand;
-import utility.Command;
-import utility.ExitCode;
-import utility.Report;
+import main.java.utility.Command;
+import main.java.utility.ExitCode;
+import main.java.utility.Report;
 
 import java.util.HashMap;
 

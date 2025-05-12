@@ -1,0 +1,35 @@
+package main.java;
+
+import main.java.commands.ClientExecuteScript;
+import main.java.connection.TCPClient;
+import main.java.managers.ConsoleManager;
+import main.java.managers.Runner;
+
+import java.io.IOException;
+import java.net.InetAddress;
+
+/**
+ * Основной класс.
+ * @author Alina
+ */
+public class Main {
+    /**
+     * Основной метод
+     * @param args название файла с загружаемой коллекцией
+     */
+    public static void main(String[] args) {
+        int port = 12345;
+        Runner runner = Runner.getRunner();
+        runner.addClientCommand(new ClientExecuteScript());
+
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            TCPClient client = new TCPClient(addr, port);
+            runner.setClient(client);
+
+            runner.run();
+        } catch (IOException e) {
+            ConsoleManager.printError("Невозможно подключиться к серверу!");
+        }
+    }
+}
