@@ -1,4 +1,4 @@
-package main.java.utility;
+package main.java.connection;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
@@ -12,7 +12,7 @@ public class SSHPortForwarding {
     private static final String sshUser = "s409478";
     private static final String sshPassword = "uEtl*8862";
 
-    private static final int localPort = 55555; // локальный порт для приложения
+    private static final int localPort = 54321; // локальный порт для приложения
     private static final String remoteHost = "localhost"; // хост на сервере, куда перенаправляем
     private static final int remotePort = 12345; // порт сервера, с которым работает ваше приложение
 
@@ -31,9 +31,9 @@ public class SSHPortForwarding {
 
             session.setPortForwardingL(localPort, remoteHost, remotePort);
 
-            System.out.println("Туннель создан. Подключайтесь к localhost:" + localPort);
+            logger.info("Туннель установлен на localhost:" + localPort);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Произошла ошибка при установлении туннеля", e);
         }
     }
 

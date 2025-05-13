@@ -4,7 +4,7 @@ import main.java.commands.ClientExecuteScript;
 import main.java.connection.TCPClient;
 import main.java.managers.ConsoleManager;
 import main.java.managers.Runner;
-import main.java.utility.SSHPortForwarding;
+import main.java.connection.SSHPortForwarding;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -26,13 +26,14 @@ public class Main {
         SSHPortForwarding.connect();
 
         try {
-            InetAddress addr = InetAddress.getLocalHost();
+            InetAddress addr = InetAddress.getByName("localhost");
             TCPClient client = new TCPClient(addr, port);
             runner.setClient(client);
 
             runner.run();
         } catch (IOException e) {
             ConsoleManager.printError("Невозможно подключиться к серверу!");
+            ConsoleManager.printError(e);
         }
     }
 }

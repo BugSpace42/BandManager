@@ -19,13 +19,13 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Программа запущена");
-        String collectionFilePath = "resources/collection.csv"; // путь к файлу с коллекцией
+        String collectionFilePath = "res/collection.csv"; // путь к файлу с коллекцией
         Path filePath = Path.of(collectionFilePath);
         FileManager fileManager = FileManager.getFileManager(filePath.toAbsolutePath());
         try {
             CollectionManager.setCollection(fileManager.readCollection());
         } catch (IOException e) {
-            logger.error("Ошибка при чтении коллекции из файла", e);
+            logger.warn("Ошибка при чтении коллекции из файла{}", fileManager.getCollectionFilePath(), e);
             logger.info("Создана пустая коллекция.");
         }
 

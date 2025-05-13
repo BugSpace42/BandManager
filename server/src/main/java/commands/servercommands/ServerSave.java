@@ -6,6 +6,8 @@ import main.java.utility.ExecutableCommand;
 import main.java.utility.ExitCode;
 import main.java.utility.Report;
 
+import java.io.IOException;
+
 /**
  * Сохраняет коллекцию в файл.
  * Серверная команда, недоступная клиенту.
@@ -36,7 +38,11 @@ public class ServerSave extends ExecutableCommand {
                 String errorString = "FileManager не инициализирован, сохранить коллекцию невозможно.";
                 report = new Report(ExitCode.ERROR.code, errorString, errorString);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            String errorString = "Невозможно записать коллекцию в файл";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
+        catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         }
