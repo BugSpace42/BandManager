@@ -17,7 +17,7 @@ import java.util.HashMap;
 
 public abstract class AbstractTCPServer {
     private final InetSocketAddress addr;
-    private final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(AbstractTCPServer.class);
     private final ServerSocket serverSocket;
     private Socket socket;
 
@@ -29,23 +29,9 @@ public abstract class AbstractTCPServer {
         this.serverSocket = new ServerSocket(port);
     }
 
-    public byte[] receiveData(InputStream in) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-
-        while ((bytesRead = in.read(buffer)) != -1) {
-            byteArrayOutputStream.write(buffer, 0, bytesRead);
-        }
-
-        byte[] dataByteArray = byteArrayOutputStream.toByteArray();
-        return dataByteArray;
-    }
-
     public CommandRequest receiveCommandRequest() throws IOException, ClassNotFoundException {
         ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-        CommandRequest request = (CommandRequest) inputStream.readObject();
-        return request;
+        return (CommandRequest) inputStream.readObject();
     }
 
     public void sendData(byte[] data) throws IOException {
@@ -68,29 +54,22 @@ public abstract class AbstractTCPServer {
         connection = false;
     }
 
-    public CommandRequest deserializeCommandRequest(byte[] data) throws IOException {
-        CommandRequest request = SerializationUtils.deserialize(data);
-        return request;
-    }
-
-    public ListOfCommandsResponse deserializeCommandList(byte[] data) throws IOException {
-        ListOfCommandsResponse listOfCommandsResponse = SerializationUtils.deserialize(data);
-        return listOfCommandsResponse;
-    }
-
     public byte[] serializeCommandData(CommandResponse response) {
-        byte[] data = SerializationUtils.serialize(response);
-        return data;
+        return SerializationUtils.serialize(response);
     }
 
     public byte[] serializeListOfCommandsData(ListOfCommandsResponse response) {
-        byte[] data = SerializationUtils.serialize(response);
-        return data;
+        return SerializationUtils.serialize(response);
     }
 
     public Report handleRequest(CommandRequest request) {
         CommandManager.addToHistory(request.getName());
         return CommandRequestManager.directCommand(request);
+    }
+
+    public Report executeServerCommand(String[] args) {
+        CommandRequest request = new CommandRequest(args[0], args);
+        return CommandRequestManager.directServerCommand(request);
     }
 
     public CommandResponse formCommandResponse(Report report) {
@@ -101,19 +80,22 @@ public abstract class AbstractTCPServer {
         return new ListOfCommandsResponse(commands);
     }
 
+    public void saveCollection() {
+        executeServerCommand(new String[]{"save"});
+    }
+
     public void close() throws IOException {
+        saveCollection();
         serverSocket.close();
     }
 
     public void start() throws IOException {
-        System.out.println("Информация о доступных командах ещё не отправлена клиенту");
         HashMap<String, Command> commands = CommandManager.getCommands();
         ListOfCommandsResponse listOfCommandsResponse = formListOfCommandsResponse(commands);
         byte[] data = serializeListOfCommandsData(listOfCommandsResponse);
 
         sendData(data);
         logger.info("Информация о доступных командах отправлена клиенту.");
-        System.out.println("Информация о доступных командах отправлена клиенту");
     }
 
     public void run() {
@@ -188,6 +170,13 @@ public abstract class AbstractTCPServer {
                     continue;
                 }
             }
+            // отладочная строчка
+            running = false;
+        }
+        try {
+            close();
+        } catch (IOException e) {
+            logger.error("Ошибка при закрытии сервера", e);
         }
     }
 

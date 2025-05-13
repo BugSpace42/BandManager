@@ -4,6 +4,7 @@ import main.java.commands.ClientExecuteScript;
 import main.java.connection.TCPClient;
 import main.java.managers.ConsoleManager;
 import main.java.managers.Runner;
+import main.java.utility.SSHPortForwarding;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -18,9 +19,11 @@ public class Main {
      * @param args название файла с загружаемой коллекцией
      */
     public static void main(String[] args) {
-        int port = 12345;
         Runner runner = Runner.getRunner();
         runner.addClientCommand(new ClientExecuteScript());
+
+        int port = SSHPortForwarding.getLocalPort();
+        SSHPortForwarding.connect();
 
         try {
             InetAddress addr = InetAddress.getLocalHost();

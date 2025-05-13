@@ -14,14 +14,29 @@ import java.util.List;
  * @author Alina
  */
 public class FileManager {
+    private static FileManager fileManager;
     private Path collectionFilePath;
 
     /**
      * Конструктор
-     * @param collectionFilePath имя файла, из которого читается и в который сохраняется коллекция
+     * @param collectionFilePath имя файла с коллекцией
      */
-    public FileManager(Path collectionFilePath) {
+    private FileManager(Path collectionFilePath) {
         this.collectionFilePath = collectionFilePath;
+    }
+
+    public static FileManager getFileManager(Path collectionFilePath) {
+        if (fileManager == null) {
+            fileManager = new FileManager(collectionFilePath);
+        }
+        return fileManager;
+    }
+
+    public static FileManager getFileManager() {
+        if (fileManager == null) {
+            return null;
+        }
+        return fileManager;
     }
 
     /**
@@ -74,7 +89,7 @@ public class FileManager {
     /**
      * Пишет в поток все переданные строки.
      * @param writer поток, в который пишутся строки
-     * @param lines строки, которые нужно запиасать
+     * @param lines строки, которые нужно записать
      * @throws IOException исключение, возникающее, если невозможно записать строку
      */
     public void writeAllLines(OutputStreamWriter writer, List<String> lines) throws IOException {

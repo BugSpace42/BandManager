@@ -2,24 +2,31 @@ package main.java;
 
 import main.java.commands.*;
 import main.java.commands.servercommands.ServerExecuteScript;
+import main.java.commands.servercommands.ServerSave;
 import main.java.connection.TCPServer;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
 import main.java.managers.FileManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.*;
 import java.nio.file.Path;
 
 public class Main {
+    private static final Logger logger = LogManager.getLogger(Main.class);
+
     public static void main(String[] args) {
-        String collectionFilePath = "collection.csv";
+        System.out.println("Программа запущена");
+        String collectionFilePath = "resources/collection.csv"; // путь к файлу с коллекцией
         Path filePath = Path.of(collectionFilePath);
-        FileManager fileManager = new FileManager(filePath.toAbsolutePath());
+        FileManager fileManager = FileManager.getFileManager(filePath.toAbsolutePath());
         try {
             CollectionManager.setCollection(fileManager.readCollection());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error("Ошибка при чтении коллекции из файла", e);
+            logger.info("Создана пустая коллекция.");
         }
 
         CommandManager commandManager = CommandManager.getCommandManager();
@@ -41,9 +48,11 @@ public class Main {
         CommandManager.newCommand(new RemoveAnyByBestAlbum());
         CommandManager.newCommand(new PrintFieldDescendingNumberOfParticipants());
 
+        CommandManager.newServerCommand(new ServerSave());
+
         try {
-            int port = 12345; // Порт, на котором будет работать сервер
-            InetAddress addr = InetAddress.getLocalHost(); // Адрес, на котором будет работать сервер
+            int port = 12345; // порт, на котором будет работать сервер
+            InetAddress addr = InetAddress.getLocalHost(); // адрес, на котором будет работать сервер
             TCPServer server = new TCPServer(addr, port);
             server.run();
         } catch (IOException e) {

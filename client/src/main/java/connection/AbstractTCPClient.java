@@ -15,7 +15,7 @@ import java.util.HashMap;
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
     private final Logger logger = LogManager.getLogger("ClientLogger");
-    private Socket socket;
+    private final Socket socket;
 
     public AbstractTCPClient(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);

@@ -1,6 +1,9 @@
 package main.java.commands.servercommands;
 
+import main.java.managers.CollectionManager;
+import main.java.managers.FileManager;
 import main.java.utility.ExecutableCommand;
+import main.java.utility.ExitCode;
 import main.java.utility.Report;
 
 /**
@@ -21,8 +24,22 @@ public class ServerSave extends ExecutableCommand {
      */
     @Override
     public Report execute(String[] args){
-        // Сохраняем коллекцию
-        Report report = new Report(0, null, "Коллекция не сохранена, команды нету");
+        Report report;
+        try {
+            FileManager fileManager = FileManager.getFileManager();
+            if (fileManager != null) {
+                fileManager.writeCollection(CollectionManager.getCollection());
+                String message = "Коллекция сохранена в файл " + fileManager.getCollectionFilePath();
+                report = new Report(ExitCode.OK.code, null, message);
+            }
+            else {
+                String errorString = "FileManager не инициализирован, сохранить коллекцию невозможно.";
+                report = new Report(ExitCode.ERROR.code, errorString, errorString);
+            }
+        } catch (Exception e) {
+            String errorString = "Непредвиденная ошибка!";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
+        }
         return report;
     }
 }
