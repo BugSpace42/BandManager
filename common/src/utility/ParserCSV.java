@@ -1,19 +1,16 @@
 package utility;
 
-import entity.Album;
-import entity.Coordinates;
-import entity.MusicBand;
-import entity.MusicGenre;
+import entity.*;
 import exceptions.IdExistsException;
 import exceptions.WrongValueException;
-import utility.builders.AlbumBuilder;
-import utility.builders.CoordinatesBuilder;
+import org.apache.commons.csv.*;
 import utility.validators.TypeValidator;
+import utility.validators.musicband.*;
+import utility.validators.musicband.coordinates.*;
+import utility.validators.musicband.bestalbum.*;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -26,151 +23,102 @@ public class ParserCSV {
      * @param fileLines строки файла в формате csv
      * @return полученная коллекция
      */
-    public static HashMap<Integer, MusicBand> parseCollectionFromCSV(List<String> fileLines) {
+    public static HashMap<Integer, MusicBand> parseCollectionFromCSV(List<String> fileLines) throws IOException {
         HashMap<Integer, MusicBand> collection = new HashMap<>();
+        List<Integer> keyList = new ArrayList<>();
         List<Long> idList = new ArrayList<>();
 
         if (fileLines.size() < 2) {
             return collection;
         }
-        int numberOfColumns = fileLines.get(0).split(",").length;
-        // Пробегаемся с 1, поскольку строка 0 это заголовок
-        for (int fileLineIndex = 1; fileLineIndex < fileLines.size(); fileLineIndex++) {
+
+        String headerLine = fileLines.get(0);
+
+        String csvContent = String.join("\n", fileLines);
+        CSVParser parser = CSVFormat.DEFAULT
+            .withFirstRecordAsHeader()
+            .parse(new java.io.StringReader(csvContent));
+
+        for (int i = 0; i < parser.getRecords().size(); i++) {
+            CSVRecord record = parser.getRecords().get(i);
             try {
-                String fileLine = fileLines.get(fileLineIndex);
-                String[] splitText = fileLine.split(",");
-                LinkedList<String> columnList = new LinkedList<>();
-                for (String column : splitText) {
-                    if (columnList.isEmpty()) {
-                        columnList.add(column);
-                        continue;
-                    }
-                    // Если последний добавленный столбец не полностью в кавычках, то добавляем к нему этот
-                    String lastColumn = columnList.getLast();
-                    if (isColumnPart(lastColumn)) {
-                        String newColumn = lastColumn + "," + column;
-                        columnList.removeLast();
-                        columnList.add(newColumn);
-                        continue;
-                    }
-                    columnList.add(column);
-                }
-
-                if (columnList.size() != numberOfColumns) {
-                    // если количество столбцов в текущей строке не равно правильному количеству, то
-                    // пропускаем эту строку или
-                    // выкидываем исключение и после его обрабатываем
-                    // continue;
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное количество аргументов. Ожидалось: " +
-                    numberOfColumns + ". Получено: " + columnList.size());
-                }
-
+                // Получение значений по индексу и валидация
                 Integer key;
-                if (TypeValidator.isInteger(getText(columnList.get(0)))) {
-                    key = Integer.valueOf(getText(columnList.get(0)));
+                if (TypeValidator.isInteger(record.get(0))) {
+                    key = Integer.parseInt(record.get(0));
+                    if (keyList.contains(key)) {
+                        throw new IdExistsException("Музыкальная группа с ключом" + key + "уже существует.");
+                    }
                 }
                 else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указан неверный ключ музыкальной группы.");
+                    throw new WrongValueException("В строке " + i +  " указан неверный ключ музыкальной группы.");
                 }
 
-                Long id;
-                if (TypeValidator.isLong(getText(columnList.get(1)))) {
-                    id = Long.valueOf(getText(columnList.get(1)));
+                Long id = Long.parseLong(record.get(1));
+                if (new IdValidator().validate(id)) {
+                    if (idList.contains(id)) {
+                        throw new IdExistsException("Музыкальная группа с id " + id + "уже существует.");
+                    }
                 }
                 else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указан неверный id музыкальной группы.");
+                    throw new WrongValueException("В строке " + i +  " указан неверный ключ музыкальной группы.");
                 }
 
-                if (idList.contains(id)) {
-                    throw new IdExistsException("Музыкальная группа с id " + id + " уже существует.");
-                }
-                else {
-                    idList.add(id);
+                String name = record.get(2);
+                if (!new NameValidator().validate(name)) {
+                    throw new WrongValueException("В строке " + i +  " указано неверное название музыкальной группы.");
                 }
 
-                String name;
-                if (!getText(columnList.get(2)).isBlank()) {
-                    name = getText(columnList.get(2));
-                }
-                else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное название музыкальной группы.");
+                Integer coordX = Integer.parseInt(record.get(3));
+                if (!new CoordXValidator().validate(coordX)) {
+                    throw new WrongValueException("В строке " + i +  " указана неверная координата x музыкальной группы.");
                 }
 
-                Integer x;
-                if (TypeValidator.isInteger(getText(columnList.get(3)))) {
-                    x = Integer.valueOf(getText(columnList.get(3)));
-                }
-                else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указана неверная координата x музыкальной группы.");
+                long coordY = Long.parseLong(record.get(4));
+                if (!new CoordYValidator().validate(coordY)) {
+                    throw new WrongValueException("В строке " + i +  " указана неверная координата y музыкальной группы.");
                 }
 
-                long y;
-                if (TypeValidator.isLongPrim(getText(columnList.get(4)))) {
-                    y = Long.parseLong(getText(columnList.get(4)));
-                }
-                else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указана неверная координата y музыкальной группы.");
+                Date creationDate = new Date(Long.parseLong(record.get(5)));
+                if (!new CreationDateValidator().validate(creationDate)) {
+                    throw new WrongValueException("В строке " + i +  " указана неверная дата создания элемента класса MusicBand.");
                 }
 
-                Date creationDate;
-                if (TypeValidator.isDate(getText(columnList.get(5)))) {
-                    creationDate = new Date(Long.parseLong(getText(columnList.get(5))));
-                }
-                else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указана неверная дата создания элемента класса MusicBand.");
+                Integer numParticipants = Integer.parseInt(record.get(6));
+                if (!new NumberOfParticipantsValidator().validate(numParticipants)) {
+                    throw new WrongValueException("В строке " + i +  " указано неверное количество участников музыкальной группы.");
                 }
 
-                Integer numberOfParticipants;
-                if (TypeValidator.isInteger(getText(columnList.get(6)))) {
-                    numberOfParticipants = Integer.valueOf(getText(columnList.get(6)));
-                }
-                else {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное количество участников музыкальной группы.");
-                }
-
-                Coordinates coordinates = CoordinatesBuilder.build(x, y);
-
-                MusicGenre genre;
-                Album bestAlbum;
+                MusicGenre genre = null;
                 try {
-                    if (getText(columnList.get(7)).isBlank()) {
+                    if (getText(record.get(7)).isBlank()) {
                         genre = null;
                     }
                     else{
-                        genre = MusicGenre.valueOf(getText(columnList.get(7)));
+                        genre = MusicGenre.valueOf(getText(record.get(7)));
                     }
                 } catch (IllegalArgumentException e) {
-                    throw new WrongValueException("В строке " + fileLineIndex +  " указан неверный жанр музыкальной группы.");
+                    throw new WrongValueException("В строке " + i +  " указан неверный жанр музыкальной группы.");
                 }
 
-                String bestAlbumName;
-                if (getText(columnList.get(8)).isBlank()) {
+                Album bestAlbum;
+                if (getText(record.get(8)).isBlank()) {
                     bestAlbum = null;
                 }
                 else {
-                    if (!getText(columnList.get(8)).isBlank()) {
-                        bestAlbumName = getText(columnList.get(8));
+                    String albumName = record.get(8);
+                    if (!new AlbumNameValidator().validate(albumName)) {
+                        throw new WrongValueException("В строке " + i +  " указано неверное название музыкального альбома.");
                     }
-                    else {
-                        throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное название музыкального альбома.");
+                    Double albumSales = Double.valueOf(record.get(9));
+                    if (!new AlbumSalesValidator().validate(albumSales)) {
+                        throw new WrongValueException("В строке " + i +  " указано неверное число продаж музыкального альбома.");
                     }
-                    Double bestAlbumSales;
-                    if (TypeValidator.isDouble(columnList.get(9))) {
-                        bestAlbumSales = Double.valueOf(getText(columnList.get(9)));
-                    }
-                    else {
-                        throw new WrongValueException("В строке " + fileLineIndex +  " указано неверное число продаж музыкального альбома.");
-                    }
-                    bestAlbum = AlbumBuilder.build(bestAlbumName, bestAlbumSales);
                 }
-
-                MusicBand musicBand = new MusicBand(id, name, coordinates, creationDate, numberOfParticipants, genre, bestAlbum);
-                collection.put(key, musicBand);
-            } catch (WrongValueException | IdExistsException e) {
-                // ConsoleManager.printError(e.getMessage());
-                // ConsoleManager.println("Строка с ошибкой пропущена.");
+            } catch (Exception e) {
+                System.out.println("Ошибка при обработке строки: " + e.getMessage());
+                System.out.println("Строка с ошибкой пропущена.");
             }
-            
         }
         return collection;
     }
@@ -181,56 +129,38 @@ public class ParserCSV {
      * @return строки файла в формате csv
      */
     public static List<String> parseCollectionToCSV(HashMap<Integer, MusicBand> collection) {
-        List<String> fileLines = new ArrayList<>();
-        String title = "\"key\",\"id\",\"name\",\"x\",\"y\",\"creationDate\",\"numberOfParticipants\",\"genre\",\"albumName\",\"albumSales\"";
-        fileLines.add(title);
-        for (Map.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-            Integer key = entry.getKey();
-            MusicBand musicBand = entry.getValue();
-            Long id = musicBand.getId();
-            String name = musicBand.getName();
-            Coordinates coordinates = musicBand.getCoordinates();
-            Integer x = coordinates.getX();
-            long y = coordinates.getY();
-            Date creationDate = musicBand.getCreationDate();
-            Integer numberOfParticipants = musicBand.getNumberOfParticipants();
-            MusicGenre genre = musicBand.getGenre();
-            Album bestAlbum = musicBand.getBestAlbum();
+        List<String> lines = new ArrayList<>();
+        String[] headers = {"id", "name", "coordinateX", "coordinateY", "creationDate", "numberOfParticipants", "genre", "albumName", "albumSales"};
 
-            LinkedList<String> columnList = new LinkedList<>();
-            columnList.add(key.toString());
-            columnList.add(id.toString());
-            columnList.add(name);
-            columnList.add(x.toString());
-            columnList.add(String.valueOf(y));
-            columnList.add(Long.toString(creationDate.getTime()));
-            columnList.add(numberOfParticipants.toString());
-            if (genre == null) {
-                columnList.add("");
-            }
-            else {
-                columnList.add(genre.toString());
-            }
-            if (bestAlbum == null) {
-                columnList.add("");
-                columnList.add("");
-            }
-            else {
-                columnList.add(bestAlbum.getName());
-                columnList.add(bestAlbum.getSales().toString());
+        try (StringWriter writer = new StringWriter();
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
+
+            for (Map.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+                csvPrinter.printRecord(
+                    entry.getKey(),
+                    entry.getValue().getId(),
+                    entry.getValue().getName(),
+                    entry.getValue().getCoordinates().getX(),
+                    entry.getValue().getCoordinates().getY(),
+                    entry.getValue().getCreationDate().toString(),
+                    entry.getValue().getNumberOfParticipants(),
+                    entry.getValue().getGenre().toString(),
+                    entry.getValue().getBestAlbum().getName(),
+                    entry.getValue().getBestAlbum().getSales()
+                );
             }
 
-            StringBuilder line = new StringBuilder();
-            for (String column : columnList) {
-                line.append("\"");
-                line.append(column);
-                line.append("\"");
-                line.append(",");
+            csvPrinter.flush();
+            String csvContent = writer.toString();
+
+            String[] csvLines = csvContent.split("\\r?\\n");
+            for (String line : csvLines) {
+                lines.add(line);
             }
-            line.deleteCharAt(line.length()-1);
-            fileLines.add(line.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return fileLines;
+        return lines;
     }
 
     /**

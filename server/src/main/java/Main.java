@@ -19,7 +19,7 @@ public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        System.out.println("Программа запущена");
+        System.out.println("Программа запущена.");
         String collectionFilePath = "res/collection.csv"; // путь к файлу с коллекцией
         Path filePath = Path.of(collectionFilePath);
         FileManager fileManager = FileManager.getFileManager(filePath.toAbsolutePath());

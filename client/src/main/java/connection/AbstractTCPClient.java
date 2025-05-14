@@ -31,7 +31,7 @@ public abstract class AbstractTCPClient {
         return (T) ois.readObject();
     }
 
-    public <T> T receiveAndDeserialize(Class<T> tClass) throws IOException, ClassNotFoundException {
+    public <T> T receiveAndDeserialize() throws IOException, ClassNotFoundException {
         ByteBuffer lengthBuf = ByteBuffer.allocate(4);
         while (lengthBuf.hasRemaining()) {
             channel.read(lengthBuf);
@@ -67,7 +67,7 @@ public abstract class AbstractTCPClient {
     }
 
     public HashMap<String, Command> getCommandMap() throws IOException, ClassNotFoundException {
-        ListOfCommandsResponse response = receiveAndDeserialize(ListOfCommandsResponse.class);
+        ListOfCommandsResponse response = receiveAndDeserialize();
         HashMap<String, Command> commands = response.getCommands();
         logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
         return commands;
