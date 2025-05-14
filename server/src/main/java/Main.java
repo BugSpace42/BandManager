@@ -4,6 +4,7 @@ import main.java.commands.*;
 import main.java.commands.servercommands.ServerExecuteScript;
 import main.java.commands.servercommands.ServerSave;
 import main.java.connection.TCPServer;
+import main.java.handlers.ShutdownHandler;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
 import main.java.managers.FileManager;
@@ -50,9 +51,12 @@ public class Main {
 
         CommandManager.newServerCommand(new ServerSave());
 
+        ShutdownHandler handler = new ShutdownHandler();
+        Runtime.getRuntime().addShutdownHook(new Thread(handler));
+
         try {
             int port = 12345; // порт, на котором будет работать сервер
-            InetAddress addr = InetAddress.getLocalHost(); // адрес, на котором будет работать сервер
+            InetAddress addr = InetAddress.getByName("localhost"); // адрес, на котором будет работать сервер
             TCPServer server = new TCPServer(addr, port);
             server.run();
         } catch (IOException e) {

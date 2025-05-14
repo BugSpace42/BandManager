@@ -16,11 +16,13 @@ public class SSHPortForwarding {
     private static final String remoteHost = "localhost"; // хост на сервере, куда перенаправляем
     private static final int remotePort = 12345; // порт сервера, с которым работает ваше приложение
 
+    private static Session session;
+
     public static void connect() {
         String sshHost = "helios.se.ifmo.ru"; // адрес сервера
         try {
             JSch jsch = new JSch();
-            Session session = jsch.getSession(sshUser, sshHost, sshPort);
+            session = jsch.getSession(sshUser, sshHost, sshPort);
             session.setPassword(sshPassword);
 
             java.util.Properties config = new java.util.Properties();
@@ -34,6 +36,13 @@ public class SSHPortForwarding {
             logger.info("Туннель установлен на localhost:" + localPort);
         } catch (Exception e) {
             logger.error("Произошла ошибка при установлении туннеля", e);
+        }
+    }
+
+    public static void disconnect() {
+        if (session != null && session.isConnected()) {
+            session.disconnect();
+            logger.info("Туннель закрыт");
         }
     }
 

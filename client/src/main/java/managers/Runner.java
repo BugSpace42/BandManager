@@ -1,5 +1,6 @@
 package main.java.managers;
 
+import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
 import main.java.connection.requests.CommandRequest;
 import main.java.connection.responses.CommandResponse;
@@ -192,7 +193,19 @@ public class Runner {
                 launchCommand(currentCommand);
             }
         }
-        ConsoleManager.println("Программа завершила свою работу.");
+    }
+
+    public void stop() {
+        try {
+            running = false;
+            SSHPortForwarding.disconnect();
+            client.close();
+            ConsoleManager.println("Программа завершила свою работу.");
+        } catch (IOException e) {
+            ConsoleManager.printError("Произошла ошибка при завершении работы программы.");
+            ConsoleManager.println("Принудительное завершение работы.");
+            System.exit(0);
+        }
     }
 
     public void addClientCommand(ExecutableCommand clientCommand) {

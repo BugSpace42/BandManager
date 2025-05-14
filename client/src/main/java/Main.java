@@ -34,6 +34,8 @@ public class Main {
         } catch (IOException e) {
             ConsoleManager.printError("Невозможно подключиться к серверу!");
             ConsoleManager.printError(e);
+        } finally {
+            SSHPortForwarding.disconnect();
         }
     }
 }

@@ -16,4 +16,13 @@
             <AppenderRef ref="FileLogger"/>
         </Root>
     </Loggers>
+
+    <Loggers>
+        <Logger name="main.java.connection.AbstractTCPServer" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
 </Configuration>

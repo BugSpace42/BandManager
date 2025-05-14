@@ -91,6 +91,11 @@ public abstract class AbstractTCPClient {
         return request;
     }
 
+    public void close() throws IOException {
+        socket.close();
+        logger.info("Сокет закрыт.");
+    }
+
     public InetSocketAddress getSocketAddress() {
         return addr;
     }
