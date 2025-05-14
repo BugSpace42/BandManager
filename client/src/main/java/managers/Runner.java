@@ -145,7 +145,7 @@ public class Runner {
                 CommandRequest request = client.formRequest(strings);
                 byte[] dataToSend = client.serializeData(request);
                 client.sendData(dataToSend);
-                commandResponse = client.receiveCommandResponse();
+                commandResponse = client.receiveAndDeserialize(CommandResponse.class);
             }
             if (commandResponse.getCode() == ExitCode.OK.code) {
                 ConsoleManager.println(commandResponse.getMessage());

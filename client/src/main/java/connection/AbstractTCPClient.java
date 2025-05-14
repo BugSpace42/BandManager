@@ -10,71 +10,64 @@ import main.java.utility.Command;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
     private final Logger logger = LogManager.getLogger("ClientLogger");
-    private final Socket socket;
+    private final SocketChannel channel;
 
     public AbstractTCPClient(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
-        this.socket = new Socket(addr, port);
+        this.channel = SocketChannel.open(this.addr);
         logger.info("Клиент подключен к " + addr);
     }
 
-    public byte[] receiveData() throws IOException {
-        InputStream in = socket.getInputStream();
-        BufferedInputStream bis = new BufferedInputStream(in);
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
+    public <T> T deserializeObject(byte[] dataBytes) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(dataBytes));
+        return (T) ois.readObject();
+    }
 
-        while (bis.available() > 0) {
-            bytesRead = bis.read(buffer);
-            byteArrayOutputStream.write(buffer, 0, bytesRead);
+    public <T> T receiveAndDeserialize(Class<T> tClass) throws IOException, ClassNotFoundException {
+        ByteBuffer lengthBuf = ByteBuffer.allocate(4);
+        while (lengthBuf.hasRemaining()) {
+            channel.read(lengthBuf);
         }
+        lengthBuf.flip();
+        int dataLength = lengthBuf.getInt();
+        logger.info("Считана длина данных: " + dataLength);
 
-        byte[] dataByteArray = byteArrayOutputStream.toByteArray();
-        logger.info("От сервера получены данные, длиной: " + dataByteArray.length);
-        return dataByteArray;
-    }
+        ByteBuffer dataBuf = ByteBuffer.allocate(dataLength);
+        while (dataBuf.hasRemaining()) {
+            channel.read(dataBuf);
+        }
+        byte[] dataBytes = dataBuf.array();
+        logger.info("Данные успешно считаны.");
 
-    public CommandResponse receiveCommandResponse() throws IOException, ClassNotFoundException {
-        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-        CommandResponse response = (CommandResponse) inputStream.readObject();
-        logger.info("От сервера получен ответ о выполнении команды.");
-        return response;
-    }
-
-    public ListOfCommandsResponse receiveListOfCommandResponse() throws IOException, ClassNotFoundException {
-        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-        ListOfCommandsResponse response = (ListOfCommandsResponse) inputStream.readObject();
-        logger.info("От сервера получены данные о доступных командах.");
-        return response;
+        return deserializeObject(dataBytes);
     }
 
     public void sendData(byte[] data) throws IOException {
-        OutputStream out = socket.getOutputStream();
-        out.write(data);
-        out.flush();
-        logger.info("Данные отправлены на сервер.");
-    }
+        ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
+        lengthBuffer.putInt(data.length);
+        lengthBuffer.flip();
+        while (lengthBuffer.hasRemaining()) {
+            channel.write(lengthBuffer);
+        }
+        logger.info("Длина данных успешно передана на сервер.");
 
-    public CommandResponse deserializeCommandData(byte[] data) throws IOException {
-        CommandResponse commandResponse = SerializationUtils.deserialize(data);
-        logger.info("Ответ от сервера десериализован.");
-        return commandResponse;
-    }
-
-    public ListOfCommandsResponse deserializeListOfCommandsData(byte[] data) throws IOException {
-        ListOfCommandsResponse listOfCommandsResponse = SerializationUtils.deserialize(data);
-        logger.info("Список команд от сервера десериализован.");
-        return listOfCommandsResponse;
+        ByteBuffer dataBuffer = ByteBuffer.wrap(data);
+        while (dataBuffer.hasRemaining()) {
+            channel.write(dataBuffer);
+        }
+        logger.info("Данные успешно переданы на сервер.");
     }
 
     public HashMap<String, Command> getCommandMap() throws IOException, ClassNotFoundException {
-        ListOfCommandsResponse response = receiveListOfCommandResponse();
+        ListOfCommandsResponse response = receiveAndDeserialize(ListOfCommandsResponse.class);
         HashMap<String, Command> commands = response.getCommands();
         logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
         return commands;
@@ -92,8 +85,8 @@ public abstract class AbstractTCPClient {
     }
 
     public void close() throws IOException {
-        socket.close();
-        logger.info("Сокет закрыт.");
+        channel.close();
+        logger.info("Канал закрыт.");
     }
 
     public InetSocketAddress getSocketAddress() {
@@ -108,7 +101,7 @@ public abstract class AbstractTCPClient {
         return addr.getPort();
     }
 
-    public Socket getSocket() {
-        return socket;
+    public SocketChannel getSocketChannel() {
+        return channel;
     }
 }

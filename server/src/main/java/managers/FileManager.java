@@ -50,6 +50,9 @@ public class FileManager {
             new InputStreamReader(new FileInputStream(this.collectionFilePath.toAbsolutePath().toString()))) {
             ArrayList<String> fileLines = readAllLines(collectionInputStreamReader);
             collection = ParserCSV.parseCollectionFromCSV(fileLines);
+            System.out.println("Считано: " + fileLines);
+            System.out.println("Преобразовано в: " + collection);
+
         }
         return collection;
     }

@@ -31,13 +31,31 @@ public abstract class AbstractTCPServer {
         this.serverSocket = new ServerSocket(port);
     }
 
-    public CommandRequest receiveCommandRequest() throws IOException, ClassNotFoundException {
-        ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-        return (CommandRequest) inputStream.readObject();
+    public <T> T receiveObject() throws IOException, ClassNotFoundException {
+        InputStream inputStream = socket.getInputStream();
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+
+        int dataLength = dataInputStream.readInt();
+        logger.info("Длина данных считана: " + dataLength);
+
+        if (dataLength <= 0) {
+            throw new IOException("Некорректная длина данных: " + dataLength);
+        }
+
+        byte[] dataBytes = new byte[dataLength];
+        dataInputStream.readFully(dataBytes);
+        logger.info("Данные успешно считаны");
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(dataBytes);
+            ObjectInputStream ois = new ObjectInputStream(bais)) {
+            return (T) ois.readObject();
+        }
     }
 
     public void sendData(byte[] data) throws IOException {
         OutputStream out = socket.getOutputStream();
+        DataOutputStream dos = new DataOutputStream(out);
+        dos.writeInt(data.length);
         out.write(data);
         out.flush();
     }
@@ -128,7 +146,7 @@ public abstract class AbstractTCPServer {
                 while (connection) {
                     CommandRequest request = null;
                     try {
-                        request = receiveCommandRequest();
+                        request = receiveObject();
                         logger.info("Запрос получен от клиента");
                     } catch (Exception e) {
                         logger.error("Ошибка при получении данных клиента", e);
