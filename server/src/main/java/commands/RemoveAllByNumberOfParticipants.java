@@ -1,13 +1,13 @@
 package main.java.commands;
 
-import entity.MusicBand;
-import main.java.utility.ExecutableCommand;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExecutableCommand;
+import utility.ExitCode;
+import utility.Report;
 import main.java.managers.CollectionManager;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Удаляет из коллекции все элементы, значение поля numberOfParticipants которого эквивалентно заданному.
@@ -26,25 +26,31 @@ public class RemoveAllByNumberOfParticipants extends ExecutableCommand {
      * @return отчёт о выполнении команды
      */
     @Override
-    public Report execute(String[] args){
+    public Report execute(String[] args) {
         Report report;
         try {
-            CollectionManager collectionManager = CollectionManager.getCollectionManager();
-            String message = "";
+            String message;
+            int targetNumber;
+            try {
+                targetNumber = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                return new Report(ExitCode.ERROR.code, "Некорректный формат числа.", "Ошибка при парсинге аргумента.");
+            }
 
-            HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
+            Collection<Integer> keysToRemove = CollectionManager.getCollection().entrySet().stream()
+                    .filter(entry -> entry.getValue().getNumberOfParticipants().equals(targetNumber))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
 
-            boolean isRemoved = false;
-            for (Map.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-                if (entry.getValue().getNumberOfParticipants().equals(Integer.valueOf(args[1]))) {
-                    collectionManager.removeByKey(entry.getKey());
-                    message = "Удалён элемент с ключом " + entry.getKey();
-                    isRemoved = true;
+            if (keysToRemove.isEmpty()) {
+                message = "Не найдено элементов с заданным полем numberOfParticipants.";
+            } else {
+                for (Integer key : keysToRemove) {
+                    CollectionManager.getCollection().remove(key);
                 }
+                message = "Удалено элементов: " + keysToRemove.size();
             }
-            if (!isRemoved) {
-                message = "Не найдено элементов с заданным полем bestAlbum.";
-            }
+
             report = new Report(ExitCode.OK.code, null, message);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";

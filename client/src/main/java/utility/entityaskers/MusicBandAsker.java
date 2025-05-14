@@ -6,9 +6,9 @@ import entity.MusicBand;
 import entity.MusicGenre;
 import exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
-import main.java.utility.builders.MusicBandBuilder;
-import main.java.utility.validators.musicband.NameValidator;
-import main.java.utility.validators.musicband.NumberOfParticipantsValidator;
+import utility.builders.MusicBandBuilder;
+import utility.validators.musicband.NameValidator;
+import utility.validators.musicband.NumberOfParticipantsValidator;
 
 /**
  * Отвечает за запрос у пользователя музыкальной группы.

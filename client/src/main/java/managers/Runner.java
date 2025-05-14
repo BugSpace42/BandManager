@@ -2,16 +2,16 @@ package main.java.managers;
 
 import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
-import main.java.connection.requests.CommandRequest;
-import main.java.connection.responses.CommandResponse;
+import connection.requests.CommandRequest;
+import connection.responses.CommandResponse;
 import exceptions.CanceledCommandException;
 import exceptions.TooFewArgumentsException;
 import exceptions.TooManyArgumentsException;
 import exceptions.UnknownCommandException;
-import main.java.utility.Command;
-import main.java.utility.ExecutableCommand;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.Command;
+import utility.ExecutableCommand;
+import utility.ExitCode;
+import utility.Report;
 import main.java.utility.entityaskers.*;
 
 import java.io.IOException;

@@ -1,8 +1,8 @@
 package main.java.commands.servercommands;
 
-import main.java.commands.ExecuteScriptCommand;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import commands.ExecuteScriptCommand;
+import utility.ExitCode;
+import utility.Report;
 
 /**
  * Считывает и исполняет скрипт из указанного файла.

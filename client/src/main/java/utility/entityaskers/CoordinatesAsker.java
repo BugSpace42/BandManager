@@ -3,9 +3,9 @@ package main.java.utility.entityaskers;
 import entity.Coordinates;
 import exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
-import main.java.utility.builders.CoordinatesBuilder;
-import main.java.utility.validators.musicband.coordinates.CoordXValidator;
-import main.java.utility.validators.musicband.coordinates.CoordYValidator;
+import utility.builders.CoordinatesBuilder;
+import utility.validators.musicband.coordinates.CoordXValidator;
+import utility.validators.musicband.coordinates.CoordYValidator;
 
 /**
  * Отвечает за запрос у пользователя местоположения.

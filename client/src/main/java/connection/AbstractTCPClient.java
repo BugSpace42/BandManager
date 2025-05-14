@@ -1,17 +1,17 @@
 package main.java.connection;
 
-import main.java.connection.requests.*;
-import main.java.connection.responses.*;
+import connection.requests.CommandRequest;
+import connection.requests.Request;
+import connection.responses.ListOfCommandsResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.apache.commons.lang3.SerializationUtils;
-import main.java.utility.Command;
+import utility.Command;
 
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 

@@ -3,9 +3,9 @@ package main.java.utility.entityaskers;
 import entity.Album;
 import exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
-import main.java.utility.builders.AlbumBuilder;
-import main.java.utility.validators.musicband.bestalbum.AlbumNameValidator;
-import main.java.utility.validators.musicband.bestalbum.AlbumSalesValidator;
+import utility.builders.AlbumBuilder;
+import utility.validators.musicband.bestalbum.AlbumNameValidator;
+import utility.validators.musicband.bestalbum.AlbumSalesValidator;
 
 /**
  * Отвечает за запрос у пользователя музыкального альбома.

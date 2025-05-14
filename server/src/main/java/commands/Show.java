@@ -1,12 +1,18 @@
 package main.java.commands;
 
+import entity.MusicBand;
 import main.java.managers.CollectionManager;
-import main.java.utility.ExecutableCommand;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExecutableCommand;
+import utility.ExitCode;
+import utility.Report;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.stream.Collectors;
 
 /**
- * Выводит в стандартный поток вывода все элементы коллекции в строковом представлении
+ * Выводит в стандартный поток вывода все элементы коллекции в строковом представлении.
+ * Элементы отсортированы по возрастанию имени.
  * @author Alina
  */
 public class Show extends ExecutableCommand {
@@ -21,11 +27,16 @@ public class Show extends ExecutableCommand {
      * @return отчёт о выполнении команды
      */
     @Override
-    public Report execute(String[] args){
-        Report report = null;
+    public Report execute(String[] args) {
+        Report report;
         try {
-            CollectionManager collectionManager = CollectionManager.getCollectionManager();
-            String message = collectionManager.toString();
+            HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
+
+            String message = collection.values().stream()
+                    .sorted(Comparator.comparing(MusicBand::getName))
+                    .map(MusicBand::toString)
+                    .collect(Collectors.joining("\n"));
+
             report = new Report(ExitCode.OK.code, null, message);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";

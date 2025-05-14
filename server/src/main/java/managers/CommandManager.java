@@ -1,7 +1,7 @@
 package main.java.managers;
 
-import main.java.utility.ExecutableCommand;
-import main.java.utility.Command;
+import utility.ExecutableCommand;
+import utility.Command;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -2,10 +2,10 @@ package main.java.commands;
 
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
-import main.java.utility.ExecutableCommand;
+import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExitCode;
+import utility.Report;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -27,29 +27,28 @@ public class ReplaceIfGreater extends ExecutableCommand {
      * @return отчёт о выполнении команды
      */
     @Override
-    public Report execute(String[] args){
+    public Report execute(String[] args) {
         Report report;
         try {
             CollectionManager collectionManager = CollectionManager.getCollectionManager();
             Integer key = Integer.valueOf(args[1]);
-            String message = "";
 
             byte[] data = Base64.getDecoder().decode(args[2]);
-            MusicBand musicBand = SerializationUtils.deserialize(data);
+            MusicBand newMusicBand = SerializationUtils.deserialize(data);
             HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
 
-            if (!collection.containsKey(key)) {
-                message = "В коллекции нет элемента с ключом " + key;
+            if (!collection.keySet().stream().anyMatch(k -> k.equals(key))) {
+                String message = "В коллекции нет элемента с ключом " + key;
                 report = new Report(ExitCode.ERROR.code, message, message);
-            }
-            else {
-                if (musicBand.compareTo(collection.get(key)) > 0) {
-                    collectionManager.addToCollection(key, musicBand);
+            } else {
+                MusicBand currentMusicBand = collection.get(key);
+                String message;
+                if (newMusicBand.compareTo(currentMusicBand) > 0) {
+                    collectionManager.addToCollection(key, newMusicBand);
                     message = "Элемент с ключом " + key + " заменён на заданный.";
-                }
-                else{
-                    message = "Элемент с ключом " + key + " больше, чем заданный.\n";
-                    message += "Элемент с ключом " + key + " не изменён.";
+                } else {
+                    message = "Элемент с ключом " + key + " больше, чем заданный.\n" +
+                              "Элемент с ключом " + key + " не изменён.";
                 }
                 report = new Report(ExitCode.OK.code, null, message);
             }

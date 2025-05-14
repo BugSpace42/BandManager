@@ -2,10 +2,10 @@ package main.java.commands;
 
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
-import main.java.utility.ExecutableCommand;
+import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExitCode;
+import utility.Report;
 
 import java.util.Base64;
 

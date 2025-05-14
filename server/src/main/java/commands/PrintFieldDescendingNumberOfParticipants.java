@@ -2,13 +2,12 @@ package main.java.commands;
 
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
-import main.java.utility.ExecutableCommand;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExecutableCommand;
+import utility.ExitCode;
+import utility.Report;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Выводит значения поля numberOfParticipants всех элементов в порядке убывания.
@@ -27,26 +26,22 @@ public class PrintFieldDescendingNumberOfParticipants extends ExecutableCommand 
      * @return отчёт о выполнении команды
      */
     @Override
-    public Report execute(String[] args){
+    public Report execute(String[] args) {
         Report report;
         try {
             String message;
-            if (CollectionManager.getCollection().isEmpty()) {
+            Collection<MusicBand> collection = CollectionManager.getCollection().values();
+
+            if (collection.isEmpty()) {
                 message = "Коллекция пуста.";
-            }
-            else {
-                ArrayList<Integer> numberOfParticipantsList = new ArrayList<>();
+            } else {
+                String numbersString = collection.stream()
+                        .map(MusicBand::getNumberOfParticipants) // получаем число участников
+                        .sorted(Comparator.reverseOrder()) // сортируем по убыванию
+                        .map(String::valueOf) // преобразуем в строки
+                        .collect(Collectors.joining(" ")); // объединяем через пробел
 
-                for (Map.Entry<Integer, MusicBand> entry : CollectionManager.getCollection().entrySet()) {
-                    numberOfParticipantsList.add(entry.getValue().getNumberOfParticipants());
-                }
-
-                numberOfParticipantsList.sort(Collections.reverseOrder());
-                message = "Значения поля numberOfParticipants всех элементов в порядке убывания:\n";
-                for (Integer number : numberOfParticipantsList) {
-                    message += number + " ";
-                }
-                message += "\n";
+                message = "Значения поля numberOfParticipants всех элементов в порядке убывания:\n" + numbersString + "\n";
             }
             report = new Report(ExitCode.OK.code, null, message);
         } catch (Exception e) {

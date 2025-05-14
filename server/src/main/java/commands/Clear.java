@@ -1,9 +1,9 @@
 package main.java.commands;
 
 import main.java.managers.CollectionManager;
-import main.java.utility.ExecutableCommand;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExecutableCommand;
+import utility.ExitCode;
+import utility.Report;
 
 /**
  * Очищает коллекцию.

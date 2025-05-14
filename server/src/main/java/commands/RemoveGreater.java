@@ -2,14 +2,16 @@ package main.java.commands;
 
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
-import main.java.utility.ExecutableCommand;
+import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
-import main.java.utility.ExitCode;
-import main.java.utility.Report;
+import utility.ExitCode;
+import utility.Report;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Удаляет из коллекции все элементы, превышающие заданный.
@@ -28,27 +30,32 @@ public class RemoveGreater extends ExecutableCommand {
      * @return отчёт о выполнении команды
      */
     @Override
-    public Report execute(String[] args){
+    public Report execute(String[] args) {
         Report report;
         try {
+            String message;
+            // Декодируем и десериализуем объект MusicBand из аргумента
             byte[] data = Base64.getDecoder().decode(args[1]);
-            MusicBand musicBand = SerializationUtils.deserialize(data);
-            CollectionManager collectionManager = CollectionManager.getCollectionManager();
+            MusicBand targetBand = SerializationUtils.deserialize(data);
+
+            // Получаем коллекцию
             HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
 
-            String message = "";
-            boolean isRemoved = false;
-            for (Map.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-                if (entry.getValue().compareTo(musicBand) > 0) {
-                    collectionManager.removeByKey(entry.getKey());
-                    message = "Удалён элемент с ключом " + entry.getKey();
-                    isRemoved = true;
-                    break;
-                }
-            }
-            if (!isRemoved) {
+            // Находим все ключи элементов, которые больше заданного
+            List<Integer> keysToRemove = collection.entrySet().stream()
+                    .filter(entry -> entry.getValue().compareTo(targetBand) > 0)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+
+            if (keysToRemove.isEmpty()) {
                 message = "Не найдено элементов, больших заданного.";
+            } else {
+                for (Integer key : keysToRemove) {
+                    CollectionManager.getCollection().remove(key);
+                }
+                message = "Удалено элементов: " + keysToRemove.size();
             }
+
             report = new Report(ExitCode.OK.code, null, message);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";

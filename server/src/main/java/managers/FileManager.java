@@ -1,7 +1,7 @@
 package main.java.managers;
 
 import entity.MusicBand;
-import main.java.utility.ParserCSV;
+import utility.ParserCSV;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -50,9 +50,6 @@ public class FileManager {
             new InputStreamReader(new FileInputStream(this.collectionFilePath.toAbsolutePath().toString()))) {
             ArrayList<String> fileLines = readAllLines(collectionInputStreamReader);
             collection = ParserCSV.parseCollectionFromCSV(fileLines);
-            System.out.println("Считано: " + fileLines);
-            System.out.println("Преобразовано в: " + collection);
-
         }
         return collection;
     }

@@ -3,7 +3,7 @@ package main.java.utility.entityaskers;
 import entity.MusicGenre;
 import exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
-import main.java.utility.builders.MusicGenreBuilder;
+import utility.builders.MusicGenreBuilder;
 
 /**
  * Отвечает за запрос у пользователя музыкального жанра.
