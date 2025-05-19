@@ -22,15 +22,15 @@ public class Main {
         Runner runner = Runner.getRunner();
         runner.addClientCommand(new ClientExecuteScript());
 
-        int port = SSHPortForwarding.getLocalPort();
-        SSHPortForwarding.connect();
-        // int port = 12345;
+        // int port = SSHPortForwarding.getLocalPort();
+        // SSHPortForwarding.connect();
+        int port = 12345;
 
         try {
             InetAddress addr = InetAddress.getByName("localhost");
             TCPClient client = new TCPClient(addr, port);
             runner.setClient(client);
-
+            ConsoleManager.println("Успешное подключение к серверу.");
             runner.run();
         } catch (IOException e) {
             ConsoleManager.printError("Невозможно подключиться к серверу!");
