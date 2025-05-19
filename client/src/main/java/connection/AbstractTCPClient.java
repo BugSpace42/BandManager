@@ -2,6 +2,7 @@ package main.java.connection;
 
 import connection.requests.CommandRequest;
 import connection.requests.Request;
+import connection.responses.KeysListResponse;
 import connection.responses.ListOfCommandsResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +15,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
@@ -71,6 +73,13 @@ public abstract class AbstractTCPClient {
         HashMap<String, Command> commands = response.getCommands();
         logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
         return commands;
+    }
+
+    public List<Integer> getKeyList() throws IOException, ClassNotFoundException {
+        KeysListResponse response = receiveAndDeserialize();
+        List<Integer> keys = response.getKeys();
+        logger.info("Получен список ключей объектов: " + keys.size() + " ключей.");
+        return keys;
     }
 
     public byte[] serializeData(Request request) throws IOException {

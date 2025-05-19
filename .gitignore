@@ -27,3 +27,15 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Default ignored files ###
+# Shelf and workspace.xml (common IDE files)
+.shelf/
+.workspace.xml
+
+# HTTP Requests (e.g., REST Client)
+# /httpRequests/
+
+# Data sources
+/dataSources/
+/dataSources.local.xml
