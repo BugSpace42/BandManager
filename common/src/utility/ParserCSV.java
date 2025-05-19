@@ -36,11 +36,13 @@ public class ParserCSV {
 
         String csvContent = String.join("\n", fileLines);
         CSVParser parser = CSVFormat.DEFAULT
-            .withFirstRecordAsHeader()
-            .parse(new java.io.StringReader(csvContent));
+                .withNullString("")
+                .withFirstRecordAsHeader()
+                .parse(new java.io.StringReader(csvContent));
 
-        for (int i = 0; i < parser.getRecords().size(); i++) {
-            CSVRecord record = parser.getRecords().get(i);
+        List<CSVRecord> records = parser.getRecords();
+        for (int i = 0; i < records.size(); i++) {
+            CSVRecord record = records.get(i);
             try {
                 // Получение значений по индексу и валидация
                 Integer key;
@@ -79,19 +81,21 @@ public class ParserCSV {
                     throw new WrongValueException("В строке " + i +  " указана неверная координата y музыкальной группы.");
                 }
 
+                Coordinates coordinates = new Coordinates(coordX, coordY);
+
                 Date creationDate = new Date(Long.parseLong(record.get(5)));
                 if (!new CreationDateValidator().validate(creationDate)) {
                     throw new WrongValueException("В строке " + i +  " указана неверная дата создания элемента класса MusicBand.");
                 }
 
-                Integer numParticipants = Integer.parseInt(record.get(6));
-                if (!new NumberOfParticipantsValidator().validate(numParticipants)) {
+                Integer numberOfParticipants = Integer.parseInt(record.get(6));
+                if (!new NumberOfParticipantsValidator().validate(numberOfParticipants)) {
                     throw new WrongValueException("В строке " + i +  " указано неверное количество участников музыкальной группы.");
                 }
 
-                MusicGenre genre = null;
+                MusicGenre genre;
                 try {
-                    if (getText(record.get(7)).isBlank()) {
+                    if (record.get(7) == null) {
                         genre = null;
                     }
                     else{
@@ -102,7 +106,7 @@ public class ParserCSV {
                 }
 
                 Album bestAlbum;
-                if (getText(record.get(8)).isBlank()) {
+                if (record.get(8) == null) {
                     bestAlbum = null;
                 }
                 else {
@@ -114,7 +118,10 @@ public class ParserCSV {
                     if (!new AlbumSalesValidator().validate(albumSales)) {
                         throw new WrongValueException("В строке " + i +  " указано неверное число продаж музыкального альбома.");
                     }
+                    bestAlbum = new Album(albumName, albumSales);
                 }
+                MusicBand musicBand = new MusicBand(id, name, coordinates, creationDate, numberOfParticipants, genre, bestAlbum);
+                collection.put(key, musicBand);
             } catch (Exception e) {
                 System.out.println("Ошибка при обработке строки: " + e.getMessage());
                 System.out.println("Строка с ошибкой пропущена.");
@@ -137,16 +144,16 @@ public class ParserCSV {
 
             for (Map.Entry<Integer, MusicBand> entry : collection.entrySet()) {
                 csvPrinter.printRecord(
-                    entry.getKey(),
-                    entry.getValue().getId(),
-                    entry.getValue().getName(),
-                    entry.getValue().getCoordinates().getX(),
-                    entry.getValue().getCoordinates().getY(),
-                    entry.getValue().getCreationDate().toString(),
-                    entry.getValue().getNumberOfParticipants(),
-                    entry.getValue().getGenre().toString(),
-                    entry.getValue().getBestAlbum().getName(),
-                    entry.getValue().getBestAlbum().getSales()
+                        entry.getKey(),
+                        entry.getValue().getId(),
+                        entry.getValue().getName(),
+                        entry.getValue().getCoordinates().getX(),
+                        entry.getValue().getCoordinates().getY(),
+                        entry.getValue().getCreationDate().getTime(),
+                        entry.getValue().getNumberOfParticipants(),
+                        (entry.getValue().getGenre() != null) ? entry.getValue().getGenre().toString() : "",
+                        (entry.getValue().getBestAlbum() != null) ? entry.getValue().getBestAlbum().getName() : "",
+                        (entry.getValue().getBestAlbum() != null) ? String.valueOf(entry.getValue().getBestAlbum().getSales()) : ""
                 );
             }
 
