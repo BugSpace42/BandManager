@@ -4,14 +4,14 @@ import java.util.HashMap;
 
 import utility.Command;
 
-public class ListOfCommandsResponse extends Response {
+public class CommandMapResponse extends Response {
     private final HashMap<String, Command> commands;
 
-    public ListOfCommandsResponse(HashMap<String, Command> commands) {
+    public CommandMapResponse(HashMap<String, Command> commands) {
         this.commands = commands;
     }
 
-    public HashMap<String, Command> getCommands() {
+    public HashMap<String, Command> getCommandMap() {
         return commands;
     }
 }

@@ -2,8 +2,9 @@ package main.java.connection;
 
 import connection.requests.CommandRequest;
 import connection.requests.Request;
-import connection.responses.KeysListResponse;
-import connection.responses.ListOfCommandsResponse;
+import connection.responses.IdListResponse;
+import connection.responses.KeyListResponse;
+import connection.responses.CommandMapResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,17 +70,24 @@ public abstract class AbstractTCPClient {
     }
 
     public HashMap<String, Command> getCommandMap() throws IOException, ClassNotFoundException {
-        ListOfCommandsResponse response = receiveAndDeserialize();
-        HashMap<String, Command> commands = response.getCommands();
+        CommandMapResponse response = receiveAndDeserialize();
+        HashMap<String, Command> commands = response.getCommandMap();
         logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
         return commands;
     }
 
     public List<Integer> getKeyList() throws IOException, ClassNotFoundException {
-        KeysListResponse response = receiveAndDeserialize();
-        List<Integer> keys = response.getKeys();
-        logger.info("Получен список ключей объектов: " + keys.size() + " ключей.");
-        return keys;
+        KeyListResponse response = receiveAndDeserialize();
+        List<Integer> keyList = response.getKeyList();
+        logger.info("Получен список ключей объектов: " + keyList.size() + " ключей.");
+        return keyList;
+    }
+
+    public List<Long> getIdList() throws IOException, ClassNotFoundException {
+        IdListResponse response = receiveAndDeserialize();
+        List<Long> idList = response.getIdList();
+        logger.info("Получен список id объектов: " + idList.size() + " id.");
+        return idList;
     }
 
     public byte[] serializeData(Request request) throws IOException {

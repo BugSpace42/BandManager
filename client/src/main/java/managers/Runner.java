@@ -15,10 +15,7 @@ import utility.Report;
 import main.java.utility.entityaskers.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Класс, который управляет работой программы.
@@ -29,6 +26,8 @@ public class Runner {
     public static ConsoleManager consoleManager;
     public HashMap<String, Command> commands;
     public HashMap<String, ExecutableCommand> clientCommands = new HashMap<>();
+    public List<Integer> keyList;
+    public List<Long> idList;
     private boolean running = false;
     private RunningMode currentMode;
     public HashSet<String> scripts;
@@ -64,6 +63,8 @@ public class Runner {
      */
     public void start() throws IOException, ClassNotFoundException {
         this.commands = client.getCommandMap();
+        this.keyList = client.getKeyList();
+        this.idList = client.getIdList();
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
         this.scripts = new HashSet<>();

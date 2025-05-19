@@ -1,8 +1,8 @@
 package main.java.connection;
 
-import connection.requests.CommandRequest;
-import connection.responses.CommandResponse;
-import connection.responses.ListOfCommandsResponse;
+import connection.requests.*;
+import connection.responses.*;
+import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
 import main.java.managers.CommandRequestManager;
 import utility.Command;
@@ -26,6 +26,7 @@ public abstract class AbstractTCPServer {
 
     private boolean running = false;
     private boolean connection = false;
+    private final CollectionManager collectionManager = CollectionManager.getCollectionManager();
 
     public AbstractTCPServer(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
@@ -75,7 +76,7 @@ public abstract class AbstractTCPServer {
         return SerializationUtils.serialize(response);
     }
 
-    public byte[] serializeListOfCommandsData(ListOfCommandsResponse response) {
+    public byte[] serializeResponse(Response response) {
         return SerializationUtils.serialize(response);
     }
 
@@ -93,8 +94,16 @@ public abstract class AbstractTCPServer {
         return new CommandResponse(report.getCode(), report.getError(), report.getMessage());
     }
 
-    public ListOfCommandsResponse formListOfCommandsResponse(HashMap<String, Command> commands) {
-        return new ListOfCommandsResponse(commands);
+    public KeyListResponse formKeyListResponse() {
+        return new KeyListResponse(CollectionManager.getKeyList());
+    }
+
+    public IdListResponse formIdListResponse() {
+        return new IdListResponse(CollectionManager.getIdList());
+    }
+
+    public CommandMapResponse formListOfCommandsResponse(HashMap<String, Command> commands) {
+        return new CommandMapResponse(commands);
     }
 
     public static void saveCollection() {
@@ -115,11 +124,20 @@ public abstract class AbstractTCPServer {
 
     public void start() throws IOException {
         HashMap<String, Command> commands = CommandManager.getCommands();
-        ListOfCommandsResponse listOfCommandsResponse = formListOfCommandsResponse(commands);
-        byte[] data = serializeListOfCommandsData(listOfCommandsResponse);
-
-        sendData(data);
+        CommandMapResponse commandsMapResponse = formListOfCommandsResponse(commands);
+        byte[] dataCommands = serializeResponse(commandsMapResponse);
+        sendData(dataCommands);
         logger.info("Информация о доступных командах отправлена клиенту.");
+
+        KeyListResponse keyListResponse = formKeyListResponse();
+        byte[] dataKeys = serializeResponse(keyListResponse);
+        sendData(dataKeys);
+        logger.info("Информация о ключах элементов коллекции отправлена клиенту.");
+
+        IdListResponse idListResponse = formIdListResponse();
+        byte[] dataId = serializeResponse(idListResponse);
+        sendData(dataId);
+        logger.info("Информация о id элементов коллекции отправлена клиенту.");
     }
 
     public void run() {

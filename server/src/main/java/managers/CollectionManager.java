@@ -102,13 +102,25 @@ public class CollectionManager {
     }
 
     /**
+     * Возвращает список ключей существующих элементов коллекции.
+     * @return список ключей существующих элементов коллекции
+     */
+    public static List<Integer> getKeyList() {
+        List<Integer> keyList = new ArrayList<>();
+        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+            keyList.add(entry.getKey());
+        }
+        return keyList;
+    }
+
+    /**
      * Задаёт новое значение полю коллекции.
      * @param collection новая коллекция.
      */
     public static void setCollection(HashMap<Integer, MusicBand> collection) {
         CollectionManager.collection = collection;
     }
-    
+
     /**
      * Возвращает строковое представление коллекции.
      * @return строковое представление коллекции
