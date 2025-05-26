@@ -49,8 +49,9 @@ public class ParserCSV {
                 if (TypeValidator.isInteger(record.get(0))) {
                     key = Integer.parseInt(record.get(0));
                     if (keyList.contains(key)) {
-                        throw new IdExistsException("Музыкальная группа с ключом" + key + "уже существует.");
+                        throw new IdExistsException("Музыкальная группа с ключом" + key + " уже существует.");
                     }
+                    keyList.add(key);
                 }
                 else {
                     throw new WrongValueException("В строке " + i +  " указан неверный ключ музыкальной группы.");
@@ -59,8 +60,9 @@ public class ParserCSV {
                 Long id = Long.parseLong(record.get(1));
                 if (new IdValidator().validate(id)) {
                     if (idList.contains(id)) {
-                        throw new IdExistsException("Музыкальная группа с id " + id + "уже существует.");
+                        throw new IdExistsException("Музыкальная группа с id " + id + " уже существует.");
                     }
+                    idList.add(id);
                 }
                 else {
                     throw new WrongValueException("В строке " + i +  " указан неверный ключ музыкальной группы.");
@@ -137,7 +139,8 @@ public class ParserCSV {
      */
     public static List<String> parseCollectionToCSV(HashMap<Integer, MusicBand> collection) {
         List<String> lines = new ArrayList<>();
-        String[] headers = {"id", "name", "coordinateX", "coordinateY", "creationDate", "numberOfParticipants", "genre", "albumName", "albumSales"};
+        String[] headers = {"key", "id", "name", "coordinateX", "coordinateY", "creationDate",
+                            "numberOfParticipants", "genre", "albumName", "albumSales"};
 
         try (StringWriter writer = new StringWriter();
              CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
