@@ -45,4 +45,12 @@ public class MusicBandBuilder {
         Date date = new Date();
         return new MusicBand(id, name, coordinates, date, numberOfParticipants, genre, bestAlbum);
     }
+
+    public static void setCurrentId(Long id) {
+        currentId = id;
+    }
+
+    public static Long getCurrentId() {
+        return currentId;
+    }
 }

@@ -13,6 +13,7 @@ import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
 import main.java.utility.entityaskers.*;
+import utility.builders.MusicBandBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -65,6 +66,7 @@ public class Runner {
         this.commands = client.getCommandMap();
         this.keyList = client.getKeyList();
         this.idList = client.getIdList();
+        MusicBandBuilder.setCurrentId(Long.valueOf(idList.size() + 1));
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
         this.scripts = new HashSet<>();
@@ -75,7 +77,6 @@ public class Runner {
      * Спрашивает у пользователя все аргументы команды.
      * @param command команда
      * @return все аргументы, записанные в массив строк
-     * @throws CanceledCommandException
      */
     public ArrayList<byte[]> askArguments(Command command) throws CanceledCommandException {
         String[] askingArguments = command.getArguments();
