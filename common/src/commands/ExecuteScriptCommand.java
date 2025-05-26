@@ -1,6 +1,5 @@
 package commands;
 
-import utility.ExecutableCommand;
 import utility.Types;
 
 public abstract class ExecuteScriptCommand extends ExecutableCommand {

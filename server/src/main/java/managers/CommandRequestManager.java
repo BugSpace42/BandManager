@@ -1,8 +1,8 @@
 package main.java.managers;
 
 import connection.requests.CommandRequest;
-import utility.ExecutableCommand;
-import utility.Report;
+import commands.ExecutableCommand;
+import commands.Report;
 
 import java.util.Map;
 

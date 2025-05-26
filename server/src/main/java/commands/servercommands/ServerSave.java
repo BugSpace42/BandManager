@@ -2,9 +2,9 @@ package main.java.commands.servercommands;
 
 import main.java.managers.CollectionManager;
 import main.java.managers.FileManager;
-import utility.ExecutableCommand;
+import commands.ExecutableCommand;
 import utility.ExitCode;
-import utility.Report;
+import commands.Report;
 import utility.Types;
 
 import java.io.IOException;

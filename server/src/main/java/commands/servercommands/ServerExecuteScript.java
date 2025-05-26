@@ -2,7 +2,7 @@ package main.java.commands.servercommands;
 
 import commands.ExecuteScriptCommand;
 import utility.ExitCode;
-import utility.Report;
+import commands.Report;
 
 /**
  * Считывает и исполняет скрипт из указанного файла.

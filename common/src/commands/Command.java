@@ -1,4 +1,6 @@
-package utility;
+package commands;
+
+import utility.Types;
 
 import java.io.Serializable;
 

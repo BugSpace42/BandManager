@@ -1,5 +1,8 @@
 package main.java.commands;
 
+import commands.Command;
+import commands.ExecutableCommand;
+import commands.Report;
 import main.java.managers.CommandManager;
 import utility.*;
 

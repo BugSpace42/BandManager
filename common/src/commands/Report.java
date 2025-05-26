@@ -1,4 +1,4 @@
-package utility;
+package commands;
 
 /**
  * Класс отчёта о выполнении команды.

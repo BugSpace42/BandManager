@@ -5,8 +5,8 @@ import connection.responses.*;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
 import main.java.managers.CommandRequestManager;
-import utility.Command;
-import utility.Report;
+import commands.Command;
+import commands.Report;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

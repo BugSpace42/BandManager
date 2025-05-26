@@ -2,7 +2,7 @@ package connection.responses;
 
 import java.util.HashMap;
 
-import utility.Command;
+import commands.Command;
 
 public class CommandMapResponse extends Response {
     private final HashMap<String, Command> commands;

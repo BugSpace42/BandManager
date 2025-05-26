@@ -1,9 +1,9 @@
 package main.java.commands;
 
 import main.java.managers.CommandManager;
-import utility.ExecutableCommand;
+import commands.ExecutableCommand;
 import utility.ExitCode;
-import utility.Report;
+import commands.Report;
 import utility.Types;
 
 import java.util.ArrayList;

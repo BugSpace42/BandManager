@@ -1,5 +1,8 @@
 package main.java.managers;
 
+import commands.Command;
+import commands.ExecutableCommand;
+import commands.Report;
 import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
 import connection.requests.CommandRequest;
