@@ -19,4 +19,8 @@ public enum Types {
     private Types(String s) {
         type = s;
     }
+
+    public String toString() {
+        return type;
+    }
 }

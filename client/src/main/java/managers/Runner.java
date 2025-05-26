@@ -3,17 +3,15 @@ package main.java.managers;
 import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
+import exceptions.*;
 import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
 import connection.requests.CommandRequest;
 import connection.responses.CommandResponse;
-import exceptions.CanceledCommandException;
-import exceptions.TooFewArgumentsException;
-import exceptions.TooManyArgumentsException;
-import exceptions.UnknownCommandException;
 import utility.*;
 import main.java.utility.entityaskers.*;
 import utility.builders.MusicBandBuilder;
+import utility.validators.TypeValidator;
 
 import java.io.IOException;
 import java.util.*;
@@ -89,12 +87,31 @@ public class Runner {
     }
 
     /**
+     * Проверяет правильность введённых позиционных аргументов.
+     * @param command команда
+     * @param userCommand введённая пользователем команда с аргументами
+     * @return true - если все аргументы верны, false или исключение - иначе
+     */
+    public boolean checkArguments(Command command, String[] userCommand) throws CanceledCommandException {
+        Types[] types = command.getPositionalArguments();
+        for (int i = 0; i < types.length; i++) {
+            Types type = types[i];
+            String value = userCommand[i+1];
+            if (! TypeValidator.isTypeValid(type, value)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Проверяет правильность ввода команды.
      * @param userCommand введённая пользователем команда
      * @return true - если команда введена верно, false или исключение - иначе
      */
     public Command checkCommand(String[] userCommand)
-            throws UnknownCommandException, TooManyArgumentsException, TooFewArgumentsException {
+            throws UnknownCommandException, TooManyArgumentsException, TooFewArgumentsException,
+            WrongValueException, CanceledCommandException {
         Command command;
         if (clientCommands.containsKey(userCommand[0])) {
             command = clientCommands.get(userCommand[0]);
@@ -110,6 +127,14 @@ public class Runner {
         if (command.getNumberOfArguments() < userCommand.length-1) {
             throw new TooFewArgumentsException("Команда " + command.getName() + " должна содержать "
                     + command.getNumberOfArguments() + " аргументов");
+        }
+        if (! checkArguments(command, userCommand)) {
+            String message = "Введены некорректные аргументы. Команда " + command.getName() +
+                    "должна получать аргументы следующих типов: \n";
+            for (Types type : command.getPositionalArguments()) {
+                message += type.toString() + " ";
+            }
+            throw new WrongValueException(message);
         }
         return command;
     }
@@ -171,7 +196,7 @@ public class Runner {
                 ConsoleManager.printError("Не найдена команда " + e.getMessage());
                 ConsoleManager.println("Для получения списка команд введите help.");
             }
-        } catch (TooManyArgumentsException | TooFewArgumentsException e) {
+        } catch (TooManyArgumentsException | TooFewArgumentsException | WrongValueException e) {
             ConsoleManager.printError(e.getMessage());
         }
     }
