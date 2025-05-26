@@ -5,6 +5,7 @@ import main.java.managers.CollectionManager;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.HashMap;
 
@@ -14,7 +15,8 @@ import java.util.HashMap;
  */
 public class Info extends ExecutableCommand {
     public Info(){
-        super("info", "вывести информацию о коллекции", 0, new String[]{});
+        super("info", "вывести информацию о коллекции",
+                new Types[]{}, new Types[]{});
     }
 
     /**
@@ -31,7 +33,7 @@ public class Info extends ExecutableCommand {
             String infoString = "Информация о коллекции:\n";
             infoString += " Тип коллекции: " + collection.getClass().getName() + "\n";
             infoString += " Дата инициализации коллекции: " + collectionManager.getInitDate() + "\n";
-            infoString += " Количество элементов: " + collection.size() + "\n";
+            infoString += " Количество элементов: " + collection.size();
 
             report = new Report(ExitCode.OK.code, null, infoString);
         } catch (Exception e) {

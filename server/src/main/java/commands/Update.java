@@ -6,6 +6,7 @@ import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.Base64;
 
@@ -17,7 +18,7 @@ public class Update extends ExecutableCommand {
     public Update() {
         super("update",
                 "обновить значение элемента коллекции, id которого равен заданному",
-                1, new String[]{"MusicBand"});
+                new Types[]{Types.MUSIC_BAND_ID}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**

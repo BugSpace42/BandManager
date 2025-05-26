@@ -6,6 +6,7 @@ import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.Base64;
 
@@ -16,7 +17,7 @@ import java.util.Base64;
 public class Insert extends ExecutableCommand {
     public Insert() {
         super("insert", "добавить новый элемент с заданным ключом",
-                1, new String[]{"MusicBand"});
+                new Types[]{Types.MUSIC_BAND_KEY}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**

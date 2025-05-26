@@ -5,6 +5,7 @@ import main.java.managers.CollectionManager;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class Show extends ExecutableCommand {
     public Show() {
         super("show", "вывести все элементы коллекции в строковом представлении",
-                0, new String[]{});
+                new Types[]{}, new Types[]{});
     }
 
     /**
@@ -32,9 +33,14 @@ public class Show extends ExecutableCommand {
         try {
             HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
 
-            String message = collection.values().stream()
-                    .sorted(Comparator.comparing(MusicBand::getName))
-                    .map(MusicBand::toString)
+            String message = collection.entrySet().stream()
+                    .sorted(Comparator.comparing(e -> e.getValue().getName()))
+                    .map(entry -> {
+                        Integer key = entry.getKey(); // ключ коллекции
+                        MusicBand musicBand = entry.getValue(); // значение
+                        String bandStr = musicBand.toString();
+                        return "Элемент коллекции с ключом " + key + ":\n" + bandStr + "\n";
+                    })
                     .collect(Collectors.joining("\n"));
 
             report = new Report(ExitCode.OK.code, null, message);

@@ -3,6 +3,7 @@ package main.java.commands;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 /**
  * Завершает программу без сохранения в файл.
@@ -11,7 +12,7 @@ import utility.Report;
 public class Exit extends ExecutableCommand {
     public Exit() {
         super("exit", "завершить программу (без сохранения в файл)",
-                0, new String[]{});
+                new Types[]{}, new Types[]{});
     }
 
     /**

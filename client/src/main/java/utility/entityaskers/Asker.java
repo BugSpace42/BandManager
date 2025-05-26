@@ -2,6 +2,7 @@ package main.java.utility.entityaskers;
 
 import exceptions.CanceledCommandException;
 import org.apache.commons.lang3.SerializationUtils;
+import utility.Types;
 
 public class Asker {
     public static String ask(String type) throws CanceledCommandException {
@@ -21,19 +22,21 @@ public class Asker {
         return result;
     }
 
-    public static byte[] askSerialized(String type) throws CanceledCommandException {
+    public static byte[] askSerialized(Types type) throws CanceledCommandException {
         byte[] result = switch (type) {
-            case "int" -> SerializationUtils.serialize(Integer.valueOf(PrimitiveAsker.askInt()));
-            case "long" -> SerializationUtils.serialize(Long.valueOf(PrimitiveAsker.askLong()));
-            case "short" -> SerializationUtils.serialize(Short.valueOf(PrimitiveAsker.askShort()));
-            case "double" -> SerializationUtils.serialize(Double.valueOf(PrimitiveAsker.askDouble()));
-            case "boolean" -> SerializationUtils.serialize(Boolean.valueOf(PrimitiveAsker.askBoolean()));
-            case "string" -> SerializationUtils.serialize(PrimitiveAsker.askString());
-            case "MusicBand" -> SerializationUtils.serialize(MusicBandAsker.askMusicBand());
-            case "MusicBandName" -> SerializationUtils.serialize(MusicBandAsker.askMusicBandName());
-            case "Coordinates" -> SerializationUtils.serialize(CoordinatesAsker.askCoordinates());
-            case "Album" -> SerializationUtils.serialize(AlbumAsker.askAlbum());
-            default -> null;
+            case INT -> SerializationUtils.serialize(PrimitiveAsker.askInt());
+            case LONG -> SerializationUtils.serialize(PrimitiveAsker.askLong());
+            case SHORT -> SerializationUtils.serialize(PrimitiveAsker.askShort());
+            case DOUBLE -> SerializationUtils.serialize(PrimitiveAsker.askDouble());
+            case BOOLEAN -> SerializationUtils.serialize(PrimitiveAsker.askBoolean());
+            case STRING -> SerializationUtils.serialize(PrimitiveAsker.askString());
+            case MUSIC_BAND -> SerializationUtils.serialize(MusicBandAsker.askMusicBand());
+            case MUSIC_BAND_KEY -> SerializationUtils.serialize(MusicBandAsker.askMusicBandKey());
+            case MUSIC_BAND_ID -> SerializationUtils.serialize(MusicBandAsker.askMusicBandId());
+            case MUSIC_BAND_NAME -> SerializationUtils.serialize(MusicBandAsker.askMusicBandName());
+            case MUSIC_BAND_NUMBER -> SerializationUtils.serialize(MusicBandAsker.askMusicBandName());
+            case COORDINATES -> SerializationUtils.serialize(CoordinatesAsker.askCoordinates());
+            case ALBUM -> SerializationUtils.serialize(AlbumAsker.askAlbum());
         };
         return result;
     }

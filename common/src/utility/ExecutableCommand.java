@@ -1,7 +1,7 @@
 package utility;
 
 public abstract class ExecutableCommand extends Command implements Executable {
-    public ExecutableCommand(String name, String description, int numberOfArguments, String[] arguments) {
-        super(name, description, numberOfArguments, arguments);
+    public ExecutableCommand(String name, String description, Types[] positionalArguments, Types[] arguments) {
+        super(name, description, positionalArguments, arguments);
     }
 }

@@ -6,6 +6,7 @@ import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ public class ReplaceIfGreater extends ExecutableCommand {
     public ReplaceIfGreater() {
         super("replace_if_greater",
                 "заменить значение по ключу, если новое значение больше старого",
-                1, new String[]{"MusicBand"});
+                new Types[]{Types.MUSIC_BAND_KEY}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**

@@ -8,10 +8,7 @@ import exceptions.CanceledCommandException;
 import exceptions.TooFewArgumentsException;
 import exceptions.TooManyArgumentsException;
 import exceptions.UnknownCommandException;
-import utility.Command;
-import utility.ExecutableCommand;
-import utility.ExitCode;
-import utility.Report;
+import utility.*;
 import main.java.utility.entityaskers.*;
 import utility.builders.MusicBandBuilder;
 
@@ -66,7 +63,7 @@ public class Runner {
         this.commands = client.getCommandMap();
         this.keyList = client.getKeyList();
         this.idList = client.getIdList();
-        MusicBandBuilder.setCurrentId(Long.valueOf(idList.size() + 1));
+        MusicBandBuilder.setCurrentId((long) (idList.size() + 1));
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
         this.scripts = new HashSet<>();
@@ -79,10 +76,10 @@ public class Runner {
      * @return все аргументы, записанные в массив строк
      */
     public ArrayList<byte[]> askArguments(Command command) throws CanceledCommandException {
-        String[] askingArguments = command.getArguments();
+        Types[] askingArguments = command.getArguments();
         ArrayList<byte[]> arguments = new ArrayList<>();
         for (int i = 0; i < askingArguments.length; i++) {
-            String type = askingArguments[i];
+            Types type = askingArguments[i];
             arguments.add(Asker.askSerialized(type));
         }
         return arguments;
@@ -116,8 +113,7 @@ public class Runner {
 
     public CommandResponse executeClientCommand(ExecutableCommand command, String[] args) {
         Report report = command.execute(args);
-        CommandResponse commandResponse = new CommandResponse(report.getCode(), report.getError(), report.getMessage());
-        return commandResponse;
+        return new CommandResponse(report.getCode(), report.getError(), report.getMessage());
     }
 
     /**

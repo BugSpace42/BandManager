@@ -5,6 +5,7 @@ import main.java.managers.FileManager;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.io.IOException;
 
@@ -16,7 +17,7 @@ import java.io.IOException;
 public class ServerSave extends ExecutableCommand {
     public ServerSave() {
         super("save", "сохранить коллекцию в файл",
-                0, new String[]{});
+                new Types[]{}, new Types[]{});
     }
 
     /**

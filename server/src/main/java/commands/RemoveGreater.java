@@ -6,6 +6,7 @@ import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class RemoveGreater extends ExecutableCommand {
     public RemoveGreater() {
         super("remove_greater",
                 "удалить из коллекции все элементы, превышающие заданный",
-                0, new String[]{"MusicBand"});
+                new Types[]{}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**

@@ -4,6 +4,7 @@ import main.java.managers.CollectionManager;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 /**
  * Очищает коллекцию.
@@ -11,7 +12,7 @@ import utility.Report;
  */
 public class Clear extends ExecutableCommand {
     public Clear() {
-        super("clear", "очистить коллекцию", 0, new String[]{});
+        super("clear", "очистить коллекцию", new Types[]{}, new Types[]{});
     }
 
     /**

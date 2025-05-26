@@ -9,13 +9,13 @@ import java.io.Serializable;
 public class Command implements Serializable {
     private final String name;
     private final String description;
-    private final int numberOfArguments;
-    private final String[] arguments;
+    private final Types[] positionalArguments;
+    private final Types[] arguments;
 
-    public Command(String name, String description, int numberOfArguments, String[] arguments) {
+    public Command(String name, String description, Types[] positionalArguments, Types[] arguments) {
         this.name = name;
         this.description = description;
-        this.numberOfArguments = numberOfArguments;
+        this.positionalArguments = positionalArguments;
         this.arguments = arguments;
     }
 
@@ -28,7 +28,7 @@ public class Command implements Serializable {
     }
 
     /**
-     * Вощвращает описание команды.
+     * Возвращает описание команды.
      * @return описание команды
      */
     public String getDescription() {
@@ -36,18 +36,34 @@ public class Command implements Serializable {
     }
 
     /**
-     * Возвращает количество агрументов команды.
-     * @return количество агрументов команды
+     * Возвращает количество позиционных аргументов команды.
+     * @return количество позиционных аргументов команды
+     */
+    public int getNumberOfPositionalArguments() {
+        return positionalArguments.length;
+    }
+
+    /**
+     * Возвращает количество аргументов команды.
+     * @return количество аргументов команды
      */
     public int getNumberOfArguments() {
-        return numberOfArguments;
+        return arguments.length;
+    }
+
+    /**
+     * Возвращает список типов позиционных аргументов команды.
+     * @return список типов позиционных аргументов команды.
+     */
+    public Types[] getPositionalArguments() {
+        return positionalArguments;
     }
 
     /**
      * Возвращает список типов аргументов команды.
      * @return список типов аргументов команды.
      */
-    public String[] getArguments() {
+    public Types[] getArguments() {
         return arguments;
     }
 }

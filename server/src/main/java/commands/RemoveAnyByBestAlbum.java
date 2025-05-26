@@ -7,6 +7,7 @@ import utility.ExecutableCommand;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.*;
 
@@ -18,7 +19,7 @@ public class RemoveAnyByBestAlbum extends ExecutableCommand {
     public RemoveAnyByBestAlbum() {
         super("remove_any_by_best_album",
                 "удалить из коллекции один элемент, значение поля bestAlbum которого эквивалентно заданному",
-                0, new String[]{"Album"});
+                new Types[]{}, new Types[]{Types.ALBUM});
     }
 
     /**

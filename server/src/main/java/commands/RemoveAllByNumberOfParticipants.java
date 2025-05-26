@@ -4,6 +4,7 @@ import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
 import main.java.managers.CollectionManager;
+import utility.Types;
 
 import java.util.Collection;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class RemoveAllByNumberOfParticipants extends ExecutableCommand {
     public RemoveAllByNumberOfParticipants() {
         super("remove_all_by_number_of_participants",
                 "удалить из коллекции все элементы, значение поля numberOfParticipants которого эквивалентно заданному",
-                1, new String[]{});
+                new Types[]{Types.MUSIC_BAND_NUMBER}, new Types[]{});
     }
 
     /**

@@ -38,7 +38,7 @@ public abstract class AbstractTCPServer {
         DataInputStream dataInputStream = new DataInputStream(inputStream);
 
         int dataLength = dataInputStream.readInt();
-        logger.info("Длина данных считана: " + dataLength);
+        logger.info("Длина данных считана: {}", dataLength);
 
         if (dataLength <= 0) {
             throw new IOException("Некорректная длина данных: " + dataLength);
@@ -142,13 +142,13 @@ public abstract class AbstractTCPServer {
 
     public void run() {
         running = true;
-        logger.info("Сервер запущен по адресу " + addr);
+        logger.info("Сервер запущен по адресу {}", addr);
         try {
             while (running) {
-                logger.info("Ожидание подключения клиента на порт " + getPort());
+                logger.info("Ожидание подключения клиента на порт {}", getPort());
                 try {
                     socket = connectToClient();
-                    logger.info("Клиент успешно подключился на порт " + getPort());
+                    logger.info("Клиент успешно подключился на порт {}", getPort());
                 } catch (Exception e) {
                     logger.error("Ошибка при подключении клиента", e);
                     disconnectFromClient();

@@ -5,6 +5,7 @@ import main.java.managers.CollectionManager;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class PrintFieldDescendingNumberOfParticipants extends ExecutableCommand 
     public PrintFieldDescendingNumberOfParticipants() {
         super("print_field_descending_number_of_participants",
                 "вывести значения поля numberOfParticipants всех элементов в порядке убывания",
-                0, new String[]{});
+                new Types[]{}, new Types[]{});
     }
 
     /**

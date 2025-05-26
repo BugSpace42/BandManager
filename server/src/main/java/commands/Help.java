@@ -1,10 +1,7 @@
 package main.java.commands;
 
 import main.java.managers.CommandManager;
-import utility.ExecutableCommand;
-import utility.Command;
-import utility.ExitCode;
-import utility.Report;
+import utility.*;
 
 import java.util.HashMap;
 
@@ -14,7 +11,8 @@ import java.util.HashMap;
  */
 public class Help extends ExecutableCommand {
     public Help(){
-        super("help", "вывести справку по доступным командам", 0, new String[]{});
+        super("help", "вывести справку по доступным командам",
+                new Types[]{}, new Types[]{});
     }
 
     /**

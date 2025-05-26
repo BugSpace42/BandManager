@@ -114,7 +114,7 @@ public class MusicBand implements Comparable<MusicBand>, Serializable {
     @Override
     public String toString() {
         String info = "";
-        info += "Музыкальная группа № " + id;
+        info += "Музыкальная группа с id: " + id;
         info += "\n Название: " + name;
         info += "\n Местоположение: " + coordinates;
         info += "\n Дата создания объекта: " + creationDate;

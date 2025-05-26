@@ -5,6 +5,7 @@ import main.java.managers.CollectionManager;
 import utility.ExecutableCommand;
 import utility.ExitCode;
 import utility.Report;
+import utility.Types;
 
 import java.util.HashMap;
 
@@ -15,7 +16,7 @@ import java.util.HashMap;
 public class RemoveKey extends ExecutableCommand {
     public RemoveKey() {
         super("remove_key", "удалить элемент из коллекции по его ключу",
-                1, new String[]{});
+                new Types[]{Types.MUSIC_BAND_KEY}, new Types[]{});
     }
 
     /**

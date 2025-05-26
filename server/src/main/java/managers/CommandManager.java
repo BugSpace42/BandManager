@@ -35,7 +35,7 @@ public class CommandManager {
     public static void newCommand(ExecutableCommand executableCommand) {
         executableCommands.put(executableCommand.getName(), executableCommand);
         Command command = new Command(executableCommand.getName(), executableCommand.getDescription(),
-                executableCommand.getNumberOfArguments(), executableCommand.getArguments());
+                executableCommand.getPositionalArguments(), executableCommand.getArguments());
         commands.put(command.getName(), command);
     }
 
