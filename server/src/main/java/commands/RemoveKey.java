@@ -16,7 +16,7 @@ import java.util.HashMap;
 public class RemoveKey extends ExecutableCommand {
     public RemoveKey() {
         super("remove_key", "удалить элемент из коллекции по его ключу",
-                new Types[]{Types.MUSIC_BAND_KEY}, new Types[]{});
+                new Types[]{Types.MUSIC_BAND_KEY_CONTAINED}, new Types[]{});
     }
 
     /**

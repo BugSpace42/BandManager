@@ -1,7 +1,7 @@
 package main.java.utility.entityaskers;
 
 import entity.Album;
-import exceptions.CanceledCommandException;
+import main.java.exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
 import utility.builders.AlbumBuilder;
 import utility.validators.musicband.bestalbum.AlbumNameValidator;

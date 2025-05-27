@@ -1,6 +1,6 @@
 package main.java.utility.entityaskers;
 
-import exceptions.CanceledCommandException;
+import main.java.exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
 
 public class PrimitiveAsker {

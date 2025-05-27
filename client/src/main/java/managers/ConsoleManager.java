@@ -1,6 +1,6 @@
 package main.java.managers;
 
-import exceptions.CanceledCommandException;
+import main.java.exceptions.CanceledCommandException;
 import main.java.utility.Console;
 import main.java.utility.StandardConsole;
 

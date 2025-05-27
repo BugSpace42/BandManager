@@ -8,10 +8,12 @@ import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
 import connection.requests.CommandRequest;
 import connection.responses.CommandResponse;
+import main.java.exceptions.AskingArgumentsException;
+import main.java.exceptions.CanceledCommandException;
 import utility.*;
+import main.java.utility.validators.TypeValidator;
 import main.java.utility.entityaskers.*;
 import utility.builders.MusicBandBuilder;
-import utility.validators.TypeValidator;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,8 +27,8 @@ public class Runner {
     public static ConsoleManager consoleManager;
     public HashMap<String, Command> commands;
     public HashMap<String, ExecutableCommand> clientCommands = new HashMap<>();
-    public List<Integer> keyList;
-    public List<Long> idList;
+    private List<Integer> keyList;
+    private List<Long> idList;
     private boolean running = false;
     private RunningMode currentMode;
     public HashSet<String> scripts;
@@ -76,7 +78,7 @@ public class Runner {
      * @param command команда
      * @return все аргументы, записанные в массив строк
      */
-    public ArrayList<byte[]> askArguments(Command command) throws CanceledCommandException {
+    public ArrayList<byte[]> askArguments(Command command) throws CanceledCommandException, AskingArgumentsException {
         Types[] askingArguments = command.getArguments();
         ArrayList<byte[]> arguments = new ArrayList<>();
         for (int i = 0; i < askingArguments.length; i++) {
@@ -92,7 +94,7 @@ public class Runner {
      * @param userCommand введённая пользователем команда с аргументами
      * @return true - если все аргументы верны, false или исключение - иначе
      */
-    public boolean checkArguments(Command command, String[] userCommand) throws CanceledCommandException {
+    public boolean checkPositionalArguments(Command command, String[] userCommand) throws AskingArgumentsException {
         Types[] types = command.getPositionalArguments();
         for (int i = 0; i < types.length; i++) {
             Types type = types[i];
@@ -111,7 +113,7 @@ public class Runner {
      */
     public Command checkCommand(String[] userCommand)
             throws UnknownCommandException, TooManyArgumentsException, TooFewArgumentsException,
-            WrongValueException, CanceledCommandException {
+            WrongValueException, AskingArgumentsException, CanceledCommandException {
         Command command;
         if (clientCommands.containsKey(userCommand[0])) {
             command = clientCommands.get(userCommand[0]);
@@ -128,9 +130,9 @@ public class Runner {
             throw new TooFewArgumentsException("Команда " + command.getName() + " должна содержать "
                     + command.getNumberOfArguments() + " аргументов");
         }
-        if (! checkArguments(command, userCommand)) {
+        if (! checkPositionalArguments(command, userCommand)) {
             String message = "Введены некорректные аргументы. Команда " + command.getName() +
-                    "должна получать аргументы следующих типов: \n";
+                    " должна получать аргументы следующих типов: \n";
             for (Types type : command.getPositionalArguments()) {
                 message += type.toString() + " ";
             }
@@ -198,6 +200,9 @@ public class Runner {
             }
         } catch (TooManyArgumentsException | TooFewArgumentsException | WrongValueException e) {
             ConsoleManager.printError(e.getMessage());
+        } catch (AskingArgumentsException e) {
+            ConsoleManager.printError("Во время чтения аргумента произошла ошибка:\n" + e.getMessage());
+            ConsoleManager.println("Команда не будет выполнена.");
         }
     }
 
@@ -214,6 +219,7 @@ public class Runner {
 
         while(running) {
             String[] currentCommand;
+            ConsoleManager.println(keyList);
             currentCommand = ConsoleManager.askCommand();
             if (currentCommand != null) {
                 launchCommand(currentCommand);
@@ -252,6 +258,14 @@ public class Runner {
 
     public void setCurrentMode(RunningMode currentMode) {
         this.currentMode = currentMode;
+    }
+
+    public List<Integer> getKeyList() {
+        return keyList;
+    }
+
+    public List<Long> getIdList() {
+        return idList;
     }
 
     public TCPClient getClient() {

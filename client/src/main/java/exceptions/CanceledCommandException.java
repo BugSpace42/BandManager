@@ -1,4 +1,4 @@
-package exceptions;
+package main.java.exceptions;
 
 /**
  * Исключение, которое выбрасывается, если выполнение команды было прервано.

@@ -1,7 +1,7 @@
 package main.java.utility.entityaskers;
 
 import entity.Coordinates;
-import exceptions.CanceledCommandException;
+import main.java.exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
 import utility.builders.CoordinatesBuilder;
 import utility.validators.musicband.coordinates.CoordXValidator;

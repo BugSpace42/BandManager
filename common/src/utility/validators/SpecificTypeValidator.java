@@ -1,52 +1,12 @@
 package utility.validators;
 
-import utility.Types;
-import utility.validators.musicband.IdValidator;
-import utility.validators.musicband.KeyValidator;
-import utility.validators.musicband.NumberOfParticipantsValidator;
-
 import java.util.Date;
 
 /**
  * Проверка строки на содержание объекта определённого типа.
  * @author Alina
  */
-public class TypeValidator {
-    public static boolean isTypeValid(Types type, String value) {
-        try {
-            switch (type) {
-                case INT -> isInteger(value);
-                case LONG -> isLong(value);
-                case SHORT -> isShort(value);
-                case DOUBLE -> isDouble(value);
-                case BOOLEAN -> isBoolean(value);
-                case MUSIC_BAND_KEY -> {
-                    Integer key = Integer.valueOf(value);
-                    if (! new KeyValidator().validate(key)) {
-                        return false;
-                    }
-                }
-                case MUSIC_BAND_ID -> {
-                    Long id = Long.valueOf(value);
-                    if (! new IdValidator().validate(id)) {
-                        return false;
-                    }
-                }
-                case MUSIC_BAND_NUMBER -> {
-                    Integer number = Integer.valueOf(value);
-                    if (! new NumberOfParticipantsValidator().validate(number)) {
-                        return false;
-                    }
-                }
-                // В остальных случаях значения либо строки, поэтому всегда валидные,
-                // либо не могут лежать в одной строке
-            }
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
+public class SpecificTypeValidator {
     /**
      * Проверяет, является ли строка числом типа int
      * @param value строка для проверки

@@ -4,10 +4,10 @@ import entity.*;
 import exceptions.IdExistsException;
 import exceptions.WrongValueException;
 import org.apache.commons.csv.*;
-import utility.validators.TypeValidator;
+import utility.validators.*;
 import utility.validators.musicband.*;
-import utility.validators.musicband.coordinates.*;
 import utility.validators.musicband.bestalbum.*;
+import utility.validators.musicband.coordinates.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -46,7 +46,7 @@ public class ParserCSV {
             try {
                 // Получение значений по индексу и валидация
                 Integer key;
-                if (TypeValidator.isInteger(record.get(0))) {
+                if (SpecificTypeValidator.isInteger(record.get(0))) {
                     key = Integer.parseInt(record.get(0));
                     if (keyList.contains(key)) {
                         throw new IdExistsException("Музыкальная группа с ключом" + key + " уже существует.");

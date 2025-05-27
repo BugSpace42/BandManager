@@ -82,6 +82,15 @@ public class CollectionManager {
     }
 
     /**
+     * Проверяет наличие элемента с заданным ключом в коллекции
+     * @param key ключ элемента, наличие которого нужно проверить
+     * @return true, если элемент с заданным ключом содержится в коллекции, false - иначе
+     */
+    public boolean containsKey(Integer key) {
+        return collection.containsKey(key);
+    }
+
+    /**
      * Возвращает дату инициализации коллекции.
      * @return дата инициализации коллекции
      */

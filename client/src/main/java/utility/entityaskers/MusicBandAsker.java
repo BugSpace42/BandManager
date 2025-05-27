@@ -4,7 +4,7 @@ import entity.Album;
 import entity.Coordinates;
 import entity.MusicBand;
 import entity.MusicGenre;
-import exceptions.CanceledCommandException;
+import main.java.exceptions.CanceledCommandException;
 import main.java.managers.ConsoleManager;
 import utility.builders.MusicBandBuilder;
 import utility.validators.musicband.IdValidator;

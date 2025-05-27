@@ -19,7 +19,7 @@ public class ReplaceIfGreater extends ExecutableCommand {
     public ReplaceIfGreater() {
         super("replace_if_greater",
                 "заменить значение по ключу, если новое значение больше старого",
-                new Types[]{Types.MUSIC_BAND_KEY}, new Types[]{Types.MUSIC_BAND});
+                new Types[]{Types.MUSIC_BAND_KEY_CONTAINED}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**

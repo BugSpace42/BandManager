@@ -18,7 +18,7 @@ public class Update extends ExecutableCommand {
     public Update() {
         super("update",
                 "обновить значение элемента коллекции, id которого равен заданному",
-                new Types[]{Types.MUSIC_BAND_ID}, new Types[]{Types.MUSIC_BAND});
+                new Types[]{Types.MUSIC_BAND_ID_CONTAINED}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**

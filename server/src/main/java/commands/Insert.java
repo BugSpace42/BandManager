@@ -17,7 +17,7 @@ import java.util.Base64;
 public class Insert extends ExecutableCommand {
     public Insert() {
         super("insert", "добавить новый элемент с заданным ключом",
-                new Types[]{Types.MUSIC_BAND_KEY}, new Types[]{Types.MUSIC_BAND});
+                new Types[]{Types.MUSIC_BAND_KEY_UNIQUE}, new Types[]{Types.MUSIC_BAND});
     }
 
     /**
@@ -32,9 +32,16 @@ public class Insert extends ExecutableCommand {
             MusicBand musicBand = SerializationUtils.deserialize(data);
 
             CollectionManager collectionManager = CollectionManager.getCollectionManager();
-            collectionManager.addToCollection(Integer.valueOf(args[1]), musicBand);
-            String message = "Элемент с ключом " + args[1] + " успешно добавлен в коллекцию.";
-            report = new Report(ExitCode.OK.code, null, message);
+            Integer key = Integer.valueOf(args[1]);
+            if (collectionManager.containsKey(key)) {
+                String errorString = "Элемент с ключом " + key + " уже находится в коллекции.";
+                report = new Report(ExitCode.ERROR.code, errorString, errorString);
+            }
+            else {
+                collectionManager.addToCollection(key, musicBand);
+                String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
+                report = new Report(ExitCode.OK.code, null, message);
+            }
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
