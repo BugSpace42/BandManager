@@ -72,12 +72,17 @@ public class ConsoleManager {
         try {
             console.println("Введите команду: ");
             console.print("> ");
-            String line = scanner.nextLine();
-            if (line == null) {
+            if (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line == null) {
+                    throw new NoSuchElementException();
+                }
+                String [] text = line.trim().split(" ");
+                return text;
+            }
+            else {
                 throw new NoSuchElementException();
             }
-            String [] text = line.trim().split(" ");
-            return text;
         } catch (NoSuchElementException e) {
             updateScanner();
             return null;
@@ -124,12 +129,17 @@ public class ConsoleManager {
      * Считывает объект.
      * @return считанная строка
      */
-         public static String readObject() {
+    public static String readObject() {
         try {
-            String text = scanner.nextLine().trim();
-            return text;
+            if (scanner.hasNextLine()) {
+                return scanner.nextLine();
+            }
+            else {
+                throw new NoSuchElementException();
+            }
         } catch (NoSuchElementException e) {
             printError("Обнаружен конец потока.");
+            System.exit(0);
             return null;
         }
     }

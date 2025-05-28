@@ -5,6 +5,7 @@ import connection.requests.Request;
 import connection.responses.IdListResponse;
 import connection.responses.KeyListResponse;
 import connection.responses.CommandMapResponse;
+import main.java.managers.ConsoleManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,18 +15,35 @@ import commands.Command;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
     private final Logger logger = LogManager.getLogger("ClientLogger");
     private final SocketChannel channel;
+    private final Selector selector;
+    private final SelectionKey key;
 
-    public AbstractTCPClient(InetAddress addr, int port) throws IOException {
+    // Поля для отправки данных
+    private ByteBuffer pendingData; // буфер с данными для отправки
+    private boolean isSending = false; // флаг, что есть данные для отправки
+
+    public AbstractTCPClient(InetAddress addr, int port, Selector selector) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
-        this.channel = SocketChannel.open(this.addr);
+        this.selector = selector;
+        this.channel = SocketChannel.open();
+        // Устанавливаем в неблокирующий режим
+        this.channel.configureBlocking(false);
+        // Подключаемся к серверу
+        this.channel.connect(new InetSocketAddress("localhost", 12345));
+        // Регистрируем канал в селекторе
+        this.key = this.channel.register(selector,SelectionKey.OP_CONNECT);
         logger.info("Клиент подключен к " + addr);
     }
 
@@ -34,7 +52,12 @@ public abstract class AbstractTCPClient {
         return (T) ois.readObject();
     }
 
-    public <T> T receiveAndDeserialize() throws IOException, ClassNotFoundException {
+    public <T> T receiveAndDeserialize(SocketChannel channel) throws IOException, ClassNotFoundException {
+        byte[] dataBytes = readData(channel);
+        return deserializeObject(dataBytes);
+    }
+
+    public byte[] readData(SocketChannel channel) throws IOException, ClassNotFoundException {
         ByteBuffer lengthBuf = ByteBuffer.allocate(4);
         while (lengthBuf.hasRemaining()) {
             channel.read(lengthBuf);
@@ -49,45 +72,121 @@ public abstract class AbstractTCPClient {
         }
         byte[] dataBytes = dataBuf.array();
         logger.info("Данные успешно считаны.");
-
-        return deserializeObject(dataBytes);
+        return dataBytes;
     }
 
-    public void sendData(byte[] data) throws IOException {
+    /**
+     * Подготавливает данные для отправки на сервер.
+     * @param data данные для отправки на сервер
+     */
+    public void prepareData(byte[] data) {
         ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
         lengthBuffer.putInt(data.length);
         lengthBuffer.flip();
-        while (lengthBuffer.hasRemaining()) {
-            channel.write(lengthBuffer);
-        }
-        logger.info("Длина данных успешно передана на сервер.");
 
-        ByteBuffer dataBuffer = ByteBuffer.wrap(data);
-        while (dataBuffer.hasRemaining()) {
-            channel.write(dataBuffer);
+        // Объединяем длину и данные в один буфер
+        ByteBuffer fullBuffer = ByteBuffer.allocate(4 + data.length);
+        fullBuffer.put(lengthBuffer);
+        fullBuffer.put(data);
+        fullBuffer.flip();
+
+        // Сохраняем в буфер для отправки
+        this.pendingData = fullBuffer;
+        this.isSending = true;
+
+        // Регистрируем канал на OP_WRITE (если еще не зарегистрирован)
+        SelectionKey key = channel.keyFor(selector);
+        key.interestOps(SelectionKey.OP_WRITE | key.interestOps());
+    }
+
+    public void sendData(SelectionKey key) {
+        try {
+            if (pendingData != null) {
+                channel.write(pendingData);
+                if (!pendingData.hasRemaining()) {
+                    logger.info("Все данные успешно отправлены на сервер.");
+                    pendingData = null;
+                    isSending = false;
+                    key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
+                }
+            }
+        } catch (IOException e) {
+            logger.error("При отправлении данных на сервер произошла ошибка: {}", e.getMessage());
         }
-        logger.info("Данные успешно переданы на сервер.");
     }
 
     public HashMap<String, Command> getCommandMap() throws IOException, ClassNotFoundException {
-        CommandMapResponse response = receiveAndDeserialize();
-        HashMap<String, Command> commands = response.getCommandMap();
-        logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
-        return commands;
+        // Ждем, пока канал не станет готов к чтению
+        while (true) {
+            int readyChannels = selector.select(); // блокирует до события
+            if (readyChannels == 0){
+                continue; // если ничего не готово, повторяем
+            }
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+            while (keyIterator.hasNext()) {
+                SelectionKey selKey = keyIterator.next();
+                if (selKey.isReadable()) {
+                    // Канал готов к чтению
+                    CommandMapResponse response = receiveAndDeserialize(channel);
+                    HashMap<String, Command> commands = response.getCommandMap();
+                    logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
+                    keyIterator.remove(); // удаляем обработанный ключ
+                    return commands;
+                }
+                keyIterator.remove(); // удаляем обработанный ключ
+            }
+        }
     }
 
     public List<Integer> getKeyList() throws IOException, ClassNotFoundException {
-        KeyListResponse response = receiveAndDeserialize();
-        List<Integer> keyList = response.getKeyList();
-        logger.info("Получен список ключей объектов: " + keyList.size() + " ключей.");
-        return keyList;
+        // Ждем, пока канал не станет готов к чтению
+        while (true) {
+            int readyChannels = selector.select(); // блокирует до события
+            if (readyChannels == 0) continue; // если ничего не готово, повторяем
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+            while (keyIterator.hasNext()) {
+                SelectionKey selKey = keyIterator.next();
+                if (selKey.isReadable()) {
+                    // Канал готов к чтению
+                    KeyListResponse response = receiveAndDeserialize(channel);
+                    List<Integer> keyList = response.getKeyList();
+                    logger.info("Получен список ключей объектов: " + keyList.size() + " ключей.");
+                    keyIterator.remove(); // удаляем обработанный ключ
+                    return keyList;
+                }
+                keyIterator.remove(); // удаляем обработанный ключ
+            }
+        }
     }
 
     public List<Long> getIdList() throws IOException, ClassNotFoundException {
-        IdListResponse response = receiveAndDeserialize();
-        List<Long> idList = response.getIdList();
-        logger.info("Получен список id объектов: " + idList.size() + " id.");
-        return idList;
+        // Ждем, пока канал не станет готов к чтению
+        while (true) {
+            int readyChannels = selector.select(); // блокирует до события
+            if (readyChannels == 0) continue; // если ничего не готово, повторяем
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+            while (keyIterator.hasNext()) {
+                SelectionKey selKey = keyIterator.next();
+                if (selKey.isReadable()) {
+                    // Канал готов к чтению
+                    IdListResponse response = receiveAndDeserialize(channel);
+                    List<Long> idList = response.getIdList();
+                    logger.info("Получен список id объектов: " + idList.size() + " id.");
+                    keyIterator.remove(); // удаляем обработанный ключ
+                    return idList;
+                }
+                keyIterator.remove(); // удаляем обработанный ключ
+            }
+        }
     }
 
     public byte[] serializeData(Request request) throws IOException {
@@ -120,5 +219,13 @@ public abstract class AbstractTCPClient {
 
     public SocketChannel getSocketChannel() {
         return channel;
+    }
+
+    public Selector getSelector() {
+        return selector;
+    }
+
+    public boolean isSending() {
+        return isSending;
     }
 }

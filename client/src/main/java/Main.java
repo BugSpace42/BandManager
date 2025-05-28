@@ -8,6 +8,7 @@ import main.java.connection.SSHPortForwarding;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.channels.Selector;
 
 /**
  * Основной класс.
@@ -28,8 +29,10 @@ public class Main {
 
         try {
             InetAddress addr = InetAddress.getByName("localhost");
-            TCPClient client = new TCPClient(addr, port);
+            Selector selector = Selector.open();
+            TCPClient client = new TCPClient(addr, port, selector);
             runner.setClient(client);
+            runner.setSelector(selector);
             ConsoleManager.println("Успешное подключение к серверу.");
             runner.run();
         } catch (IOException e) {

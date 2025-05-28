@@ -3,6 +3,8 @@ package main.java.managers;
 import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
+import connection.responses.CommandMapResponse;
+import connection.responses.KeyListResponse;
 import exceptions.*;
 import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
@@ -16,6 +18,10 @@ import main.java.utility.entityaskers.*;
 import utility.builders.MusicBandBuilder;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.util.*;
 
 /**
@@ -31,8 +37,13 @@ public class Runner {
     private List<Long> idList;
     private boolean running = false;
     private RunningMode currentMode;
+    private String[] currentCommand = null;
     public HashSet<String> scripts;
     private TCPClient client;
+
+    private Selector selector;
+    private SelectionKey keyWrite;
+    private SelectionKey keyRead;
 
     /**
      * Перечисление режимов работы программы.
@@ -58,11 +69,30 @@ public class Runner {
         return runner;
     }
 
+    public void connect() throws IOException {
+        selector.select();
+        Set<SelectionKey> selectedKeys = selector.selectedKeys();
+        Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+        while (keyIterator.hasNext()) {
+            SelectionKey key = keyIterator.next();
+            SocketChannel channel = (SocketChannel) key.channel();
+            if (key.isConnectable()) {
+                if (channel.finishConnect()) {
+                    // Соединение установлено.
+                    // Меняем интересы на чтение и запись
+                    key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                }
+            }
+            keyIterator.remove(); // удаляем обработанный ключ
+        }
+    }
+
     /**
      * Производит действия, необходимые для начала работы.
      * @throws IOException исключение, если невозможно получить информацию о командах от сервера
      */
     public void start() throws IOException, ClassNotFoundException {
+        connect();
         this.commands = client.getCommandMap();
         this.keyList = client.getKeyList();
         this.idList = client.getIdList();
@@ -70,6 +100,7 @@ public class Runner {
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
         this.scripts = new HashSet<>();
+        ConsoleManager.println("Выполнены действия по подготовке приложения к работе.\n");
         ConsoleManager.greeting();
     }
 
@@ -146,6 +177,94 @@ public class Runner {
         return new CommandResponse(report.getCode(), report.getError(), report.getMessage());
     }
 
+    public void analyzeCommandResponse(CommandResponse commandResponse, String[] userCommand) {
+        if (commandResponse.getCode() == ExitCode.OK.code) {
+            ConsoleManager.println(commandResponse.getMessage());
+            ConsoleManager.println("Команда " + userCommand[0] + " успешно выполнена.");
+        } else if (commandResponse.getCode() == ExitCode.CANCEL.code) {
+            ConsoleManager.println("Получен сигнал отмены команды.");
+        } else if (commandResponse.getCode() == ExitCode.ERROR.code) {
+            ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
+            ConsoleManager.println(commandResponse.getMessage());
+        } else if (commandResponse.getCode() == ExitCode.EXIT.code) {
+            ConsoleManager.println("Получен сигнал выхода из программы.");
+            this.running = false;
+        } else {
+            ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
+        }
+    }
+
+    public String[] combineCommandResponseStrings(String[] userCommand, ArrayList<byte[]> arguments) {
+        String[] strings = new String[userCommand.length + arguments.size()];
+        for (int i = 0; i < userCommand.length; i++) {
+            strings[i] = userCommand[i];
+        }
+        for (int i = 0; i < arguments.size(); i++) {
+            byte[] data = arguments.get(i);
+            String encodedData = Base64.getEncoder().encodeToString(data);
+            strings[userCommand.length + i] = encodedData;
+        }
+        return strings;
+    }
+
+    public CommandResponse formCommandResponse(String[] userCommand, String[] strings)
+            throws IOException, ClassNotFoundException {
+        CommandResponse commandResponse;
+        if (clientCommands.containsKey(userCommand[0])) {
+            commandResponse = executeClientCommand(clientCommands.get(userCommand[0]), strings);
+        } else {
+            CommandRequest request = client.formRequest(strings);
+            byte[] dataToSend = client.serializeData(request);
+            sendData(dataToSend);
+            commandResponse = readData();
+        }
+        return commandResponse;
+    }
+
+    public <T> T readData() throws IOException, ClassNotFoundException {
+        // Ждем, пока канал не станет готов к чтению
+        while (true) {
+            int readyChannels = selector.select(); // блокирует до события
+            if (readyChannels == 0) continue; // если ничего не готово, повторяем
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+            while (keyIterator.hasNext()) {
+                SelectionKey currentKey = keyIterator.next();
+                if (currentKey.isReadable()) {
+                    // Канал готов к чтению
+                    T object = client.receiveAndDeserialize((SocketChannel) currentKey.channel());
+                    keyIterator.remove(); // удаляем обработанный ключ
+                    return object;
+                }
+                keyIterator.remove(); // удаляем обработанный ключ
+            }
+        }
+    }
+
+    public void sendData(byte[] data) {
+        try {
+            client.prepareData(data);
+            while (client.isSending()) {
+                selector.select();
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> iterator = selectedKeys.iterator();
+                while (iterator.hasNext()) {
+                    SelectionKey currentKey = iterator.next();
+                    iterator.remove(); // Удаляем обработанный ключ
+                    if (currentKey.isValid()) {
+                        if (currentKey.isWritable()) {
+                            client.sendData(currentKey);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            ConsoleManager.printError("При отправке данных на сервер произошла ошибка.");
+        }
+    }
+
     /**
      * Запускает команду, которую ввёл пользователь.
      * @param userCommand команда
@@ -154,45 +273,14 @@ public class Runner {
         try {
             Command command = checkCommand(userCommand);
             ArrayList<byte[]> arguments = askArguments(command);
-
-            String[] strings = new String[userCommand.length + arguments.size()];
-            for (int i = 0; i < userCommand.length; i++) {
-                strings[i] = userCommand[i];
-            }
-            for (int i = 0; i < arguments.size(); i++) {
-                byte[] data = arguments.get(i);
-                String encodedData = Base64.getEncoder().encodeToString(data);
-                strings[userCommand.length + i] = encodedData;
-            }
-
-            CommandResponse commandResponse;
-            if (clientCommands.containsKey(userCommand[0])) {
-                commandResponse = executeClientCommand(clientCommands.get(userCommand[0]), strings);
-            }
-            else {
-                CommandRequest request = client.formRequest(strings);
-                byte[] dataToSend = client.serializeData(request);
-                client.sendData(dataToSend);
-                commandResponse = client.receiveAndDeserialize();
-            }
-            if (commandResponse.getCode() == ExitCode.OK.code) {
-                ConsoleManager.println(commandResponse.getMessage());
-                ConsoleManager.println("Команда " + userCommand[0] + " успешно выполнена.");
-            } else if (commandResponse.getCode() == ExitCode.CANCEL.code) {
-                ConsoleManager.println("Получен сигнал отмены команды.");
-            } else if (commandResponse.getCode() == ExitCode.ERROR.code) {
-                ConsoleManager.println("При выполнении команды " + userCommand[0] + " произошла ошибка.");
-                ConsoleManager.println(commandResponse.getMessage());
-            } else if (commandResponse.getCode() == ExitCode.EXIT.code) {
-                ConsoleManager.println("Получен сигнал выхода из программы.");
-                this.running = false;
-            } else {
-                ConsoleManager.println("Команда " + userCommand[0] + " не была выполнена.");
-            }
+            String[] strings = combineCommandResponseStrings(userCommand, arguments);
+            CommandResponse commandResponse = formCommandResponse(strings, strings);
+            analyzeCommandResponse(commandResponse, userCommand);
         } catch (IOException | ClassNotFoundException e) {
             ConsoleManager.printError("Произошла ошибка при получении ответа от сервера.");
         } catch (CanceledCommandException e) {
             ConsoleManager.println("Получен сигнал отмены команды.");
+            currentCommand = null;
         } catch (UnknownCommandException e) {
             if (currentMode == RunningMode.INTERACTIVE) {
                 ConsoleManager.printError("Не найдена команда " + e.getMessage());
@@ -218,11 +306,14 @@ public class Runner {
         }
 
         while(running) {
-            String[] currentCommand;
-            ConsoleManager.println(keyList);
+            ConsoleManager.println("цикл");
             currentCommand = ConsoleManager.askCommand();
             if (currentCommand != null) {
                 launchCommand(currentCommand);
+            }
+            else {
+                ConsoleManager.println("Поток ввода закрыт.");
+                stop();
             }
         }
     }
@@ -274,5 +365,13 @@ public class Runner {
 
     public void setClient(TCPClient client) {
         this.client = client;
+    }
+
+    public Selector getSelector() {
+        return selector;
+    }
+
+    public void setSelector(Selector selector) {
+        this.selector = selector;
     }
 }

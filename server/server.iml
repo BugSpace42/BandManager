@@ -10,11 +10,19 @@
     <orderEntry type="module" module-name="common" />
     <orderEntry type="library" name="apache.logging.log4j.api" level="project" />
     <orderEntry type="library" name="apache.logging.log4j.core" level="project" />
-    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/commons-lang3-3.17.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/commons-csv-1.14.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/commons-codec-1.18.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -32,7 +40,16 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/commons-codec-1.18.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../lib/commons-lang3-3.17.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../lib/jsch-0.1.55.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
