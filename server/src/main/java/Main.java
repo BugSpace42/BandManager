@@ -55,7 +55,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(handler));
 
         try {
-            int port = 12345; // порт, на котором будет работать сервер
+            int port = 53621; // порт, на котором будет работать сервер
             InetAddress addr = InetAddress.getByName("localhost"); // адрес, на котором будет работать сервер
             TCPServer server = new TCPServer(addr, port);
             server.run();

@@ -6,7 +6,6 @@ import connection.responses.IdListResponse;
 import connection.responses.KeyListResponse;
 import connection.responses.CommandMapResponse;
 import main.java.exceptions.ServerIsNotAvailableException;
-import main.java.managers.ConsoleManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,7 +41,7 @@ public abstract class AbstractTCPClient {
         // Устанавливаем в неблокирующий режим
         this.channel.configureBlocking(false);
         // Подключаемся к серверу
-        this.channel.connect(new InetSocketAddress("localhost", 12345));
+        this.channel.connect(new InetSocketAddress(addr, port));
         // Регистрируем канал в селекторе
         this.key = this.channel.register(selector,SelectionKey.OP_CONNECT);
         logger.info("Клиент подключен к " + addr);

@@ -149,7 +149,7 @@ public class ConsoleManager {
      */
     private static void updateScanner() {
         print("\n");
-        ConsoleManager.scanner = new Scanner(System.in, "Cp866");
+        ConsoleManager.scanner = new Scanner(System.in);
     }
 
     /**
