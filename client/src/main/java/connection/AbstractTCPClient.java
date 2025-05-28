@@ -5,6 +5,7 @@ import connection.requests.Request;
 import connection.responses.IdListResponse;
 import connection.responses.KeyListResponse;
 import connection.responses.CommandMapResponse;
+import main.java.exceptions.ServerIsNotAvailableException;
 import main.java.managers.ConsoleManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -99,7 +100,7 @@ public abstract class AbstractTCPClient {
         key.interestOps(SelectionKey.OP_WRITE | key.interestOps());
     }
 
-    public void sendData(SelectionKey key) {
+    public void sendData(SelectionKey key) throws ServerIsNotAvailableException {
         try {
             if (pendingData != null) {
                 channel.write(pendingData);
@@ -112,6 +113,8 @@ public abstract class AbstractTCPClient {
             }
         } catch (IOException e) {
             logger.error("При отправлении данных на сервер произошла ошибка: {}", e.getMessage());
+            throw new ServerIsNotAvailableException("При отправлении данных на сервер произошла ошибка.\n" +
+                    "Сервер временно недоступен.");
         }
     }
 

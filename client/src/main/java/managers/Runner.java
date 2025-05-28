@@ -3,8 +3,6 @@ package main.java.managers;
 import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
-import connection.responses.CommandMapResponse;
-import connection.responses.KeyListResponse;
 import exceptions.*;
 import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
@@ -12,13 +10,14 @@ import connection.requests.CommandRequest;
 import connection.responses.CommandResponse;
 import main.java.exceptions.AskingArgumentsException;
 import main.java.exceptions.CanceledCommandException;
+import main.java.exceptions.ServerIsNotAvailableException;
 import utility.*;
 import main.java.utility.validators.TypeValidator;
 import main.java.utility.entityaskers.*;
 import utility.builders.MusicBandBuilder;
 
 import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
+import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -40,6 +39,7 @@ public class Runner {
     private String[] currentCommand = null;
     public HashSet<String> scripts;
     private TCPClient client;
+    private InetSocketAddress addr;
 
     private Selector selector;
     private SelectionKey keyWrite;
@@ -93,6 +93,7 @@ public class Runner {
      */
     public void start() throws IOException, ClassNotFoundException {
         connect();
+        this.addr = client.getSocketAddress();
         this.commands = client.getCommandMap();
         this.keyList = client.getKeyList();
         this.idList = client.getIdList();
@@ -208,7 +209,7 @@ public class Runner {
     }
 
     public CommandResponse formCommandResponse(String[] userCommand, String[] strings)
-            throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException, ServerIsNotAvailableException {
         CommandResponse commandResponse;
         if (clientCommands.containsKey(userCommand[0])) {
             commandResponse = executeClientCommand(clientCommands.get(userCommand[0]), strings);
@@ -243,7 +244,12 @@ public class Runner {
         }
     }
 
-    public void sendData(byte[] data) {
+    /**
+     * Отправляет данные на сервер.
+     * @param data данные для отправки
+     * @throws ServerIsNotAvailableException исключение, которое выбрасывается, если сервер временно недоступен
+     */
+    public void sendData(byte[] data) throws ServerIsNotAvailableException {
         try {
             client.prepareData(data);
             while (client.isSending()) {
@@ -261,7 +267,27 @@ public class Runner {
                 }
             }
         } catch (IOException e) {
-            ConsoleManager.printError("При отправке данных на сервер произошла ошибка.");
+            throw new ServerIsNotAvailableException("При отправлении данных на сервер произошла ошибка.\n" +
+                    "Сервер временно недоступен.");
+        }
+    }
+
+    /**
+     * Пытается восстановить подключение к серверу.
+     */
+    public void resetConnection() {
+        ConsoleManager.println("Производится повторное подключение к серверу.");
+        boolean isConnected = false;
+        while (!isConnected) {
+            try {
+                Selector newSelector = Selector.open();
+                TCPClient newClient = new TCPClient(addr.getAddress(), addr.getPort(), newSelector);
+                setClient(newClient);
+                setSelector(newSelector);
+                start();
+                isConnected = true;
+                ConsoleManager.println("Подключение к серверу восстановлено.");
+            } catch (IOException | ClassNotFoundException e) {}
         }
     }
 
@@ -269,14 +295,16 @@ public class Runner {
      * Запускает команду, которую ввёл пользователь.
      * @param userCommand команда
      */
-    public void launchCommand(String[] userCommand) {
+    public void launchCommand(String[] userCommand) throws ServerIsNotAvailableException {
         try {
             Command command = checkCommand(userCommand);
             ArrayList<byte[]> arguments = askArguments(command);
             String[] strings = combineCommandResponseStrings(userCommand, arguments);
             CommandResponse commandResponse = formCommandResponse(strings, strings);
             analyzeCommandResponse(commandResponse, userCommand);
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            throw new ServerIsNotAvailableException("Произошла ошибка при получении ответа от сервера.\nСервер временно недоступен.");
+        } catch (ClassNotFoundException e) {
             ConsoleManager.printError("Произошла ошибка при получении ответа от сервера.");
         } catch (CanceledCommandException e) {
             ConsoleManager.println("Получен сигнал отмены команды.");
@@ -306,14 +334,18 @@ public class Runner {
         }
 
         while(running) {
-            ConsoleManager.println("цикл");
-            currentCommand = ConsoleManager.askCommand();
-            if (currentCommand != null) {
-                launchCommand(currentCommand);
-            }
-            else {
-                ConsoleManager.println("Поток ввода закрыт.");
-                stop();
+            try {
+                currentCommand = ConsoleManager.askCommand();
+                if (currentCommand != null) {
+                    launchCommand(currentCommand);
+                }
+                else {
+                    ConsoleManager.println("Поток ввода закрыт.");
+                    stop();
+                }
+            } catch (ServerIsNotAvailableException e) {
+                ConsoleManager.printError(e.getMessage());
+                resetConnection();
             }
         }
     }

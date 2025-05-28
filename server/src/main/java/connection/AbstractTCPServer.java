@@ -212,8 +212,8 @@ public abstract class AbstractTCPServer {
                         continue;
                     }
                 }
-
-                running = false; // отладочная строчка
+                // Выход из цикла для отладки
+                //running = false;
             }
         } catch (Exception e) {
             logger.error("Ошибка при работе сервера", e);
