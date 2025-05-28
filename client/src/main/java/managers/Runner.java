@@ -127,15 +127,19 @@ public class Runner {
      * @return true - если все аргументы верны, false или исключение - иначе
      */
     public boolean checkPositionalArguments(Command command, String[] userCommand) throws AskingArgumentsException {
-        Types[] types = command.getPositionalArguments();
-        for (int i = 0; i < types.length; i++) {
-            Types type = types[i];
-            String value = userCommand[i+1];
-            if (! TypeValidator.isTypeValid(type, value)) {
-                return false;
+        try {
+            Types[] types = command.getPositionalArguments();
+            for (int i = 0; i < types.length; i++) {
+                Types type = types[i];
+                String value = userCommand[i + 1];
+                if (!TypeValidator.isTypeValid(type, value)) {
+                    return false;
+                }
             }
+            return true;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
         }
-        return true;
     }
 
     /**
@@ -154,13 +158,13 @@ public class Runner {
         } else {
             throw new UnknownCommandException(userCommand[0]);
         }
-        if (command.getNumberOfArguments() > userCommand.length-1) {
+        if (command.getNumberOfPositionalArguments() > userCommand.length-1) {
             throw new TooManyArgumentsException("Команда " + command.getName() + " должна содержать "
-                    + command.getNumberOfArguments() + " аргументов");
+                    + command.getNumberOfPositionalArguments() + " аргументов");
         }
-        if (command.getNumberOfArguments() < userCommand.length-1) {
+        if (command.getNumberOfPositionalArguments() < userCommand.length-1) {
             throw new TooFewArgumentsException("Команда " + command.getName() + " должна содержать "
-                    + command.getNumberOfArguments() + " аргументов");
+                    + command.getNumberOfPositionalArguments() + " аргументов");
         }
         if (! checkPositionalArguments(command, userCommand)) {
             String message = "Введены некорректные аргументы. Команда " + command.getName() +
