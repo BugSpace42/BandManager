@@ -101,7 +101,7 @@ public class ParserCSV {
                         genre = null;
                     }
                     else{
-                        genre = MusicGenre.valueOf(getText(record.get(7)));
+                        genre = MusicGenre.valueOf(record.get(7));
                     }
                 } catch (IllegalArgumentException e) {
                     throw new WrongValueException("В строке " + i +  " указан неверный жанр музыкальной группы.");
@@ -171,26 +171,5 @@ public class ParserCSV {
             e.printStackTrace();
         }
         return lines;
-    }
-
-    /**
-     * Проверяет, является текст частью другого столбца
-     * @param text текст текущего столбца
-     * @return true - если текст часть другого столбца, false - если нет 
-     */
-    private static boolean isColumnPart(String text) {
-        String trimText = text.trim();
-        // Если в начале и в конце строки стоят кавычки, значит это целый столбец
-        // Иначе, это часть предыдущего или следующего столбца
-        return !(trimText.startsWith("\"") && trimText.endsWith("\""));
-    }
-
-    /**
-     * Возвращает текст столбца (обрезает кавычки).
-     * @param column столбец
-     * @return текст, который содержит столбец
-     */
-    private static String getText(String column) {
-        return column.substring(1, column.length()-1);
     }
 }
