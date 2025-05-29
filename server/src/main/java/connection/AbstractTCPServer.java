@@ -2,6 +2,7 @@ package main.java.connection;
 
 import connection.requests.*;
 import connection.responses.*;
+import main.java.handlers.ClientHandler;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
 import main.java.managers.CommandRequestManager;
@@ -20,20 +21,15 @@ public abstract class AbstractTCPServer {
     private final InetSocketAddress addr;
     private static final Logger logger = LogManager.getLogger(AbstractTCPServer.class);
     private final ServerSocket serverSocket;
-    private Socket socket;
-    // По заданию, для обмена данными на сервере необходимо использовать потоки ввода-вывода
-    // Поэтому я создаю сокеты и использую InputStream и OutputStream
 
     private boolean running = false;
-    private boolean connection = false;
-    private final CollectionManager collectionManager = CollectionManager.getCollectionManager();
 
     public AbstractTCPServer(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
         this.serverSocket = new ServerSocket(port);
     }
 
-    public <T> T receiveObject() throws IOException, ClassNotFoundException {
+    public <T> T receiveObject(Socket socket) throws IOException, ClassNotFoundException {
         InputStream inputStream = socket.getInputStream();
         DataInputStream dataInputStream = new DataInputStream(inputStream);
 
@@ -54,7 +50,7 @@ public abstract class AbstractTCPServer {
         }
     }
 
-    public void sendData(byte[] data) throws IOException {
+    public void sendData(Socket socket, byte[] data) throws IOException {
         OutputStream out = socket.getOutputStream();
         DataOutputStream dos = new DataOutputStream(out);
         dos.writeInt(data.length);
@@ -63,13 +59,11 @@ public abstract class AbstractTCPServer {
     }
 
     public Socket connectToClient() throws IOException {
-        connection = true;
         return serverSocket.accept();
     }
 
-    public void disconnectFromClient() throws IOException {
+    public void disconnectFromClient(Socket socket) throws IOException {
         socket.close();
-        connection = false;
     }
 
     public byte[] serializeCommandData(CommandResponse response) {
@@ -122,96 +116,17 @@ public abstract class AbstractTCPServer {
         }
     }
 
-    public void start() throws IOException {
-        HashMap<String, Command> commands = CommandManager.getCommands();
-        CommandMapResponse commandsMapResponse = formListOfCommandsResponse(commands);
-        byte[] dataCommands = serializeResponse(commandsMapResponse);
-        sendData(dataCommands);
-        logger.info("Информация о доступных командах отправлена клиенту.");
-
-        KeyListResponse keyListResponse = formKeyListResponse();
-        byte[] dataKeys = serializeResponse(keyListResponse);
-        sendData(dataKeys);
-        logger.info("Информация о ключах элементов коллекции отправлена клиенту.");
-
-        IdListResponse idListResponse = formIdListResponse();
-        byte[] dataId = serializeResponse(idListResponse);
-        sendData(dataId);
-        logger.info("Информация о id элементов коллекции отправлена клиенту.");
-    }
-
     public void run() {
         running = true;
         logger.info("Сервер запущен по адресу {}", addr);
         try {
             while (running) {
                 logger.info("Ожидание подключения клиента на порт {}", getPort());
-                try {
-                    socket = connectToClient();
-                    logger.info("Клиент успешно подключился на порт {}", getPort());
-                } catch (Exception e) {
-                    logger.error("Ошибка при подключении клиента", e);
-                    disconnectFromClient();
-                }
+                Socket clientSocket;
+                clientSocket = connectToClient();
+                logger.info("Клиент успешно подключился на порт {}", getPort());
+                new Thread(new ClientHandler(this, clientSocket)).start();
 
-                try {
-                    start();
-                    logger.info("Произведены действия для начала работы с клиентом.");
-                } catch (Exception e) {
-                    logger.error("Ошибка при произведении действий для начала работы с клиентом", e);
-                    disconnectFromClient();
-                }
-
-                while (connection) {
-                    CommandRequest request = null;
-                    try {
-                        request = receiveObject();
-                        logger.info("Запрос получен от клиента");
-                    } catch (Exception e) {
-                        logger.error("Ошибка при получении данных клиента", e);
-                        disconnectFromClient();
-                        continue;
-                    }
-
-                    Report report = null;
-                    try {
-                        report = handleRequest(request);
-                        logger.info("Данные клиента обработаны.");
-                    } catch (Exception e) {
-                        logger.error("Ошибка при обработке данных клиента", e);
-                        disconnectFromClient();
-                        continue;
-                    }
-
-                    CommandResponse commandResponse = null;
-                    try {
-                        commandResponse = formCommandResponse(report);
-                        logger.info("Сформирован ответ клиенту");
-                    } catch (Exception e) {
-                        logger.error("Ошибка при формировании ответа клиенту", e);
-                        disconnectFromClient();
-                        continue;
-                    }
-
-                    byte[] responseData = null;
-                    try {
-                        responseData = serializeCommandData(commandResponse);
-                        logger.info("Данные десериализованы");
-                    } catch (Exception e) {
-                        logger.error("Ошибка сериализации ответа клиенту", e);
-                        disconnectFromClient();
-                        continue;
-                    }
-
-                    try {
-                        sendData(responseData);
-                        logger.info("Данные отправлены клиенту");
-                    } catch (IOException e) {
-                        logger.error("Ошибка при отправке данных клиенту", e);
-                        disconnectFromClient();
-                        continue;
-                    }
-                }
                 // Выход из цикла для отладки
                 //running = false;
             }
