@@ -23,9 +23,12 @@ public class Main {
         Runner runner = Runner.getRunner();
         runner.addClientCommand(new ClientExecuteScript());
 
-        // int port = SSHPortForwarding.getLocalPort();
-        // SSHPortForwarding.connect();
+        // Подключение локально
         int port = 53621;
+
+        // Подключение по SSH
+        //int port = SSHPortForwarding.getLocalPort();
+        //SSHPortForwarding.connect();
 
         try {
             InetAddress addr = InetAddress.getByName("localhost");

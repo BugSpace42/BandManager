@@ -14,7 +14,7 @@ public class SSHPortForwarding {
 
     private static final int localPort = 54321; // локальный порт для приложения
     private static final String remoteHost = "localhost"; // хост на сервере, куда перенаправляем
-    private static final int remotePort = 12345; // порт сервера, с которым работает ваше приложение
+    private static final int remotePort = 53621; // порт сервера, с которым работает ваше приложение
 
     private static Session session;
 

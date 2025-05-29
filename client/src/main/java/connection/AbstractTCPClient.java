@@ -44,7 +44,7 @@ public abstract class AbstractTCPClient {
         this.channel.connect(new InetSocketAddress(addr, port));
         // Регистрируем канал в селекторе
         this.key = this.channel.register(selector,SelectionKey.OP_CONNECT);
-        logger.info("Клиент подключен к " + addr);
+        //logger.info("Клиент подключен к " + addr);
     }
 
     public <T> T deserializeObject(byte[] dataBytes) throws IOException, ClassNotFoundException {
