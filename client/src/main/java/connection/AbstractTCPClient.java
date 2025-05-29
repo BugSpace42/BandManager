@@ -25,7 +25,7 @@ import java.util.Set;
 
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
-    private final Logger logger = LogManager.getLogger("ClientLogger");
+    private final Logger logger = LogManager.getLogger(AbstractTCPClient.class);
     private final SocketChannel channel;
     private final Selector selector;
     private final SelectionKey key;

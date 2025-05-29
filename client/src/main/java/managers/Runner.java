@@ -93,6 +93,11 @@ public class Runner {
      */
     public void start() throws IOException, ClassNotFoundException {
         connect();
+        boolean authenticated = false;
+        while (!authenticated) {
+            authenticated = AuthenticationManager.doAuthentication();
+        }
+
         this.addr = client.getSocketAddress();
         this.commands = client.getCommandMap();
         this.keyList = client.getKeyList();
