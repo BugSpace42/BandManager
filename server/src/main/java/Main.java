@@ -7,6 +7,7 @@ import main.java.connection.TCPServer;
 import main.java.handlers.ShutdownHandler;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
+import main.java.managers.DatabaseManager;
 import main.java.managers.FileManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,9 @@ public class Main {
 
     public static void main(String[] args) {
         System.out.println("Программа запущена.");
+
+        DatabaseManager.connect();
+
         String collectionFilePath = "res/collection.csv"; // путь к файлу с коллекцией
         Path filePath = Path.of(collectionFilePath);
         FileManager fileManager = FileManager.getFileManager(filePath.toAbsolutePath());
