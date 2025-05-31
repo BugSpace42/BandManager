@@ -1,57 +1,33 @@
 package main.java.managers;
 
+import connection.requests.AuthenticationRequest;
+import connection.requests.Request;
+import connection.responses.AuthenticationResponse;
 import exceptions.AuthenticationException;
+import main.java.connection.TCPClient;
+import main.java.exceptions.ServerIsNotAvailableException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import utility.AuthenticationCommands;
+import utility.Encoder;
 
-import java.io.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.HashMap;
+import java.io.IOException;
 
 
 public class AuthenticationManager {
-    private static final HashMap<String, String> users = new HashMap<>();
     private static final Logger logger = LogManager.getLogger(AuthenticationManager.class);
-    private static final String USERS_FILE = "res/users.csv"; // для сервера
+    private static Runner runner;
+    private static TCPClient client;
+    private String login;
+    private String password;
 
-    public AuthenticationManager() {}
-
-    private static void loadUsers() {
-        File file = new File(USERS_FILE);
-        if (!file.exists()) {
-            logger.info("Файл с пользователями не найден.");
-            return;
-        }
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 2) {
-                    String login = parts[0];
-                    String passwordHash = parts[1];
-                    users.put(login, passwordHash);
-                }
-            }
-            logger.info("Загружено пользователей: " + users.size());
-        } catch (IOException e) {
-            logger.error("Ошибка при чтении файла.", e);
-        }
+    public AuthenticationManager(Runner runner) {
+        AuthenticationManager.runner = runner;
+        AuthenticationManager.client = runner.getClient();
     }
 
-    private static void saveUser(String login, String passwordHash) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(USERS_FILE, true))) {
-            bw.write(login + "," + passwordHash);
-            bw.newLine();
-        } catch (IOException e) {
-            logger.error("Ошибка при сохранении пользователя.", e);
-        }
-    }
-
-    public static boolean doAuthentication() {
+    public static boolean doAuthentication() throws ServerIsNotAvailableException {
         try{
-            loadUsers();
             ConsoleManager.println("Введите login для входа в систему или register для регистрации.");
             String command = ConsoleManager.readObject();
             if (command == null) {
@@ -67,7 +43,9 @@ public class AuthenticationManager {
                 return false;
             }
         } catch (AuthenticationException e) {
-            logger.error("Произошла ошибка при аутентификации пользователя.", e);
+            logger.warn("Произошла ошибка при аутентификации пользователя: {}", e.getMessage());
+            ConsoleManager.printError(e.getMessage());
+            ConsoleManager.println("Вы не вошли в систему.");
             return false;
         }
     }
@@ -78,78 +56,82 @@ public class AuthenticationManager {
             String login = ConsoleManager.readObject();
             logger.info("При регистрации введён логин {}.", login);
 
-            if (users.containsKey(login)) {
-                logger.info("При регистрации введён существующий логин.");
-                logger.info("Регистрация прервана.");
-                ConsoleManager.println("Этот логин уже занят.");
-                return false;
-            }
-
             ConsoleManager.println("Введите пароль:");
             String password = ConsoleManager.readObject();
             logger.info("Пароль введён при регистрации.");
 
-            String hashedPassword = hashPassword(password);
+            String hashedPassword = Encoder.hashPassword(password);
             logger.info("Пароль зашифрован при регистрации.");
 
-            addUser(login, hashedPassword);
-            logger.info("Новый пользователь успешно добавлен. Логин: {}", login);
-            saveUser(login, hashedPassword);
-            logger.info("Информация о новом пользователе успешно сохранена.");
-            ConsoleManager.println("Регистрация прошла успешно!");
-            return true;
+            AuthenticationRequest authenticationRequest = formRequest(AuthenticationCommands.REGISTER, login, hashedPassword);
+            byte[] data = client.serializeData(authenticationRequest);
+            runner.sendData(data);
+            AuthenticationResponse authenticationResponse = runner.readData();
+
+            if (isAuthenticated(authenticationResponse)) {
+                ConsoleManager.println("Регистрация прошла успешно!");
+                ConsoleManager.println("Вы зашли в систему.");
+                logger.info("Успешная регистрация нового пользователя. Логин: {}", login);
+                return true;
+            }
+            return false;
+        } catch (AuthenticationException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("Произошла ошибка при регистрации нового пользователя.", e);
             throw new AuthenticationException("Ошибка при регистрации нового пользователя.");
         }
     }
 
-    private static boolean login() throws AuthenticationException {
+    private static boolean login() throws AuthenticationException, ServerIsNotAvailableException {
         try {
             ConsoleManager.println("Введите логин:");
             String login = ConsoleManager.readObject();
             logger.info("Логин введён при входе в систему. Логин: {}", login);
 
-            if (!users.containsKey(login)) {
-                ConsoleManager.println("Пользователь не найден.");
-                logger.info("Пользователь с введённым логином не найден.");
-                return false;
-            }
-            logger.info("Пользователь с введённым логином найден. Логин: {}", login);
-
             ConsoleManager.println("Введите пароль:");
             String password = ConsoleManager.readObject();
             logger.info("Пароль введён при входе в систему.");
 
-            String hashedPassword = hashPassword(password);
+            String hashedPassword = Encoder.hashPassword(password);
             logger.info("Пароль зашифрован при входе в систему.");
-            if (hashedPassword.equals(users.get(login))) {
+
+            AuthenticationRequest authenticationRequest = formRequest(AuthenticationCommands.LOGIN, login, hashedPassword);
+            byte[] data = client.serializeData(authenticationRequest);
+            runner.sendData(data);
+            AuthenticationResponse authenticationResponse = runner.readData();
+
+            if (isAuthenticated(authenticationResponse)) {
                 ConsoleManager.println("Успешный вход!");
                 logger.info("Успешный вход в систему. Логин: {}", login);
                 return true;
-            } else {
-                ConsoleManager.println("Неверный пароль.");
-                logger.info("Введён неверный пароль.");
-                return false;
             }
-        } catch (Exception e) {
-            logger.error("Произошла ошибка при регистрации нового пользователя.", e);
-            throw new AuthenticationException("Ошибка при регистрации нового пользователя.");
+            return false;
+        } catch (IOException | ClassNotFoundException | AuthenticationException e) {
+            logger.error("Произошла ошибка при входе пользователя в систему: {}", e.getMessage());
+            throw new AuthenticationException(e.getMessage());
         }
     }
 
-    private static String hashPassword(String password) throws AuthenticationException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-224");
-            byte[] hashBytes = md.digest(password.getBytes("UTF-8"));
-            return Base64.getEncoder().encodeToString(hashBytes);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            logger.error("Ошибка при хэшировании пароля.", e);
-            throw new AuthenticationException("Ошибка при хэшировании пароля.");
-        }
+    private static AuthenticationRequest formRequest(AuthenticationCommands command, String login, String password) {
+        return new AuthenticationRequest(command, login, password);
     }
 
-    private static void addUser(String username, String password) throws AuthenticationException {
-        users.put(username, hashPassword(password));
+    private static boolean isAuthenticated(AuthenticationResponse response) throws AuthenticationException {
+        if (response == null) {
+            return false;
+        }
+        if (response.isAuthenticated()) {
+            return true;
+        }
+        throw new AuthenticationException(response.getError());
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

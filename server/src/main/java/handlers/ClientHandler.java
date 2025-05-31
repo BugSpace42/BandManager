@@ -2,12 +2,11 @@ package main.java.handlers;
 
 import commands.Command;
 import commands.Report;
+import connection.requests.AuthenticationRequest;
 import connection.requests.CommandRequest;
-import connection.responses.CommandMapResponse;
-import connection.responses.CommandResponse;
-import connection.responses.IdListResponse;
-import connection.responses.KeyListResponse;
+import connection.responses.*;
 import main.java.connection.AbstractTCPServer;
+import main.java.managers.AuthenticationManager;
 import main.java.managers.CommandManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,6 +17,7 @@ import java.util.HashMap;
 
 public class ClientHandler implements Runnable {
     private final AbstractTCPServer server;
+    private final AuthenticationManager authenticationManager;
     private final Socket socket;
     private boolean connection = false;
     private static final Logger logger = LogManager.getLogger(ClientHandler.class);
@@ -25,6 +25,7 @@ public class ClientHandler implements Runnable {
     public ClientHandler(AbstractTCPServer server, Socket socket) {
         this.server = server;
         this.socket = socket;
+        this.authenticationManager = new AuthenticationManager(this);
     }
 
     public void sendCommands() {
@@ -74,14 +75,31 @@ public class ClientHandler implements Runnable {
 
     public void stop() {
         logger.info("Отключение от клиента.");
+        connection = false;
         closeSocket();
     }
 
     public void start() {
+        boolean authenticated = false;
+        while (! authenticated) {
+            authenticated = authenticationManager.doAuthentication();
+        }
         sendCommands();
         sendKeyList();
         sendIdList();
         logger.info("Произведены действия для начала работы с клиентом.");
+    }
+
+    public AuthenticationRequest receiveAuthenticationRequest() {
+        AuthenticationRequest request = null;
+        try {
+            request = server.receiveObject(socket);
+            logger.info("Запрос получен от клиента");
+        } catch (Exception e) {
+            logger.error("Ошибка при получении данных клиента", e);
+            stop();
+        }
+        return request;
     }
 
     public CommandRequest receiveCommandRequest() {
@@ -120,11 +138,11 @@ public class ClientHandler implements Runnable {
         return commandResponse;
     }
 
-    public byte[] serializeCommandResponse(CommandResponse commandResponse) {
+    public byte[] serializeResponse(Response response) {
         byte[] responseData = null;
         try {
-            responseData = server.serializeCommandData(commandResponse);
-            logger.info("Данные десериализованы");
+            responseData = server.serializeResponse(response);
+            logger.info("Данные сериализованы");
         } catch (Exception e) {
             logger.error("Ошибка сериализации ответа клиенту", e);
             stop();
@@ -150,7 +168,7 @@ public class ClientHandler implements Runnable {
                 CommandRequest request = receiveCommandRequest();
                 Report report = getReport(request);
                 CommandResponse commandResponse = getCommandResponse(report);
-                byte[] responseData = serializeCommandResponse(commandResponse);
+                byte[] responseData = serializeResponse(commandResponse);
                 sendData(responseData);
             }
         }
@@ -160,5 +178,9 @@ public class ClientHandler implements Runnable {
         finally {
             stop();
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

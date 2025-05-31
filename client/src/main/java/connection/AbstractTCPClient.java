@@ -191,7 +191,7 @@ public abstract class AbstractTCPClient {
         }
     }
 
-    public byte[] serializeData(Request request) throws IOException {
+    public byte[] serializeData(Request request) {
         byte[] data = SerializationUtils.serialize(request);
         logger.info("Запрос к серверу сериализован.");
         return data;

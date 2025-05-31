@@ -66,10 +66,6 @@ public abstract class AbstractTCPServer {
         socket.close();
     }
 
-    public byte[] serializeCommandData(CommandResponse response) {
-        return SerializationUtils.serialize(response);
-    }
-
     public byte[] serializeResponse(Response response) {
         return SerializationUtils.serialize(response);
     }
@@ -126,9 +122,6 @@ public abstract class AbstractTCPServer {
                 clientSocket = connectToClient();
                 logger.info("Клиент успешно подключился на порт {}", getPort());
                 new Thread(new ClientHandler(this, clientSocket)).start();
-
-                // Выход из цикла для отладки
-                //running = false;
             }
         } catch (Exception e) {
             logger.error("Ошибка при работе сервера", e);

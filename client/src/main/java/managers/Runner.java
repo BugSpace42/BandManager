@@ -3,6 +3,7 @@ package main.java.managers;
 import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
+import connection.requests.AuthenticationRequest;
 import exceptions.*;
 import main.java.connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
@@ -30,11 +31,13 @@ import java.util.*;
 public class Runner {
     private static Runner runner;
     public static ConsoleManager consoleManager;
+    public static AuthenticationManager authenticationManager;
     public HashMap<String, Command> commands;
     public HashMap<String, ExecutableCommand> clientCommands = new HashMap<>();
     private List<Integer> keyList;
     private List<Long> idList;
     private boolean running = false;
+    private boolean isConnected = false;
     private RunningMode currentMode;
     private String[] currentCommand = null;
     public HashSet<String> scripts;
@@ -53,9 +56,7 @@ public class Runner {
         SCRIPT
     }
 
-    private Runner() {
-        this.consoleManager = ConsoleManager.getConsoleManager();
-    }
+    private Runner() {}
 
     /**
      * Метод, использующийся для получения Runner.
@@ -88,14 +89,35 @@ public class Runner {
     }
 
     /**
-     * Производит действия, необходимые для начала работы.
-     * @throws IOException исключение, если невозможно получить информацию о командах от сервера
+     * Проводит аутентификацию пользователя.
+     * @throws ServerIsNotAvailableException исключение, если сервер недоступен
      */
-    public void start() throws IOException, ClassNotFoundException {
-        connect();
+    public void authentication() throws ServerIsNotAvailableException {
         boolean authenticated = false;
         while (!authenticated) {
             authenticated = AuthenticationManager.doAuthentication();
+        }
+    }
+
+    public void reAuthentication() throws ServerIsNotAvailableException {
+        AuthenticationRequest request = new AuthenticationRequest(AuthenticationCommands.LOGIN,
+                authenticationManager.getLogin(), authenticationManager.getPassword());
+        byte[] data = client.serializeData(request);
+        sendData(data);
+    }
+
+    /**
+     * Производит действия, необходимые для начала работы.
+     * @throws IOException исключение, если невозможно получить информацию о командах от сервера
+     */
+    public void start() throws IOException, ClassNotFoundException, ServerIsNotAvailableException {
+        connect();
+        if (isConnected) {
+            reAuthentication();
+        }
+        else {
+            authentication();
+            this.isConnected = true;
         }
 
         this.addr = client.getSocketAddress();
@@ -296,7 +318,15 @@ public class Runner {
                 start();
                 isConnected = true;
                 ConsoleManager.println("Подключение к серверу восстановлено.");
-            } catch (IOException | ClassNotFoundException e) {}
+            } catch (IOException | ClassNotFoundException e) {
+                ConsoleManager.printError("Ошибка при переподключении к серверу.");
+                ConsoleManager.println("Закрытие приложения.");
+                stop();
+            } catch (ServerIsNotAvailableException e) {
+                ConsoleManager.printError("Ошибка при переподключении к серверу.");
+                ConsoleManager.println("Повторное подключение.");
+                resetConnection();
+            }
         }
     }
 
@@ -335,11 +365,14 @@ public class Runner {
      * Управляет работой программы.
      */
     public void run() {
+        Runner.consoleManager = ConsoleManager.getConsoleManager();
+        Runner.authenticationManager = new AuthenticationManager(this);
         try {
             start();
-        } catch (IOException | ClassNotFoundException e) {
-            ConsoleManager.printError("Произошла ошибка при получении списка команд от сервера.");
-            running = false;
+        } catch (IOException | ClassNotFoundException | ServerIsNotAvailableException e) {
+            ConsoleManager.printError("Произошла ошибка во время начала работы с сервером.");
+            ConsoleManager.printError("Завершение работы приложения.");
+            stop();
         }
 
         while(running) {
