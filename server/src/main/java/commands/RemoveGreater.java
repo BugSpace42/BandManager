@@ -1,8 +1,10 @@
 package main.java.commands;
 
 import entity.MusicBand;
+import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.managers.DatabaseManager;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -52,12 +54,16 @@ public class RemoveGreater extends ExecutableCommand {
                 message = "Не найдено элементов, больших заданного.";
             } else {
                 for (Integer key : keysToRemove) {
+                    DatabaseManager.removeMusicBandByKey(key);
                     CollectionManager.getCollection().remove(key);
                 }
                 message = "Удалено элементов: " + keysToRemove.size();
             }
 
             report = new Report(ExitCode.OK.code, null, message);
+        } catch (DatabaseException e){
+            String errorString = "Ошибка при удалении элемента в базе данных.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);

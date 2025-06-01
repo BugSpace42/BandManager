@@ -29,26 +29,11 @@ public class Main {
 
         SSHPortForwarding.connect();
         DatabaseManager.connect();
-        /*
-        MusicBand musicBand = MusicBandBuilder.build("asdf", new Coordinates(12, 12),
-                12, null, null);
-        DatabaseManager.addMusicBand(21, musicBand);*/
-
-        HashMap<Integer, MusicBand> collection = DatabaseManager.getCollection();
-        System.out.println(collection);
-
-        String collectionFilePath = "res/collection.csv"; // путь к файлу с коллекцией
-        Path filePath = Path.of(collectionFilePath);
-        FileManager fileManager = FileManager.getFileManager(filePath.toAbsolutePath());
-        try {
-            CollectionManager.setCollection(fileManager.readCollection());
-        } catch (IOException e) {
-            logger.warn("Ошибка при чтении коллекции из файла{}", fileManager.getCollectionFilePath(), e);
-            logger.info("Создана пустая коллекция.");
-        }
 
         CommandManager commandManager = CommandManager.getCommandManager();
         CollectionManager collectionManager = CollectionManager.getCollectionManager();
+
+        CollectionManager.setCollection(DatabaseManager.getCollection());
 
         CommandManager.newCommand(new Help());
         CommandManager.newCommand(new Info());

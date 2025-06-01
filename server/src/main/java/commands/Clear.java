@@ -2,6 +2,7 @@ package main.java.commands;
 
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.managers.DatabaseManager;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -25,6 +26,7 @@ public class Clear extends ExecutableCommand {
         Report report = null;
         try {
             CollectionManager collectionManager = CollectionManager.getCollectionManager();
+            DatabaseManager.clearCollection();
             collectionManager.clearCollection();
             String message = "Коллекция очищена.";
             report = new Report(ExitCode.OK.code, null, message);

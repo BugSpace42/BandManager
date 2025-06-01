@@ -1,6 +1,8 @@
 package main.java.commands;
 
 import commands.ExecutableCommand;
+import exceptions.DatabaseException;
+import main.java.managers.DatabaseManager;
 import utility.ExitCode;
 import commands.Report;
 import main.java.managers.CollectionManager;
@@ -47,12 +49,16 @@ public class RemoveAllByNumberOfParticipants extends ExecutableCommand {
                 message = "Не найдено элементов с заданным полем numberOfParticipants.";
             } else {
                 for (Integer key : keysToRemove) {
+                    DatabaseManager.removeMusicBandByKey(key);
                     CollectionManager.getCollection().remove(key);
                 }
                 message = "Удалено элементов: " + keysToRemove.size();
             }
 
             report = new Report(ExitCode.OK.code, null, message);
+        } catch (DatabaseException e){
+            String errorString = "Ошибка при удалении элемента в базе данных.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);

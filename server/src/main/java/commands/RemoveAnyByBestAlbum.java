@@ -2,8 +2,10 @@ package main.java.commands;
 
 import entity.Album;
 import entity.MusicBand;
+import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.managers.DatabaseManager;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -46,6 +48,7 @@ public class RemoveAnyByBestAlbum extends ExecutableCommand {
 
             if (entryOpt.isPresent()) {
                 Integer key = entryOpt.get().getKey();
+                DatabaseManager.removeMusicBandByKey(key);
                 CollectionManager.getCollection().remove(key);
                 message = "Удалён элемент с ключом " + key;
             } else {
@@ -53,6 +56,9 @@ public class RemoveAnyByBestAlbum extends ExecutableCommand {
             }
 
             report = new Report(ExitCode.OK.code, null, message);
+        } catch (DatabaseException e){
+            String errorString = "Ошибка при удалении элемента в базе данных.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             System.out.println(e.getMessage());

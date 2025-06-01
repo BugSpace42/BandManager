@@ -4,6 +4,7 @@ import entity.Album;
 import entity.Coordinates;
 import entity.MusicBand;
 import entity.MusicGenre;
+import exceptions.DatabaseException;
 import main.java.connection.AbstractTCPServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,15 +65,15 @@ public class DatabaseManager {
         return collection;
     }
 
-    public static boolean addMusicBand(Integer key, MusicBand musicBand) {
+    public static void addMusicBand(Integer key, MusicBand musicBand) throws DatabaseException {
         String sql = "INSERT INTO music_band (key, name, coordinates_x, coordinates_y, creation_date, " +
                 "number_of_participants, genre, best_album_name, best_album_sales) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, key);
             pstmt.setString(2, musicBand.getName());
-            pstmt.setDouble(3, musicBand.getCoordinates().getX());
-            pstmt.setDouble(4, musicBand.getCoordinates().getY());
+            pstmt.setInt(3, musicBand.getCoordinates().getX());
+            pstmt.setLong(4, musicBand.getCoordinates().getY());
             pstmt.setTimestamp(5, new java.sql.Timestamp(musicBand.getCreationDate().getTime()));
             pstmt.setInt(6, musicBand.getNumberOfParticipants());
             pstmt.setString(7, musicBand.getGenre() != null ? musicBand.getGenre().name() : null);
@@ -82,10 +83,100 @@ public class DatabaseManager {
 
             pstmt.executeUpdate();
             logger.info("Добавлен элемент: {}", musicBand);
-            return true;
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при добавлении элемента {}\n Текст ошибки: {}", musicBand, e.getMessage());
-            return false;
+            throw new DatabaseException("Произошла ошибка при добавлении элемента " + musicBand);
+        }
+    }
+
+    public static void updateMusicBandById(Long id, MusicBand musicBand) throws DatabaseException {
+        String sql = "UPDATE music_band SET (name, coordinates_x, coordinates_y, " +
+                "number_of_participants, genre, best_album_name, best_album_sales) = " +
+                "(?, ?, ?, ?, ?, ?, ?, ?) WHERE id = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, musicBand.getName());
+            pstmt.setInt(2, musicBand.getCoordinates().getX());
+            pstmt.setLong(3, musicBand.getCoordinates().getY());
+            pstmt.setInt(4, musicBand.getNumberOfParticipants());
+            pstmt.setString(5, musicBand.getGenre() != null ? musicBand.getGenre().name() : null);
+            pstmt.setString(6, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
+            if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
+            else pstmt.setDouble(7, 0);
+            pstmt.setLong(8, id);
+
+            pstmt.executeUpdate();
+            logger.info("Значение элемента с id {} обновлено на: {}", id, musicBand);
+        } catch (SQLException e) {
+            logger.warn("Произошла ошибка при обновлении значения элемента с id {}\n Текст ошибки: {}",
+                    id, e.getMessage());
+            throw new DatabaseException("Произошла ошибка при обновлении значения элемента с id " + id);
+        }
+    }
+
+    public static void updateMusicBandByKey(Integer key, MusicBand musicBand) throws DatabaseException {
+        String sql = "UPDATE music_band SET (name, coordinates_x, coordinates_y, " +
+                "number_of_participants, genre, best_album_name, best_album_sales) = " +
+                "(?, ?, ?, ?, ?, ?, ?, ?) WHERE key = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, musicBand.getName());
+            pstmt.setInt(2, musicBand.getCoordinates().getX());
+            pstmt.setLong(3, musicBand.getCoordinates().getY());
+            pstmt.setInt(4, musicBand.getNumberOfParticipants());
+            pstmt.setString(5, musicBand.getGenre() != null ? musicBand.getGenre().name() : null);
+            pstmt.setString(6, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
+            if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
+            else pstmt.setDouble(7, 0);
+            pstmt.setLong(8, key);
+
+            pstmt.executeUpdate();
+            logger.info("Значение элемента с ключом {} обновлено на: {}", key, musicBand);
+        } catch (SQLException e) {
+            logger.warn("Произошла ошибка при обновлении значения элемента с ключом {}\n Текст ошибки: {}",
+                    key, e.getMessage());
+            throw new DatabaseException("Произошла ошибка при обновлении значения элемента с ключом " + key);
+        }
+    }
+
+    public static void removeMusicBandByKey(Integer key) throws DatabaseException {
+        String sql = "DELETE FROM music_band WHERE key = ?";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, key);
+
+            pstmt.executeUpdate();
+            logger.info("Удалён элемент с ключом: {}", key);
+        } catch (SQLException e) {
+            logger.warn("Произошла ошибка при удалении элемента с ключом {}\n Текст ошибки: {}", key, e.getMessage());
+            throw new DatabaseException("Произошла ошибка при удалении элемента с ключом " + key);
+        }
+    }
+
+    public static void removeMusicBandById(Long id) throws DatabaseException {
+        String sql = "DELETE FROM music_band WHERE id = ?";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setLong(1, id);
+
+            pstmt.executeUpdate();
+            logger.info("Удалён элемент с id: {}", id);
+        } catch (SQLException e) {
+            logger.warn("Произошла ошибка при удалении элемента с id {}\n Текст ошибки: {}", id, e.getMessage());
+            throw new DatabaseException("Произошла ошибка при удалении элемента с id " + id);
+        }
+    }
+
+    public static void clearCollection() throws DatabaseException {
+        String sql = "TRUNCATE TABLE music_band";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+
+            pstmt.executeUpdate();
+            logger.info("Коллекция очищена.");
+        } catch (SQLException e) {
+            logger.warn("Произошла ошибка при очистке коллекции. Текст ошибки: {}", e.getMessage());
+            throw new DatabaseException("Произошла ошибка при очистке коллекции");
         }
     }
 }

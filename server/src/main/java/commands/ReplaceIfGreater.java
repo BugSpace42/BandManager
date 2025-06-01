@@ -1,8 +1,10 @@
 package main.java.commands;
 
 import entity.MusicBand;
+import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.managers.DatabaseManager;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -45,6 +47,7 @@ public class ReplaceIfGreater extends ExecutableCommand {
                 MusicBand currentMusicBand = collection.get(key);
                 String message;
                 if (newMusicBand.compareTo(currentMusicBand) > 0) {
+                    DatabaseManager.updateMusicBandByKey(key, newMusicBand);
                     collectionManager.addToCollection(key, newMusicBand);
                     message = "Элемент с ключом " + key + " заменён на заданный.";
                 } else {
@@ -53,6 +56,9 @@ public class ReplaceIfGreater extends ExecutableCommand {
                 }
                 report = new Report(ExitCode.OK.code, null, message);
             }
+        } catch (DatabaseException e){
+            String errorString = "Ошибка при замене элемента в базе данных.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);

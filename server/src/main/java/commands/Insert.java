@@ -1,8 +1,10 @@
 package main.java.commands;
 
 import entity.MusicBand;
+import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.managers.DatabaseManager;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -38,10 +40,14 @@ public class Insert extends ExecutableCommand {
                 report = new Report(ExitCode.ERROR.code, errorString, errorString);
             }
             else {
+                DatabaseManager.addMusicBand(key, musicBand);
                 collectionManager.addToCollection(key, musicBand);
                 String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
                 report = new Report(ExitCode.OK.code, null, message);
             }
+        } catch (DatabaseException e) {
+            String errorString = "Ошибка при добавлении элемента в базу данных.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
