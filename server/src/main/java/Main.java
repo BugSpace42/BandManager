@@ -1,5 +1,8 @@
 package main.java;
 
+import connection.SSHPortForwarding;
+import entity.Coordinates;
+import entity.MusicBand;
 import main.java.commands.*;
 import main.java.commands.servercommands.ServerExecuteScript;
 import main.java.commands.servercommands.ServerSave;
@@ -11,10 +14,12 @@ import main.java.managers.DatabaseManager;
 import main.java.managers.FileManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import utility.builders.MusicBandBuilder;
 
 import java.io.*;
 import java.net.*;
 import java.nio.file.Path;
+import java.util.HashMap;
 
 public class Main {
     private static final Logger logger = LogManager.getLogger(Main.class);
@@ -22,7 +27,15 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Программа запущена.");
 
+        SSHPortForwarding.connect();
         DatabaseManager.connect();
+        /*
+        MusicBand musicBand = MusicBandBuilder.build("asdf", new Coordinates(12, 12),
+                12, null, null);
+        DatabaseManager.addMusicBand(21, musicBand);*/
+
+        HashMap<Integer, MusicBand> collection = DatabaseManager.getCollection();
+        System.out.println(collection);
 
         String collectionFilePath = "res/collection.csv"; // путь к файлу с коллекцией
         Path filePath = Path.of(collectionFilePath);

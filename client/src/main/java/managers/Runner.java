@@ -5,7 +5,7 @@ import commands.ExecutableCommand;
 import commands.Report;
 import connection.requests.AuthenticationRequest;
 import exceptions.*;
-import main.java.connection.SSHPortForwarding;
+import connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
 import connection.requests.CommandRequest;
 import connection.responses.CommandResponse;

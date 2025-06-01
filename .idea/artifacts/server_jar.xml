@@ -1,0 +1,28 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="server:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/server_jar</output-path>
+    <root id="archive" name="server.jar">
+      <element id="module-output" name="server" />
+      <element id="module-output" name="common" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx-swt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.web.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.fxml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.media.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="C:/Program Files/JavaFX/javafx-sdk-17.0.15/lib/javafx.graphics.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.m2/repository/org/apache/logging/log4j/log4j-core/2.22.0/log4j-core-2.22.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.m2/repository/org/apache/logging/log4j/log4j-api/2.22.0/log4j-api-2.22.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-lang3-3.17.0.jar" path-in-jar="/" />
+      <element id="dir-copy" path="$PROJECT_DIR$/server/src/main/resources" />
+      <element id="dir-copy" path="$PROJECT_DIR$/lib" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-codec-1.18.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-csv-1.14.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/commons-io-2.19.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jsch-0.1.55.jar" path-in-jar="/" />
+      <element id="library" level="project" name="postgresql-42.7.5" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/postgresql-42.7.5.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

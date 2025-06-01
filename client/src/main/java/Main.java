@@ -4,7 +4,7 @@ import main.java.commands.ClientExecuteScript;
 import main.java.connection.TCPClient;
 import main.java.managers.ConsoleManager;
 import main.java.managers.Runner;
-import main.java.connection.SSHPortForwarding;
+import connection.SSHPortForwarding;
 
 import java.io.IOException;
 import java.net.InetAddress;
