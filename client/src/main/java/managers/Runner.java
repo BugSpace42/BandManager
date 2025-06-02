@@ -95,7 +95,7 @@ public class Runner {
     public void authentication() throws ServerIsNotAvailableException {
         boolean authenticated = false;
         while (!authenticated) {
-            authenticated = AuthenticationManager.doAuthentication();
+            authenticated = authenticationManager.doAuthentication();
         }
     }
 

@@ -33,13 +33,20 @@ public class AuthenticationManager {
                     sendAuthenticationResponse(true, null);
                     return true;
                 }
+                else {
+                    throw new AuthenticationException("Неправильный логин или пароль.");
+                }
             } else if (authenticationRequest.getCommand() == AuthenticationCommands.REGISTER) {
                 if (register(authenticationRequest.getUsername(), authenticationRequest.getPassword())) {
                     sendAuthenticationResponse(true, null);
                     return true;
                 }
+                else {
+                    throw new AuthenticationException("Возникла проблема с регистрацией нового пользователя.");
+                }
+            } else {
+                throw new AuthenticationException("Неизвестная команда аутентификации.");
             }
-            return false;
         } catch (AuthenticationException e) {
             sendAuthenticationResponse(false, e.getMessage());
             return false;
@@ -67,12 +74,10 @@ public class AuthenticationManager {
         logger.info("Пользователь с введённым логином найден. Логин: {}", username);
         if (password.equals(users.get(username))) {
             logger.info("Успешный вход в систему. Логин: {}", username);
-            sendAuthenticationResponse(true, null);
             return true;
         } else {
             logger.info("Введён неверный пароль.");
-            sendAuthenticationResponse(false, "Введён неверный пароль.");
-            return false;
+            throw new AuthenticationException("Введён неверный пароль.");
         }
     }
 

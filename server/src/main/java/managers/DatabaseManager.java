@@ -92,7 +92,7 @@ public class DatabaseManager {
     public static void updateMusicBandById(Long id, MusicBand musicBand) throws DatabaseException {
         String sql = "UPDATE music_band SET (name, coordinates_x, coordinates_y, " +
                 "number_of_participants, genre, best_album_name, best_album_sales) = " +
-                "(?, ?, ?, ?, ?, ?, ?, ?) WHERE id = ?";
+                "(?, ?, ?, ?, ?, ?, ?) WHERE id = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, musicBand.getName());

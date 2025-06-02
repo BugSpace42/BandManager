@@ -44,8 +44,8 @@ public class Update extends ExecutableCommand {
                 report = new Report(ExitCode.ERROR.code, message, message);
             }
             else {
-                collectionManager.updateElementById(id, musicBand); // TODO (говорит, что не заменяется элемент, но он заменяется)
                 DatabaseManager.updateMusicBandById(id, musicBand);
+                collectionManager.updateElementById(id, musicBand); // TODO (говорит, что не заменяется элемент, но он заменяется)
                 message = "Элемент по id " + id + " успешно изменён на заданный.";
                 report = new Report(ExitCode.OK.code, null, message);
             }

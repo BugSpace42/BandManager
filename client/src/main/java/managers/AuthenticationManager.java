@@ -26,7 +26,7 @@ public class AuthenticationManager {
         AuthenticationManager.client = runner.getClient();
     }
 
-    public static boolean doAuthentication() throws ServerIsNotAvailableException {
+    public boolean doAuthentication() throws ServerIsNotAvailableException {
         try{
             ConsoleManager.println("Введите login для входа в систему или register для регистрации.");
             String command = ConsoleManager.readObject();
@@ -50,7 +50,7 @@ public class AuthenticationManager {
         }
     }
 
-    private static boolean register() throws AuthenticationException {
+    private boolean register() throws AuthenticationException, ServerIsNotAvailableException {
         try {
             ConsoleManager.println("Введите логин:");
             String login = ConsoleManager.readObject();
@@ -75,15 +75,13 @@ public class AuthenticationManager {
                 return true;
             }
             return false;
-        } catch (AuthenticationException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException | AuthenticationException e) {
             logger.error("Произошла ошибка при регистрации нового пользователя.", e);
             throw new AuthenticationException("Ошибка при регистрации нового пользователя.");
         }
     }
 
-    private static boolean login() throws AuthenticationException, ServerIsNotAvailableException {
+    private boolean login() throws AuthenticationException, ServerIsNotAvailableException {
         try {
             ConsoleManager.println("Введите логин:");
             String login = ConsoleManager.readObject();
@@ -104,6 +102,8 @@ public class AuthenticationManager {
             if (isAuthenticated(authenticationResponse)) {
                 ConsoleManager.println("Успешный вход!");
                 logger.info("Успешный вход в систему. Логин: {}", login);
+                this.login = login;
+                this.password = hashedPassword;
                 return true;
             }
             return false;
@@ -113,11 +113,11 @@ public class AuthenticationManager {
         }
     }
 
-    private static AuthenticationRequest formRequest(AuthenticationCommands command, String login, String password) {
+    private AuthenticationRequest formRequest(AuthenticationCommands command, String login, String password) {
         return new AuthenticationRequest(command, login, password);
     }
 
-    private static boolean isAuthenticated(AuthenticationResponse response) throws AuthenticationException {
+    private boolean isAuthenticated(AuthenticationResponse response) throws AuthenticationException {
         if (response == null) {
             return false;
         }
