@@ -7,6 +7,7 @@ import main.java.handlers.ClientHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import utility.AuthenticationCommands;
+import utility.Encoder;
 
 import java.io.*;
 import java.util.HashMap;
@@ -16,6 +17,8 @@ public class AuthenticationManager {
     private static final String USERS_FILE = "res/users.csv";
     private static HashMap<String, String> users = new HashMap<>();
     private final ClientHandler clientHandler;
+    private String username;
+    private String password;
 
     public AuthenticationManager(ClientHandler clientHandler) {
         this.clientHandler = clientHandler;
@@ -23,7 +26,7 @@ public class AuthenticationManager {
 
     public boolean doAuthentication() {
         try {
-            AuthenticationRequest authenticationRequest = clientHandler.receiveAuthenticationRequest();
+            AuthenticationRequest authenticationRequest = clientHandler.receiveUserRequest();
             loadUsers();
             if (authenticationRequest == null) {
                 return false;
@@ -31,6 +34,8 @@ public class AuthenticationManager {
             if (authenticationRequest.getCommand() == AuthenticationCommands.LOGIN) {
                 if (login(authenticationRequest.getUsername(), authenticationRequest.getPassword())){
                     sendAuthenticationResponse(true, null);
+                    this.username = authenticationRequest.getUsername();
+                    this.password = authenticationRequest.getPassword();
                     return true;
                 }
                 else {
@@ -39,6 +44,8 @@ public class AuthenticationManager {
             } else if (authenticationRequest.getCommand() == AuthenticationCommands.REGISTER) {
                 if (register(authenticationRequest.getUsername(), authenticationRequest.getPassword())) {
                     sendAuthenticationResponse(true, null);
+                    this.username = authenticationRequest.getUsername();
+                    this.password = authenticationRequest.getPassword();
                     return true;
                 }
                 else {
@@ -123,5 +130,13 @@ public class AuthenticationManager {
 
     private AuthenticationResponse formAuthenticationResponse(boolean authenticated, String error) {
         return new AuthenticationResponse(authenticated, error);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

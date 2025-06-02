@@ -6,12 +6,14 @@ public class ShutdownHandler extends Thread {
 
     @Override
     public void run() {
-        saveData();
+        //saveData();
         System.out.println("Завершение работы программы.");
     }
 
+    /*
     private void saveData() {
         AbstractTCPServer.saveCollection();
         System.out.println("Данные успешно сохранены.");
     }
+     */
 }

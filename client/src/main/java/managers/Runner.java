@@ -245,7 +245,7 @@ public class Runner {
         if (clientCommands.containsKey(userCommand[0])) {
             commandResponse = executeClientCommand(clientCommands.get(userCommand[0]), strings);
         } else {
-            CommandRequest request = client.formRequest(strings);
+            CommandRequest request = client.formCommandRequest(strings);
             byte[] dataToSend = client.serializeData(request);
             sendData(dataToSend);
             commandResponse = readData();
@@ -447,5 +447,9 @@ public class Runner {
 
     public void setSelector(Selector selector) {
         this.selector = selector;
+    }
+
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
     }
 }

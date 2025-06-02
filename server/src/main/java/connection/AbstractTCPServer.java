@@ -2,6 +2,7 @@ package main.java.connection;
 
 import connection.requests.*;
 import connection.responses.*;
+import exceptions.AuthenticationException;
 import main.java.handlers.ClientHandler;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
@@ -12,6 +13,7 @@ import commands.Report;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.commons.lang3.SerializationUtils;
+import utility.Encoder;
 
 import java.io.*;
 import java.net.*;
@@ -21,12 +23,16 @@ public abstract class AbstractTCPServer {
     private final InetSocketAddress addr;
     private static final Logger logger = LogManager.getLogger(AbstractTCPServer.class);
     private final ServerSocket serverSocket;
+    private final String loginAdmin;
+    private final String passwordAdmin;
 
     private boolean running = false;
 
     public AbstractTCPServer(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
         this.serverSocket = new ServerSocket(port);
+        this.loginAdmin = "admin";
+        this.passwordAdmin = "admin";
     }
 
     public <T> T receiveObject(Socket socket) throws IOException, ClassNotFoundException {
@@ -75,8 +81,8 @@ public abstract class AbstractTCPServer {
         return CommandRequestManager.directCommand(request);
     }
 
-    public static Report executeServerCommand(String[] args) {
-        CommandRequest request = new CommandRequest(args[0], args);
+    public Report executeServerCommand(String[] args) {
+        CommandRequest request = new CommandRequest(args[0], args, loginAdmin, passwordAdmin);
         return CommandRequestManager.directServerCommand(request);
     }
 
@@ -96,7 +102,7 @@ public abstract class AbstractTCPServer {
         return new CommandMapResponse(commands);
     }
 
-    public static void saveCollection() {
+    public void saveCollection() {
         executeServerCommand(new String[]{"save"});
     }
 

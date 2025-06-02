@@ -4,6 +4,8 @@ import commands.Command;
 import commands.Report;
 import connection.requests.AuthenticationRequest;
 import connection.requests.CommandRequest;
+import connection.requests.Request;
+import connection.requests.UserRequest;
 import connection.responses.*;
 import main.java.connection.AbstractTCPServer;
 import main.java.managers.AuthenticationManager;
@@ -90,11 +92,15 @@ public class ClientHandler implements Runnable {
         logger.info("Произведены действия для начала работы с клиентом.");
     }
 
-    public AuthenticationRequest receiveAuthenticationRequest() {
-        AuthenticationRequest request = null;
+    public <T extends UserRequest> T receiveUserRequest() {
+        T request = null;
         try {
             request = server.receiveObject(socket);
-            logger.info("Запрос получен от клиента");
+            logger.info("Запрос получен от клиента {}", request.getUsername());
+            if (! catchUserRequest(request)) {
+                logger.error("Ошибка при сверке логина и пароля клиента.");
+                stop();
+            }
         } catch (Exception e) {
             logger.error("Ошибка при получении данных клиента", e);
             stop();
@@ -102,16 +108,16 @@ public class ClientHandler implements Runnable {
         return request;
     }
 
-    public CommandRequest receiveCommandRequest() {
-        CommandRequest request = null;
-        try {
-            request = server.receiveObject(socket);
-            logger.info("Запрос получен от клиента");
-        } catch (Exception e) {
-            logger.error("Ошибка при получении данных клиента", e);
-            stop();
+    public boolean catchUserRequest(UserRequest userRequest) {
+        String username = userRequest.getUsername();
+        String password = userRequest.getPassword();
+        if (username != authenticationManager.getUsername()) {
+            return false;
         }
-        return request;
+        if (password != authenticationManager.getPassword()) {
+            return false;
+        }
+        return true;
     }
 
     public Report getReport(CommandRequest request) {
@@ -165,7 +171,7 @@ public class ClientHandler implements Runnable {
             connection = true;
             start();
             while (connection) {
-                CommandRequest request = receiveCommandRequest();
+                CommandRequest request = receiveUserRequest();
                 Report report = getReport(request);
                 CommandResponse commandResponse = getCommandResponse(report);
                 byte[] responseData = serializeResponse(commandResponse);

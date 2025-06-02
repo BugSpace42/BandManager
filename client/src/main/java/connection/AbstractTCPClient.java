@@ -6,6 +6,7 @@ import connection.responses.IdListResponse;
 import connection.responses.KeyListResponse;
 import connection.responses.CommandMapResponse;
 import main.java.exceptions.ServerIsNotAvailableException;
+import main.java.managers.Runner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +27,7 @@ import java.util.Set;
 public abstract class AbstractTCPClient {
     private final InetSocketAddress addr;
     private final Logger logger = LogManager.getLogger(AbstractTCPClient.class);
+    private final Runner runner = Runner.getRunner();
     private final SocketChannel channel;
     private final Selector selector;
     private final SelectionKey key;
@@ -197,9 +199,11 @@ public abstract class AbstractTCPClient {
         return data;
     }
 
-    public CommandRequest formRequest(String[] args) {
-        CommandRequest request = new CommandRequest(args[0], args);
-        return request;
+    public CommandRequest formCommandRequest(String[] args) {
+        String username = runner.getAuthenticationManager().getLogin();
+        String password = runner.getAuthenticationManager().getPassword();
+
+        return new CommandRequest(args[0], args, username, password);
     }
 
     public void close() throws IOException {
