@@ -72,6 +72,8 @@ public class AuthenticationManager {
                 ConsoleManager.println("Регистрация прошла успешно!");
                 ConsoleManager.println("Вы зашли в систему.");
                 logger.info("Успешная регистрация нового пользователя. Логин: {}", login);
+                this.login = login;
+                this.password = hashedPassword;
                 return true;
             }
             return false;

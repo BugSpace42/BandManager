@@ -13,7 +13,7 @@ import java.sql.*;
 import java.util.HashMap;
 
 public class DatabaseManager {
-    //private static final String url = "jdbc:postgresql://pg:5432/studs"; // если запускаю сразу на helios
+    // private static final String url = "jdbc:postgresql://pg:5432/studs"; // если запускаю сразу на helios
     private static final String url = "jdbc:postgresql://127.0.0.1:54321/studs"; // если пробрасываю порты по ssh
     private static final String user = "s409478";
     private static final String password = "KLJNrXjJbVh9iVTm";
