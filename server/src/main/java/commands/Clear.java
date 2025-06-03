@@ -3,6 +3,7 @@ package main.java.commands;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -13,7 +14,7 @@ import utility.Types;
  */
 public class Clear extends ExecutableCommand {
     public Clear() {
-        super("clear", "очистить коллекцию", new Types[]{}, new Types[]{});
+        super(Commands.CLEAR, "очистить коллекцию", new Types[]{}, new Types[]{});
     }
 
     /**

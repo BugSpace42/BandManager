@@ -3,6 +3,7 @@ package main.java.commands;
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -15,7 +16,7 @@ import java.util.HashMap;
  */
 public class Info extends ExecutableCommand {
     public Info(){
-        super("info", "вывести информацию о коллекции",
+        super(Commands.INFO, "вывести информацию о коллекции",
                 new Types[]{}, new Types[]{});
     }
 

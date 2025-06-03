@@ -3,6 +3,7 @@ package main.java.managers;
 import connection.requests.CommandRequest;
 import commands.ExecutableCommand;
 import commands.Report;
+import main.java.utility.Commands;
 
 import java.util.Map;
 
@@ -20,6 +21,14 @@ public class CommandRequestManager {
      */
     public static Report directCommand(CommandRequest request) {
         String commandName = request.getName();
+        String username = request.getUsername();
+        if (Commands.isModifyingCommand(commandName)) {
+            String[] args = request.getArgs();
+            String[] newArgs = new String[args.length + 1];
+            System.arraycopy(args, 0, newArgs, 0, args.length);
+            newArgs[args.length] = username;
+            return commands.get(commandName).execute(newArgs);
+        }
         return commands.get(commandName).execute(request.getArgs());
     }
 

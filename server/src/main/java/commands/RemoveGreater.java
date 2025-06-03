@@ -5,6 +5,7 @@ import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class RemoveGreater extends ExecutableCommand {
     public RemoveGreater() {
-        super("remove_greater",
+        super(Commands.REMOVE_GREATER,
                 "удалить из коллекции все элементы, превышающие заданный",
                 new Types[]{}, new Types[]{Types.MUSIC_BAND});
     }

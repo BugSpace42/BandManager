@@ -6,6 +6,7 @@ import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -19,7 +20,7 @@ import java.util.*;
  */
 public class RemoveAnyByBestAlbum extends ExecutableCommand {
     public RemoveAnyByBestAlbum() {
-        super("remove_any_by_best_album",
+        super(Commands.REMOVE_ANY_BY_ALBUM,
                 "удалить из коллекции один элемент, значение поля bestAlbum которого эквивалентно заданному",
                 new Types[]{}, new Types[]{Types.ALBUM});
     }

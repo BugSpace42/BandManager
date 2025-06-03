@@ -5,6 +5,7 @@ import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -19,7 +20,7 @@ import java.util.HashMap;
  */
 public class ReplaceIfGreater extends ExecutableCommand {
     public ReplaceIfGreater() {
-        super("replace_if_greater",
+        super(Commands.REPLACE_IF_GREATER,
                 "заменить значение по ключу, если новое значение больше старого",
                 new Types[]{Types.MUSIC_BAND_KEY_CONTAINED}, new Types[]{Types.MUSIC_BAND});
     }

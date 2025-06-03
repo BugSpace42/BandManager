@@ -1,6 +1,7 @@
 package main.java.commands;
 
 import commands.ExecutableCommand;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -11,7 +12,7 @@ import utility.Types;
  */
 public class Exit extends ExecutableCommand {
     public Exit() {
-        super("exit", "завершить программу (без сохранения в файл)",
+        super(Commands.EXIT, "завершить программу (без сохранения в файл)",
                 new Types[]{}, new Types[]{});
     }
 

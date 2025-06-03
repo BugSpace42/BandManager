@@ -5,6 +5,7 @@ import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -17,7 +18,7 @@ import java.util.HashMap;
  */
 public class RemoveKey extends ExecutableCommand {
     public RemoveKey() {
-        super("remove_key", "удалить элемент из коллекции по его ключу",
+        super(Commands.REMOVE_KEY, "удалить элемент из коллекции по его ключу",
                 new Types[]{Types.MUSIC_BAND_KEY_CONTAINED}, new Types[]{});
     }
 

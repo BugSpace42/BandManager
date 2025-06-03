@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS music_band (
     number_of_participants INTEGER NOT NULL CHECK (number_of_participants > 0),
     genre VARCHAR(50),
     best_album_name VARCHAR(255),
-    best_album_sales DOUBLE PRECISION DEFAULT NULL
+    best_album_sales DOUBLE PRECISION DEFAULT NULL,
+    owner_username VARCHAR(255)
     );
 
 SELECT * FROM music_band;

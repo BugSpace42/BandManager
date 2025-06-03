@@ -3,6 +3,7 @@ package main.java.commands;
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class Show extends ExecutableCommand {
     public Show() {
-        super("show", "вывести все элементы коллекции в строковом представлении",
+        super(Commands.SHOW, "вывести все элементы коллекции в строковом представлении",
                 new Types[]{}, new Types[]{});
     }
 

@@ -3,6 +3,7 @@ package main.java.commands;
 import commands.ExecutableCommand;
 import exceptions.DatabaseException;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import main.java.managers.CollectionManager;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class RemoveAllByNumberOfParticipants extends ExecutableCommand {
     public RemoveAllByNumberOfParticipants() {
-        super("remove_all_by_number_of_participants",
+        super(Commands.REMOVE_BY_NUMBER,
                 "удалить из коллекции все элементы, значение поля numberOfParticipants которого эквивалентно заданному",
                 new Types[]{Types.MUSIC_BAND_NUMBER}, new Types[]{});
     }

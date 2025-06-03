@@ -3,6 +3,7 @@ package main.java.commands;
 import entity.MusicBand;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class PrintFieldDescendingNumberOfParticipants extends ExecutableCommand {
     public PrintFieldDescendingNumberOfParticipants() {
-        super("print_field_descending_number_of_participants",
+        super(Commands.PRINT_DESCENDING_NUMBER,
                 "вывести значения поля numberOfParticipants всех элементов в порядке убывания",
                 new Types[]{}, new Types[]{});
     }

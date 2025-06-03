@@ -4,6 +4,7 @@ import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
 import main.java.managers.CommandManager;
+import main.java.utility.Commands;
 import utility.*;
 
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import java.util.HashMap;
  */
 public class Help extends ExecutableCommand {
     public Help(){
-        super("help", "вывести справку по доступным командам",
+        super(Commands.HELP, "вывести справку по доступным командам",
                 new Types[]{}, new Types[]{});
     }
 

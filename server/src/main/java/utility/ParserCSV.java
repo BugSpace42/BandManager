@@ -1,8 +1,9 @@
-package utility;
+package main.java.utility;
 
 import entity.*;
 import exceptions.IdExistsException;
 import exceptions.WrongValueException;
+import main.java.managers.CollectionManager;
 import org.apache.commons.csv.*;
 import utility.validators.*;
 import utility.validators.musicband.*;
@@ -25,6 +26,8 @@ public class ParserCSV {
      */
     public static HashMap<Integer, MusicBand> parseCollectionFromCSV(List<String> fileLines) throws IOException {
         HashMap<Integer, MusicBand> collection = new HashMap<>();
+        HashMap<Integer, String> musicBandOwners = new HashMap<>();
+
         List<Integer> keyList = new ArrayList<>();
         List<Long> idList = new ArrayList<>();
 
@@ -122,8 +125,14 @@ public class ParserCSV {
                     }
                     bestAlbum = new Album(albumName, albumSales);
                 }
+
+                String owner = record.get(10);
+
                 MusicBand musicBand = new MusicBand(id, name, coordinates, creationDate, numberOfParticipants, genre, bestAlbum);
                 collection.put(key, musicBand);
+                musicBandOwners.put(key, owner);
+                // CollectionManager.setCollection(collection);
+                CollectionManager.setMusicBandOwners(musicBandOwners);
             } catch (Exception e) {
                 System.out.println("Ошибка при обработке строки: " + e.getMessage());
                 System.out.println("Строка с ошибкой пропущена.");
@@ -140,7 +149,9 @@ public class ParserCSV {
     public static List<String> parseCollectionToCSV(HashMap<Integer, MusicBand> collection) {
         List<String> lines = new ArrayList<>();
         String[] headers = {"key", "id", "name", "coordinateX", "coordinateY", "creationDate",
-                            "numberOfParticipants", "genre", "albumName", "albumSales"};
+                            "numberOfParticipants", "genre", "albumName", "albumSales", "ownerUsername"};
+
+        HashMap<Integer, String> musicBandOwners = CollectionManager.getMusicBandOwners();
 
         try (StringWriter writer = new StringWriter();
              CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(headers))) {
@@ -156,7 +167,8 @@ public class ParserCSV {
                         entry.getValue().getNumberOfParticipants(),
                         (entry.getValue().getGenre() != null) ? entry.getValue().getGenre().toString() : "",
                         (entry.getValue().getBestAlbum() != null) ? entry.getValue().getBestAlbum().getName() : "",
-                        (entry.getValue().getBestAlbum() != null) ? String.valueOf(entry.getValue().getBestAlbum().getSales()) : ""
+                        (entry.getValue().getBestAlbum() != null) ? String.valueOf(entry.getValue().getBestAlbum().getSales()) : "",
+                        musicBandOwners.get(entry.getKey())
                 );
             }
 

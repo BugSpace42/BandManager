@@ -11,6 +11,7 @@ import java.util.*;
 public class CollectionManager {
     private static CollectionManager collectionManager;
     private static HashMap<Integer, MusicBand> collection = new HashMap<>();
+    private static HashMap<Integer, String> musicBandOwners = new HashMap<>();
     private static Date initDate;
 
     private CollectionManager() {}
@@ -36,6 +37,13 @@ public class CollectionManager {
     }
 
     /**
+     * @return коллекция c информацией о владельцах записей о музыкальных группах
+     */
+    public static HashMap<Integer, String> getMusicBandOwners() {
+        return musicBandOwners;
+    }
+
+    /**
      * Возвращает элемент коллекции с заданным id.
      * @param id id элемента
      * @return элемент коллекции
@@ -49,10 +57,20 @@ public class CollectionManager {
 
     /**
      * Добавляет элемент в коллекцию.
+     * @param key ключ музыкальной группы
      * @param musicBand добавляемый объект
      */
     public void addToCollection(Integer key, MusicBand musicBand) {
         collection.put(key, musicBand);
+    }
+
+    /**
+     * Добавляет в коллекцию информацию о владельце записи о музыкальной группы.
+     * @param key ключ записи
+     * @param owner имя пользователя-владельца
+     */
+    public void addOwnerToCollection(Integer key, String owner) {
+        musicBandOwners.put(key, owner);
     }
 
     /**
@@ -72,6 +90,7 @@ public class CollectionManager {
      */
     public void removeByKey(Integer key) {
         collection.remove(key);
+        musicBandOwners.remove(key);
     }
 
     /**
@@ -79,6 +98,7 @@ public class CollectionManager {
      */
     public void clearCollection() {
         collection.clear();
+        musicBandOwners.clear();
     }
 
     /**
@@ -88,6 +108,20 @@ public class CollectionManager {
      */
     public boolean containsKey(Integer key) {
         return collection.containsKey(key);
+    }
+
+    /**
+     * Проверяет, является ли пользователь владельцем записи о музыкальной группе.
+     * @param owner имя пользователя
+     * @param key ключ записи
+     * @return true, если пользователь является владельцем записи о музыкальной группе, false - иначе
+     */
+    public static boolean checkOwner(String owner, Integer key) {
+        HashMap<Integer, String> musicBandOwners = CollectionManager.getMusicBandOwners();
+        if (musicBandOwners.get(key).equals(owner)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -128,6 +162,10 @@ public class CollectionManager {
      */
     public static void setCollection(HashMap<Integer, MusicBand> collection) {
         CollectionManager.collection = collection;
+    }
+
+    public static void setMusicBandOwners(HashMap<Integer, String> musicBandOwners) {
+        CollectionManager.musicBandOwners = musicBandOwners;
     }
 
     /**

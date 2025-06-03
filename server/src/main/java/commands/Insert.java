@@ -5,6 +5,7 @@ import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -18,7 +19,7 @@ import java.util.Base64;
  */
 public class Insert extends ExecutableCommand {
     public Insert() {
-        super("insert", "добавить новый элемент с заданным ключом",
+        super(Commands.INSERT, "добавить новый элемент с заданным ключом",
                 new Types[]{Types.MUSIC_BAND_KEY_UNIQUE}, new Types[]{Types.MUSIC_BAND});
     }
 

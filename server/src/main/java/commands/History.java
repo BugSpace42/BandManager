@@ -2,6 +2,7 @@ package main.java.commands;
 
 import main.java.managers.CommandManager;
 import commands.ExecutableCommand;
+import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  */
 public class History extends ExecutableCommand {
     public History(){
-        super("history", "вывести последние 8 команд",
+        super(Commands.HISTORY, "вывести последние 8 команд",
                 new Types[]{}, new Types[]{});
     }
 

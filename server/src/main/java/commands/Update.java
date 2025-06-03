@@ -5,6 +5,7 @@ import exceptions.DatabaseException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
+import main.java.utility.Commands;
 import org.apache.commons.lang3.SerializationUtils;
 import utility.ExitCode;
 import commands.Report;
@@ -18,7 +19,7 @@ import java.util.Base64;
  */
 public class Update extends ExecutableCommand {
     public Update() {
-        super("update",
+        super(Commands.UPDATE,
                 "обновить значение элемента коллекции, id которого равен заданному",
                 new Types[]{Types.MUSIC_BAND_ID_CONTAINED}, new Types[]{Types.MUSIC_BAND});
     }

@@ -114,6 +114,7 @@ public class ClientHandler implements Runnable {
                 logger.error("Ошибка при сверке логина и пароля клиента.");
                 stop();
             }
+            logger.info("В запросе указаны верные логин и пароль.");
         } catch (Exception e) {
             logger.error("Ошибка при получении данных клиента", e);
             stop();
