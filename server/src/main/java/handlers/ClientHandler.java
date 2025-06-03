@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ClientHandler implements Runnable {
     private final AbstractTCPServer server;
@@ -92,6 +93,18 @@ public class ClientHandler implements Runnable {
         logger.info("Произведены действия для начала работы с клиентом.");
     }
 
+    public AuthenticationRequest receiveAuthenticationRequest() {
+        AuthenticationRequest request = null;
+        try {
+            request = server.receiveObject(socket);
+            logger.info("Запрос на аутентификацию получен от клиента {}", request.getUsername());
+        } catch (Exception e) {
+            logger.error("Ошибка при получении данных клиента", e);
+            stop();
+        }
+        return request;
+    }
+
     public <T extends UserRequest> T receiveUserRequest() {
         T request = null;
         try {
@@ -111,10 +124,10 @@ public class ClientHandler implements Runnable {
     public boolean catchUserRequest(UserRequest userRequest) {
         String username = userRequest.getUsername();
         String password = userRequest.getPassword();
-        if (username != authenticationManager.getUsername()) {
+        if (!Objects.equals(username, authenticationManager.getUsername())) {
             return false;
         }
-        if (password != authenticationManager.getPassword()) {
+        if (!Objects.equals(password, authenticationManager.getPassword())) {
             return false;
         }
         return true;

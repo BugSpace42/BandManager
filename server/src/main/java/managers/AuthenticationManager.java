@@ -26,7 +26,7 @@ public class AuthenticationManager {
 
     public boolean doAuthentication() {
         try {
-            AuthenticationRequest authenticationRequest = clientHandler.receiveUserRequest();
+            AuthenticationRequest authenticationRequest = clientHandler.receiveAuthenticationRequest();
             loadUsers();
             if (authenticationRequest == null) {
                 return false;
