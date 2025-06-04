@@ -190,6 +190,8 @@ public class ClientHandler implements Runnable {
                 CommandResponse commandResponse = getCommandResponse(report);
                 byte[] responseData = serializeResponse(commandResponse);
                 sendData(responseData);
+                sendKeyList();
+                sendIdList();
             }
         }
         catch (Exception e) {

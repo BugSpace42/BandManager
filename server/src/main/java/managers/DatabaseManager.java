@@ -65,7 +65,14 @@ public class DatabaseManager {
         return collection;
     }
 
-    public static void addMusicBand(Integer key, MusicBand musicBand) throws DatabaseException {
+    /**
+     * Добавляет объект класса MusicBand в коллекцию
+     * @param key ключ, по которому нужно добавить элемент
+     * @param musicBand элемент, который нужно добавить
+     * @return id добавленного элемента
+     * @throws DatabaseException исключение
+     */
+    public static Long addMusicBand(Integer key, MusicBand musicBand) throws DatabaseException {
         String sql = "INSERT INTO music_band (key, name, coordinates_x, coordinates_y, creation_date, " +
                 "number_of_participants, genre, best_album_name, best_album_sales) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -81,8 +88,18 @@ public class DatabaseManager {
             if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
             else pstmt.setDouble(9, 0);
 
-            pstmt.executeUpdate();
             logger.info("Добавлен элемент: {}", musicBand);
+
+            /*
+            String sqlId = "SELECT id FROM music_band WHERE key=?";
+            PreparedStatement pstmtId = connection.prepareStatement(sqlId);
+            pstmtId.setLong(1, key);
+            ResultSet rs = pstmtId.executeQuery();
+            Long generatedId = null;
+            rs.next();
+            generatedId = rs.getLong(1);
+             */
+            return musicBand.getId();
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при добавлении элемента {}\n Текст ошибки: {}", musicBand, e.getMessage());
             throw new DatabaseException("Произошла ошибка при добавлении элемента " + musicBand);

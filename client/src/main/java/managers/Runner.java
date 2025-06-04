@@ -124,7 +124,13 @@ public class Runner {
         this.commands = client.getCommandMap();
         this.keyList = client.getKeyList();
         this.idList = client.getIdList();
-        MusicBandBuilder.setCurrentId((long) (idList.size() + 1));
+        Long maxId = 0L;
+        for (Long id : idList) {
+            if (id > maxId) {
+                maxId = id;
+            }
+        }
+        MusicBandBuilder.setCurrentId(maxId + 1);
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
         this.scripts = new HashSet<>();
@@ -380,6 +386,8 @@ public class Runner {
                 currentCommand = ConsoleManager.askCommand();
                 if (currentCommand != null) {
                     launchCommand(currentCommand);
+                    this.keyList = client.getKeyList();
+                    this.idList = client.getIdList();
                 }
                 else {
                     ConsoleManager.println("Поток ввода закрыт.");
@@ -388,6 +396,10 @@ public class Runner {
             } catch (ServerIsNotAvailableException e) {
                 ConsoleManager.printError(e.getMessage());
                 resetConnection();
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
     }

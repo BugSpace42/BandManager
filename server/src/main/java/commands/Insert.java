@@ -43,8 +43,11 @@ public class Insert extends ExecutableCommand {
                 report = new Report(ExitCode.ERROR.code, errorString, errorString);
             }
             else {
-                DatabaseManager.addMusicBand(key, musicBand);
-                collectionManager.addToCollection(key, musicBand);
+                Long newId = DatabaseManager.addMusicBand(key, musicBand);
+                MusicBand newMusicBand = new MusicBand(newId, musicBand.getName(), musicBand.getCoordinates(),
+                        musicBand.getCreationDate(), musicBand.getNumberOfParticipants(), musicBand.getGenre(),
+                        musicBand.getBestAlbum());
+                collectionManager.addToCollection(key, newMusicBand);
                 collectionManager.addOwnerToCollection(key, args[3]);
                 String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
                 report = new Report(ExitCode.OK.code, null, message);
