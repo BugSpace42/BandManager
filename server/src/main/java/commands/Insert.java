@@ -2,6 +2,7 @@ package main.java.commands;
 
 import entity.MusicBand;
 import exceptions.DatabaseException;
+import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
@@ -36,6 +37,7 @@ public class Insert extends ExecutableCommand {
 
             CollectionManager collectionManager = CollectionManager.getCollectionManager();
             Integer key = Integer.valueOf(args[1]);
+
             if (collectionManager.containsKey(key)) {
                 String errorString = "Элемент с ключом " + key + " уже находится в коллекции.";
                 report = new Report(ExitCode.ERROR.code, errorString, errorString);
@@ -43,6 +45,7 @@ public class Insert extends ExecutableCommand {
             else {
                 DatabaseManager.addMusicBand(key, musicBand);
                 collectionManager.addToCollection(key, musicBand);
+                collectionManager.addOwnerToCollection(key, args[3]);
                 String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
                 report = new Report(ExitCode.OK.code, null, message);
             }

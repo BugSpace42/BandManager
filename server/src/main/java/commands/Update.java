@@ -2,6 +2,7 @@ package main.java.commands;
 
 import entity.MusicBand;
 import exceptions.DatabaseException;
+import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
@@ -45,11 +46,19 @@ public class Update extends ExecutableCommand {
                 report = new Report(ExitCode.ERROR.code, message, message);
             }
             else {
+                String owner = args[2];
+                if (! CollectionManager.checkOwner(owner, collectionManager.getKeyById(id))) {
+                    throw new WrongUserException("Невозможно удалить элемент коллекции. " +
+                            "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
+                }
                 DatabaseManager.updateMusicBandById(id, musicBand);
-                collectionManager.updateElementById(id, musicBand); // TODO (говорит, что не заменяется элемент, но он заменяется)
+                collectionManager.updateElementById(id, musicBand);
                 message = "Элемент по id " + id + " успешно изменён на заданный.";
                 report = new Report(ExitCode.OK.code, null, message);
             }
+        } catch (WrongUserException e){
+            String errorString = "Ошибка при замене элемента, связанная с правами доступа.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (DatabaseException e){
             String errorString = "Ошибка при обновлении элемента в базе данных.";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);

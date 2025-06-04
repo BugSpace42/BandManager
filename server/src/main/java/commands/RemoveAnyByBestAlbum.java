@@ -3,6 +3,7 @@ package main.java.commands;
 import entity.Album;
 import entity.MusicBand;
 import exceptions.DatabaseException;
+import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
@@ -42,18 +43,42 @@ public class RemoveAnyByBestAlbum extends ExecutableCommand {
             byte[] data = Base64.getDecoder().decode(args[1]);
             targetAlbum = SerializationUtils.deserialize(data);
 
-            // Находим ключ первого элемента с matching album
-            Optional<Map.Entry<Integer, MusicBand>> entryOpt = CollectionManager.getCollection().entrySet().stream()
-                    .filter(entry -> targetAlbum.equals(entry.getValue().getBestAlbum()))
-                    .findFirst();
+            boolean isRemoved = false;
+            HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
+            List<Integer> keys = CollectionManager.getKeyList();
+            String owner = args[2];
+            ArrayList<Integer> notRemoved = new ArrayList<>();
+            int counter = 0;
 
-            if (entryOpt.isPresent()) {
-                Integer key = entryOpt.get().getKey();
-                DatabaseManager.removeMusicBandByKey(key);
-                CollectionManager.getCollection().remove(key);
-                message = "Удалён элемент с ключом " + key;
-            } else {
+            for (Integer key : keys) {
+                try {
+                    if (collection.get(key).equals(targetAlbum)) {
+                        counter++;
+                        if (!CollectionManager.checkOwner(owner, key)) {
+                            notRemoved.add(key);
+                            throw new WrongUserException("Невозможно удалить элемент коллекции. " +
+                                    "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
+                        }
+                        DatabaseManager.removeMusicBandByKey(key);
+                        CollectionManager.getCollection().remove(key);
+                        isRemoved = true;
+                        message = "Удалён элемент с ключом " + key;
+                        report = new Report(ExitCode.OK.code, null, message);
+                        return report;
+                    }
+                } catch (WrongUserException e) {
+                    System.out.println(e.getMessage());
+                    System.out.println("Элемент коллекции пропущен.");
+                }
+            }
+
+            if (counter == 0) {
                 message = "Не найдено элементов с заданным полем bestAlbum.";
+            } else if (notRemoved.size() > 0) {
+                message = "Были найдены элементы с заданным полем bestAlbum с ключами: " + notRemoved.toString();
+                message += "\n Не были удалены элементы с ключами: " + notRemoved.toString() + " по причине прав доступа.";
+            } else {
+                message = "Ни один элемент не был удалён";
             }
 
             report = new Report(ExitCode.OK.code, null, message);

@@ -2,6 +2,7 @@ package main.java.commands;
 
 import entity.MusicBand;
 import exceptions.DatabaseException;
+import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
@@ -11,10 +12,7 @@ import utility.ExitCode;
 import commands.Report;
 import utility.Types;
 
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -43,7 +41,11 @@ public class RemoveGreater extends ExecutableCommand {
             MusicBand targetBand = SerializationUtils.deserialize(data);
 
             // Получаем коллекцию
+            CollectionManager collectionManager = CollectionManager.getCollectionManager();
             HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
+            String owner = args[2];
+            int counter = 0;
+            ArrayList<Integer> notRemoved = new ArrayList<>();
 
             // Находим все ключи элементов, которые больше заданного
             List<Integer> keysToRemove = collection.entrySet().stream()
@@ -55,10 +57,24 @@ public class RemoveGreater extends ExecutableCommand {
                 message = "Не найдено элементов, больших заданного.";
             } else {
                 for (Integer key : keysToRemove) {
-                    DatabaseManager.removeMusicBandByKey(key);
-                    CollectionManager.getCollection().remove(key);
+                    try {
+                        if (! CollectionManager.checkOwner(owner, key)) {
+                            notRemoved.add(key);
+                            throw new WrongUserException("Невозможно удалить элемент коллекции. " +
+                                    "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
+                        }
+                        DatabaseManager.removeMusicBandByKey(key);
+                        collectionManager.removeByKey(key);
+                        counter++;
+                    } catch (WrongUserException e) {
+                        System.out.println(e.getMessage());
+                        System.out.println("Элемент коллекции пропущен.");
+                    }
                 }
-                message = "Удалено элементов: " + keysToRemove.size();
+                message = "Удалено элементов: " + counter;
+                if (notRemoved.size() > 0) {
+                    message += "\nНе были удалены элементы с ключами: " + notRemoved.toString();
+                }
             }
 
             report = new Report(ExitCode.OK.code, null, message);

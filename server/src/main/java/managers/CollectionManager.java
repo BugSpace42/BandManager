@@ -53,7 +53,19 @@ public class CollectionManager {
           if (entry.getValue().getId().equals(id)) return entry.getValue();
         }
         return null;
-      }
+    }
+
+    /**
+     * Возвращает ключ элемента коллекции с заданным id.
+     * @param id id элемента
+     * @return ключ элемента коллекции
+     */
+    public Integer getKeyById(Long id) {
+        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+            if (entry.getValue().getId().equals(id)) return entry.getKey();
+        }
+        return null;
+    }
 
     /**
      * Добавляет элемент в коллекцию.
@@ -117,9 +129,8 @@ public class CollectionManager {
      * @return true, если пользователь является владельцем записи о музыкальной группе, false - иначе
      */
     public static boolean checkOwner(String owner, Integer key) {
-        HashMap<Integer, String> musicBandOwners = CollectionManager.getMusicBandOwners();
-        if (musicBandOwners.get(key).equals(owner)) {
-            return true;
+        if (musicBandOwners.containsKey(key)) {
+            return musicBandOwners.get(key).equals(owner);
         }
         return false;
     }

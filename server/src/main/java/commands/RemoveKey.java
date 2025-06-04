@@ -2,6 +2,7 @@ package main.java.commands;
 
 import entity.MusicBand;
 import exceptions.DatabaseException;
+import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
@@ -36,6 +37,11 @@ public class RemoveKey extends ExecutableCommand {
             HashMap<Integer, MusicBand> collection = CollectionManager.getCollection();
 
             if (collection.keySet().stream().anyMatch(k -> k.equals(key))) {
+                String owner = args[2];
+                if (! CollectionManager.checkOwner(owner, key)) {
+                    throw new WrongUserException("Невозможно удалить элемент коллекции. " +
+                            "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
+                }
                 DatabaseManager.removeMusicBandByKey(key);
                 collection.remove(key);
                 message = "Элемент с ключом " + key + " успешно удалён.";
@@ -44,6 +50,9 @@ public class RemoveKey extends ExecutableCommand {
                 message = "В коллекции нет элемента с ключом " + key;
                 report = new Report(ExitCode.ERROR.code, message, message);
             }
+        } catch (WrongUserException e){
+            String errorString = "Ошибка при удалении элемента, связанная с правами доступа.";
+            report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (DatabaseException e){
             String errorString = "Ошибка при удалении элемента в базе данных.";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);

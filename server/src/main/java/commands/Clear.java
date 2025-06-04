@@ -1,12 +1,15 @@
 package main.java.commands;
 
+import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
-import main.java.managers.DatabaseManager;
 import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
 import utility.Types;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Очищает коллекцию.
@@ -24,12 +27,32 @@ public class Clear extends ExecutableCommand {
      */
     @Override
     public Report execute(String[] args){
-        Report report = null;
+        Report report;
         try {
             CollectionManager collectionManager = CollectionManager.getCollectionManager();
-            DatabaseManager.clearCollection();
-            collectionManager.clearCollection();
-            String message = "Коллекция очищена.";
+            List<Integer> keys = CollectionManager.getKeyList();
+            String owner = args[1];
+            int counter = 0;
+            ArrayList<Integer> notRemoved = new ArrayList<>();
+            for (Integer key : keys) {
+                try {
+                    if (! CollectionManager.checkOwner(owner, key)) {
+                        notRemoved.add(key);
+                        throw new WrongUserException("Невозможно удалить элемент коллекции. " +
+                                "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
+                    }
+                    collectionManager.removeByKey(key);
+                    counter++;
+                } catch (WrongUserException e) {
+                    System.out.println(e.getMessage());
+                    System.out.println("Элемент коллекции пропущен.");
+                }
+            }
+            // String message = "Коллекция очищена.";
+            String message = "Удалены все элементы, доступные для удаления. Удалено " + counter + " элементов";
+            if (notRemoved.size() > 0) {
+                message += "\nНе были удалены элементы с ключами: " + notRemoved.toString();
+            }
             report = new Report(ExitCode.OK.code, null, message);
         } catch (Exception e) {
             String errorString = "Непредвиденная ошибка!";
