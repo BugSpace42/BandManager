@@ -223,9 +223,12 @@ public class Runner {
         return command;
     }
 
-    public CommandResponse executeClientCommand(ExecutableCommand command, String[] args) {
+    public CompositeResponse executeClientCommand(ExecutableCommand command, String[] args) {
         Report report = command.execute(args);
-        return new CommandResponse(report.getCode(), report.getError(), report.getMessage());
+        CommandResponse commandResponse = new CommandResponse(report.getCode(), report.getError(), report.getMessage());
+        KeyListResponse keyListResponse = new KeyListResponse(keyList);
+        IdListResponse idListResponse = new IdListResponse(idList);
+        return new CompositeResponse(commandResponse, keyListResponse, idListResponse);
     }
 
     public void analyzeCommandResponse(CommandResponse commandResponse, String[] userCommand) {
@@ -258,15 +261,11 @@ public class Runner {
         return strings;
     }
 
-    public void formCommandResponse(String[] userCommand, String[] strings)
+    public void sendCommandData(String[] strings)
             throws IOException, ClassNotFoundException, ServerIsNotAvailableException {
-        if (clientCommands.containsKey(userCommand[0])) {
-            executeClientCommand(clientCommands.get(userCommand[0]), strings);
-        } else {
-            CommandRequest request = client.formCommandRequest(strings);
-            byte[] dataToSend = client.serializeData(request);
-            sendData(dataToSend);
-        }
+        CommandRequest request = client.formCommandRequest(strings);
+        byte[] dataToSend = client.serializeData(request);
+        sendData(dataToSend);
     }
 
     public <T> T readData() throws IOException, ClassNotFoundException {
@@ -355,9 +354,16 @@ public class Runner {
             Command command = checkCommand(userCommand);
             ArrayList<byte[]> arguments = askArguments(command);
             String[] strings = combineCommandResponseStrings(userCommand, arguments);
-            //CompositeResponse compositeResponse
-            formCommandResponse(strings, strings);
-            CompositeResponse compositeResponse = client.getCompositeResponse();
+
+            CompositeResponse compositeResponse;
+            if (clientCommands.containsKey(userCommand[0])) {
+                compositeResponse = executeClientCommand(clientCommands.get(userCommand[0]), strings);
+            }
+            else {
+                sendCommandData(strings);
+                compositeResponse = client.getCompositeResponse();
+            }
+
             CommandResponse commandResponse = compositeResponse.getCommandResponse();
             KeyListResponse keyListResponse = compositeResponse.getKeyList();
             IdListResponse idListResponse = compositeResponse.getIdList();
