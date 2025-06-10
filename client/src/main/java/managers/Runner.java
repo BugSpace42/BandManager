@@ -347,6 +347,9 @@ public class Runner {
             String[] strings = combineCommandResponseStrings(userCommand, arguments);
             CommandResponse commandResponse = formCommandResponse(strings, strings);
             analyzeCommandResponse(commandResponse, userCommand);
+
+            this.keyList = client.getKeyList();
+            this.idList = client.getIdList();
         } catch (IOException e) {
             throw new ServerIsNotAvailableException("Произошла ошибка при получении ответа от сервера.\nСервер временно недоступен.");
         } catch (ClassNotFoundException e) {
@@ -386,8 +389,6 @@ public class Runner {
                 currentCommand = ConsoleManager.askCommand();
                 if (currentCommand != null) {
                     launchCommand(currentCommand);
-                    this.keyList = client.getKeyList();
-                    this.idList = client.getIdList();
                 }
                 else {
                     ConsoleManager.println("Поток ввода закрыт.");
@@ -396,10 +397,6 @@ public class Runner {
             } catch (ServerIsNotAvailableException e) {
                 ConsoleManager.printError(e.getMessage());
                 resetConnection();
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
     }

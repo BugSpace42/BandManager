@@ -16,6 +16,7 @@ public class Commands {
     public static final String REMOVE_KEY = "remove_key";
     public static final String REPLACE_IF_GREATER = "replace_if_greater";
     public static final String SHOW = "show";
+    public static final String SHOW_WITH_OWNERS = "show_with_owners";
     public static final String UPDATE = "update";
 
     public static boolean isModifyingCommand(String command) {

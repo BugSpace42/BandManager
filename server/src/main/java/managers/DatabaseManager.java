@@ -32,8 +32,9 @@ public class DatabaseManager {
         }
     }
 
-    public static HashMap<Integer, MusicBand> getCollection() {
+    public static void getCollection() {
         HashMap<Integer, MusicBand> collection = new HashMap<>();
+        HashMap<Integer, String> ownersCollection = new HashMap<>();
         String sql = "SELECT * FROM music_band";
         try {
             Statement stmt = connection.createStatement();
@@ -56,13 +57,17 @@ public class DatabaseManager {
 
                 MusicBand musicBand = new MusicBand(id, name, coords, creationDate, numberOfParticipants, genre, album);
                 collection.put(key, musicBand);
+
+                String owner = rs.getString("owner_username");
+                ownersCollection.put(key, owner);
+
                 logger.info("Элемент считан в коллекцию: {}", musicBand.toString());
             }
+            CollectionManager.setCollection(collection);
+            CollectionManager.setMusicBandOwners(ownersCollection);
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при чтении коллекции: {}", e.getMessage());
-            return null;
         }
-        return collection;
     }
 
     /**
@@ -72,9 +77,10 @@ public class DatabaseManager {
      * @return id добавленного элемента
      * @throws DatabaseException исключение
      */
-    public static Long addMusicBand(Integer key, MusicBand musicBand) throws DatabaseException {
+    public static void addMusicBand(Integer key, MusicBand musicBand) throws DatabaseException {
         String sql = "INSERT INTO music_band (key, name, coordinates_x, coordinates_y, creation_date, " +
-                "number_of_participants, genre, best_album_name, best_album_sales) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "number_of_participants, genre, best_album_name, best_album_sales, owner_username) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setInt(1, key);
@@ -87,8 +93,9 @@ public class DatabaseManager {
             pstmt.setString(8, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
             if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
             else pstmt.setDouble(9, 0);
+            pstmt.setString(10, CollectionManager.getMusicBandOwners().get(key));
 
-            logger.info("Добавлен элемент: {}", musicBand);
+            logger.info("В базу данных добавлен элемент: {}", musicBand);
 
             /*
             String sqlId = "SELECT id FROM music_band WHERE key=?";
@@ -99,7 +106,7 @@ public class DatabaseManager {
             rs.next();
             generatedId = rs.getLong(1);
              */
-            return musicBand.getId();
+            //return musicBand.getId();
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при добавлении элемента {}\n Текст ошибки: {}", musicBand, e.getMessage());
             throw new DatabaseException("Произошла ошибка при добавлении элемента " + musicBand);

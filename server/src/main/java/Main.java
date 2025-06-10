@@ -33,7 +33,7 @@ public class Main {
         CommandManager commandManager = CommandManager.getCommandManager();
         CollectionManager collectionManager = CollectionManager.getCollectionManager();
 
-        CollectionManager.setCollection(DatabaseManager.getCollection());
+        DatabaseManager.getCollection();
 
         CommandManager.newCommand(new Help());
         CommandManager.newCommand(new Info());
@@ -50,6 +50,7 @@ public class Main {
         CommandManager.newCommand(new RemoveAllByNumberOfParticipants());
         CommandManager.newCommand(new RemoveAnyByBestAlbum());
         CommandManager.newCommand(new PrintFieldDescendingNumberOfParticipants());
+        CommandManager.newCommand(new ShowWithOwners());
 
         CommandManager.newServerCommand(new ServerSave());
 
