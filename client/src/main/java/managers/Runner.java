@@ -4,6 +4,9 @@ import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
 import connection.requests.AuthenticationRequest;
+import connection.responses.CompositeResponse;
+import connection.responses.IdListResponse;
+import connection.responses.KeyListResponse;
 import exceptions.*;
 import connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
@@ -245,18 +248,15 @@ public class Runner {
         return strings;
     }
 
-    public CommandResponse formCommandResponse(String[] userCommand, String[] strings)
+    public void formCommandResponse(String[] userCommand, String[] strings)
             throws IOException, ClassNotFoundException, ServerIsNotAvailableException {
-        CommandResponse commandResponse;
         if (clientCommands.containsKey(userCommand[0])) {
-            commandResponse = executeClientCommand(clientCommands.get(userCommand[0]), strings);
+            executeClientCommand(clientCommands.get(userCommand[0]), strings);
         } else {
             CommandRequest request = client.formCommandRequest(strings);
             byte[] dataToSend = client.serializeData(request);
             sendData(dataToSend);
-            commandResponse = readData();
         }
-        return commandResponse;
     }
 
     public <T> T readData() throws IOException, ClassNotFoundException {
@@ -345,11 +345,16 @@ public class Runner {
             Command command = checkCommand(userCommand);
             ArrayList<byte[]> arguments = askArguments(command);
             String[] strings = combineCommandResponseStrings(userCommand, arguments);
-            CommandResponse commandResponse = formCommandResponse(strings, strings);
-            analyzeCommandResponse(commandResponse, userCommand);
+            //CompositeResponse compositeResponse
+            formCommandResponse(strings, strings);
+            CompositeResponse compositeResponse = client.getCompositeResponse();
+            CommandResponse commandResponse = compositeResponse.getCommandResponse();
+            KeyListResponse keyListResponse = compositeResponse.getKeyList();
+            IdListResponse idListResponse = compositeResponse.getIdList();
 
-            this.keyList = client.getKeyList();
-            this.idList = client.getIdList();
+            analyzeCommandResponse(commandResponse, userCommand);
+            this.keyList = keyListResponse.getKeyList();
+            this.idList = idListResponse.getIdList();
         } catch (IOException e) {
             throw new ServerIsNotAvailableException("Произошла ошибка при получении ответа от сервера.\nСервер временно недоступен.");
         } catch (ClassNotFoundException e) {

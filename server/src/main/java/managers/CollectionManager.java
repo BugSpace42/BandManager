@@ -1,20 +1,26 @@
 package main.java.managers;
 
 import entity.MusicBand;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.Date;
 
 /**
  * Класс, который оперирует коллекцией.
  * @author Alina
  */
 public class CollectionManager {
-    private static CollectionManager collectionManager;
-    private static HashMap<Integer, MusicBand> collection = new HashMap<>();
+    private static CollectionManager instance;
+    private static HashMap<Integer, MusicBand> collection;
     private static HashMap<Integer, String> musicBandOwners = new HashMap<>();
     private static Date initDate;
 
-    private CollectionManager() {}
+    private CollectionManager() {
+        collection = new HashMap<>();
+        initDate = new Date();
+    }
 
     /**
      * Метод, использующийся для получения CollectionManager.
@@ -22,25 +28,70 @@ public class CollectionManager {
      * @return collectionManager
      */
     public static CollectionManager getCollectionManager() {
-        if (collectionManager == null) {
-            collectionManager = new CollectionManager();
-            initDate = new Date();
+        if (instance == null) {
+            instance = new CollectionManager();
         }
-        return collectionManager;
+        return instance;
     }
 
     /**
-    * @return коллекция
-    */
-    public static HashMap<Integer, MusicBand> getCollection() {
-        return collection;
-    }
-
-    /**
-     * @return коллекция c информацией о владельцах записей о музыкальных группах
+     * @return коллекция
      */
-    public static HashMap<Integer, String> getMusicBandOwners() {
-        return musicBandOwners;
+    public static HashMap<Integer, MusicBand> getCollection() {
+        synchronized (collection) {
+            return new HashMap<>(collection);
+        }
+    }
+
+    /**
+     * Добавляет элемент в коллекцию.
+     * @param key ключ музыкальной группы
+     * @param musicBand добавляемый объект
+     */
+    public static void add(Integer key, MusicBand musicBand) {
+        synchronized (collection) {
+            collection.put(key, musicBand);
+        }
+    }
+
+    public void addToCollection(Integer key, MusicBand musicBand) {
+        synchronized (collection) {
+            collection.put(key, musicBand);
+        }
+    }
+
+    public void addOwnerToCollection(Integer key, String owner) {
+        synchronized (musicBandOwners) {
+            musicBandOwners.put(key, owner);
+        }
+    }
+
+    /**
+     * Удаляет элемент из коллекции по его ключу.
+     * @param key ключ элемента, который нужно удалить
+     */
+    public static void remove(Integer key) {
+        synchronized (collection) {
+            collection.remove(key);
+        }
+    }
+
+    public void removeByKey(Integer key) {
+        synchronized (collection) {
+            synchronized (musicBandOwners) {
+                collection.remove(key);
+                musicBandOwners.remove(key);
+            }
+        }
+    }
+
+    /**
+     * Очищает коллекцию.
+     */
+    public static void clear() {
+        synchronized (collection) {
+            collection.clear();
+        }
     }
 
     /**
@@ -49,10 +100,12 @@ public class CollectionManager {
      * @return элемент коллекции
      */
     public MusicBand getById(Long id) {
-        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-          if (entry.getValue().getId().equals(id)) return entry.getValue();
+        synchronized (collection) {
+            for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+                if (entry.getValue().getId().equals(id)) return entry.getValue();
+            }
+            return null;
         }
-        return null;
     }
 
     /**
@@ -61,28 +114,12 @@ public class CollectionManager {
      * @return ключ элемента коллекции
      */
     public Integer getKeyById(Long id) {
-        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-            if (entry.getValue().getId().equals(id)) return entry.getKey();
+        synchronized (collection) {
+            for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+                if (entry.getValue().getId().equals(id)) return entry.getKey();
+            }
+            return null;
         }
-        return null;
-    }
-
-    /**
-     * Добавляет элемент в коллекцию.
-     * @param key ключ музыкальной группы
-     * @param musicBand добавляемый объект
-     */
-    public void addToCollection(Integer key, MusicBand musicBand) {
-        collection.put(key, musicBand);
-    }
-
-    /**
-     * Добавляет в коллекцию информацию о владельце записи о музыкальной группы.
-     * @param key ключ записи
-     * @param owner имя пользователя-владельца
-     */
-    public void addOwnerToCollection(Integer key, String owner) {
-        musicBandOwners.put(key, owner);
     }
 
     /**
@@ -91,26 +128,11 @@ public class CollectionManager {
      * @param musicBand новое значение элемента
      */
     public void updateElementById(Long id, MusicBand musicBand) {
-        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-            if (entry.getValue().getId().equals(id)) collection.put(entry.getKey(), musicBand);
+        synchronized (collection) {
+            for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+                if (entry.getValue().getId().equals(id)) collection.put(entry.getKey(), musicBand);
+            }
         }
-    }
-
-    /**
-     * Удаляет элемент из коллекции по его ключу.
-     * @param key ключ элемента, который нужно удалить
-     */
-    public void removeByKey(Integer key) {
-        collection.remove(key);
-        musicBandOwners.remove(key);
-    }
-
-    /**
-     * Очищает коллекцию.
-     */
-    public void clearCollection() {
-        collection.clear();
-        musicBandOwners.clear();
     }
 
     /**
@@ -119,18 +141,16 @@ public class CollectionManager {
      * @return true, если элемент с заданным ключом содержится в коллекции, false - иначе
      */
     public boolean containsKey(Integer key) {
-        return collection.containsKey(key);
+        synchronized (collection) {
+            return collection.containsKey(key);
+        }
     }
 
-    /**
-     * Проверяет, является ли пользователь владельцем записи о музыкальной группе.
-     * @param owner имя пользователя
-     * @param key ключ записи
-     * @return true, если пользователь является владельцем записи о музыкальной группе, false - иначе
-     */
     public static boolean checkOwner(String owner, Integer key) {
-        if (musicBandOwners.containsKey(key)) {
-            return musicBandOwners.get(key).equals(owner);
+        synchronized (musicBandOwners) {
+            if (musicBandOwners.containsKey(key)) {
+                return musicBandOwners.get(key).equals(owner);
+            }
         }
         return false;
     }
@@ -148,11 +168,11 @@ public class CollectionManager {
      * @return список id существующих элементов коллекции
      */
     public static List<Long> getIdList() {
-        ArrayList<Long> idList = new ArrayList<>();
-        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-            idList.add(entry.getValue().getId());
+        synchronized (collection) {
+            return collection.values().stream()
+                    .map(MusicBand::getId)
+                    .collect(Collectors.toList());
         }
-        return idList;
     }
 
     /**
@@ -160,23 +180,30 @@ public class CollectionManager {
      * @return список ключей существующих элементов коллекции
      */
     public static List<Integer> getKeyList() {
-        List<Integer> keyList = new ArrayList<>();
-        for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
-            keyList.add(entry.getKey());
+        synchronized (collection) {
+            return collection.keySet().stream().collect(Collectors.toList());
         }
-        return keyList;
     }
 
     /**
      * Задаёт новое значение полю коллекции.
-     * @param collection новая коллекция.
      */
-    public static void setCollection(HashMap<Integer, MusicBand> collection) {
-        CollectionManager.collection = collection;
+    public static void setCollection(HashMap<Integer, MusicBand> newCollection) {
+        synchronized (collection) {
+            collection = newCollection;
+        }
     }
 
     public static void setMusicBandOwners(HashMap<Integer, String> musicBandOwners) {
-        CollectionManager.musicBandOwners = musicBandOwners;
+        synchronized (musicBandOwners) {
+            CollectionManager.musicBandOwners = musicBandOwners;
+        }
+    }
+
+    public static HashMap<Integer, String> getMusicBandOwners() {
+        synchronized (musicBandOwners) {
+            return new HashMap<>(CollectionManager.musicBandOwners);
+        }
     }
 
     /**
@@ -185,15 +212,13 @@ public class CollectionManager {
      */
     @Override
     public String toString() {
-        String info = "";
-        for (Map.Entry<Integer, MusicBand> elem : collection.entrySet()) {
-            info += "Элемент коллекции с ключом " + elem.getKey() + ":\n";
-            info += elem.getValue();
-            info += "\n";
+        synchronized (collection) {
+            StringBuilder info = new StringBuilder();
+            for (Map.Entry<Integer, MusicBand> elem : collection.entrySet()) {
+                info.append("Элемент коллекции с ключом ").append(elem.getKey()).append(":\n");
+                info.append(elem.getValue());
+            }
+            return info.toString();
         }
-        if (info.length() > 0) {
-            info = info.substring(0, info.length()-1);
-        }
-        return info;
     }
 }

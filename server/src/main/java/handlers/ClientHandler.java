@@ -10,6 +10,7 @@ import connection.responses.*;
 import main.java.connection.AbstractTCPServer;
 import main.java.managers.AuthenticationManager;
 import main.java.managers.CommandManager;
+import main.java.managers.ThreadPoolManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class ClientHandler implements Runnable {
     private final AbstractTCPServer server;
@@ -24,11 +27,13 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private boolean connection = false;
     private static final Logger logger = LogManager.getLogger(ClientHandler.class);
+    private final ThreadPoolManager threadPoolManager;
 
     public ClientHandler(AbstractTCPServer server, Socket socket) {
         this.server = server;
         this.socket = socket;
         this.authenticationManager = new AuthenticationManager(this);
+        this.threadPoolManager = ThreadPoolManager.getInstance();
     }
 
     public void sendCommands() {
@@ -40,6 +45,23 @@ public class ClientHandler implements Runnable {
             logger.info("Информация о доступных командах отправлена клиенту.");
         } catch (IOException e) {
             logger.error("Ошибка при отправке клиенту данных о доступных командах.", e);
+            stop();
+        }
+    }
+
+    public void sendCompositeResponse(Report report) {
+        try {
+            CommandResponse commandResponse = server.formCommandResponse(report);
+            KeyListResponse keyListResponse = server.formKeyListResponse();
+            IdListResponse idListResponse = server.formIdListResponse();
+
+            CompositeResponse compositeResponse = new CompositeResponse(commandResponse, keyListResponse, idListResponse);
+            byte[] data = server.serializeResponse(compositeResponse);
+            server.sendData(socket, data);
+            logger.info("Информация о результате выполнения команды, о ключах элементов " +
+                    "и об id элементов коллекции отправлена клиенту.");
+        } catch (IOException e) {
+            logger.error("Ошибка при отправке клиенту данных.", e);
             stop();
         }
     }
@@ -137,7 +159,16 @@ public class ClientHandler implements Runnable {
     public Report getReport(CommandRequest request) {
         Report report = null;
         try {
-            report = server.handleRequest(request);
+            CompletableFuture<Report> future = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return server.handleRequest(request);
+                } catch (Exception e) {
+                    logger.error("Error processing request", e);
+                    return null;
+                }
+            }, threadPoolManager.getRequestProcessorPool());
+
+            report = future.get();
             logger.info("Данные клиента обработаны.");
         } catch (Exception e) {
             logger.error("Ошибка при обработке данных клиента", e);
@@ -171,13 +202,15 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendData(byte[] data) {
-        try {
-            server.sendData(socket, data);
-            logger.info("Данные отправлены клиенту");
-        } catch (IOException e) {
-            logger.error("Ошибка при отправке данных клиенту", e);
-            stop();
-        }
+        threadPoolManager.getResponseSenderPool().submit(() -> {
+            try {
+                server.sendData(socket, data);
+                logger.info("Данные отправлены клиенту");
+            } catch (IOException e) {
+                logger.error("Ошибка при отправке данных клиенту", e);
+                stop();
+            }
+        });
     }
 
     public void run() {
@@ -185,19 +218,29 @@ public class ClientHandler implements Runnable {
             connection = true;
             start();
             while (connection) {
-                CommandRequest request = receiveUserRequest();
-                Report report = getReport(request);
-                CommandResponse commandResponse = getCommandResponse(report);
-                byte[] responseData = serializeResponse(commandResponse);
-                sendData(responseData);
-                sendKeyList();
-                sendIdList();
+                CompletableFuture<CommandRequest> requestFuture = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return receiveUserRequest();
+                    } catch (Exception e) {
+                        logger.error("Error receiving request", e);
+                        return null;
+                    }
+                }, threadPoolManager.getRequestReaderPool());
+
+                CommandRequest request = requestFuture.get();
+                if (request != null) {
+                    Report report = getReport(request);
+                    //CommandResponse commandResponse = getCommandResponse(report);
+                    //byte[] responseData = serializeResponse(commandResponse);
+                    sendCompositeResponse(report);
+                    /*sendData(responseData);
+                    sendKeyList();
+                    sendIdList();*/
+                }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Непредвиденная ошибка.", e);
-        }
-        finally {
+        } finally {
             stop();
         }
     }

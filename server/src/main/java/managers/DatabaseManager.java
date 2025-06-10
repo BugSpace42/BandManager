@@ -18,7 +18,7 @@ public class DatabaseManager {
     private static final String user = "s409478";
     private static final String password = "KLJNrXjJbVh9iVTm";
     private static Connection connection;
-    private static final Logger logger = LogManager.getLogger(AbstractTCPServer.class);
+    private static final Logger logger = LogManager.getLogger(DatabaseManager.class);
 
     public static void connect() {
         try {
@@ -94,6 +94,9 @@ public class DatabaseManager {
             if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
             else pstmt.setDouble(9, 0);
             pstmt.setString(10, CollectionManager.getMusicBandOwners().get(key));
+
+            int num = pstmt.executeUpdate();
+            logger.info("Добавлено {} строк", num);
 
             logger.info("В базу данных добавлен элемент: {}", musicBand);
 

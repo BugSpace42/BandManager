@@ -51,6 +51,7 @@ public class Insert extends ExecutableCommand {
                 collectionManager.addToCollection(key, newMusicBand);
                 */
                 DatabaseManager.addMusicBand(key, musicBand);
+                CollectionManager.add(key, musicBand);
                 collectionManager.addOwnerToCollection(key, args[3]);
                 String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
                 report = new Report(ExitCode.OK.code, null, message);

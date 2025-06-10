@@ -7,6 +7,7 @@ import main.java.handlers.ClientHandler;
 import main.java.managers.CollectionManager;
 import main.java.managers.CommandManager;
 import main.java.managers.CommandRequestManager;
+import main.java.managers.ThreadPoolManager;
 import commands.Command;
 import commands.Report;
 
@@ -25,6 +26,7 @@ public abstract class AbstractTCPServer {
     private final ServerSocket serverSocket;
     private final String loginAdmin;
     private final String passwordAdmin;
+    private final ThreadPoolManager threadPoolManager;
 
     private boolean running = false;
 
@@ -33,6 +35,7 @@ public abstract class AbstractTCPServer {
         this.serverSocket = new ServerSocket(port);
         this.loginAdmin = "admin";
         this.passwordAdmin = "admin";
+        this.threadPoolManager = ThreadPoolManager.getInstance();
     }
 
     public <T> T receiveObject(Socket socket) throws IOException, ClassNotFoundException {
@@ -51,7 +54,7 @@ public abstract class AbstractTCPServer {
         logger.info("Данные успешно считаны");
 
         try (ByteArrayInputStream bais = new ByteArrayInputStream(dataBytes);
-            ObjectInputStream ois = new ObjectInputStream(bais)) {
+             ObjectInputStream ois = new ObjectInputStream(bais)) {
             return (T) ois.readObject();
         }
     }
@@ -110,6 +113,7 @@ public abstract class AbstractTCPServer {
         saveCollection();
         try {
             serverSocket.close();
+            threadPoolManager.shutdown();
             logger.info("Сервер успешно закрыт.");
         } catch (IOException e) {
             logger.error("Ошибка при закрытии сервера", e);

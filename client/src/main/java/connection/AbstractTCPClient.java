@@ -1,7 +1,9 @@
 package main.java.connection;
 
+import commands.Report;
 import connection.requests.CommandRequest;
 import connection.requests.Request;
+import connection.responses.CompositeResponse;
 import connection.responses.IdListResponse;
 import connection.responses.KeyListResponse;
 import connection.responses.CommandMapResponse;
@@ -116,6 +118,27 @@ public abstract class AbstractTCPClient {
             logger.error("При отправлении данных на сервер произошла ошибка: {}", e.getMessage());
             throw new ServerIsNotAvailableException("При отправлении данных на сервер произошла ошибка.\n" +
                     "Сервер временно недоступен.");
+        }
+    }
+
+    public CompositeResponse getCompositeResponse() throws IOException, ClassNotFoundException {
+        // Ждем, пока канал не станет готов к чтению
+        while (true) {
+            int readyChannels = selector.select(); // блокирует до события
+            if (readyChannels == 0) continue; // если ничего не готово, повторяем
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+            while (keyIterator.hasNext()) {
+                SelectionKey selKey = keyIterator.next();
+                if (selKey.isReadable()) {
+                    // Канал готов к чтению
+                    CompositeResponse response = receiveAndDeserialize(channel);
+                    keyIterator.remove(); // удаляем обработанный ключ
+                    return response;
+                }
+            }
         }
     }
 
