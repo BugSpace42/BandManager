@@ -5,7 +5,6 @@ import entity.Coordinates;
 import entity.MusicBand;
 import entity.MusicGenre;
 import exceptions.DatabaseException;
-import main.java.connection.AbstractTCPServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -74,7 +73,6 @@ public class DatabaseManager {
      * Добавляет объект класса MusicBand в коллекцию
      * @param key ключ, по которому нужно добавить элемент
      * @param musicBand элемент, который нужно добавить
-     * @return id добавленного элемента
      * @throws DatabaseException исключение
      */
     public static void addMusicBand(Integer key, MusicBand musicBand, String owner) throws DatabaseException {
@@ -91,8 +89,7 @@ public class DatabaseManager {
             pstmt.setInt(6, musicBand.getNumberOfParticipants());
             pstmt.setString(7, musicBand.getGenre() != null ? musicBand.getGenre().name() : null);
             pstmt.setString(8, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
-            if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
-            else pstmt.setDouble(9, 0);
+            pstmt.setDouble(9, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getSales() : 0);
             pstmt.setString(10, owner);
 
             int num = pstmt.executeUpdate();
@@ -120,8 +117,7 @@ public class DatabaseManager {
             pstmt.setInt(4, musicBand.getNumberOfParticipants());
             pstmt.setString(5, musicBand.getGenre() != null ? musicBand.getGenre().name() : null);
             pstmt.setString(6, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
-            if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
-            else pstmt.setDouble(7, 0);
+            pstmt.setDouble(7, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getSales() : 0);
             pstmt.setLong(8, id);
 
             int num = pstmt.executeUpdate();
@@ -150,8 +146,7 @@ public class DatabaseManager {
             pstmt.setInt(4, musicBand.getNumberOfParticipants());
             pstmt.setString(5, musicBand.getGenre() != null ? musicBand.getGenre().name() : null);
             pstmt.setString(6, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
-            if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
-            else pstmt.setDouble(7, 0);
+            pstmt.setDouble(7, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getSales() : 0);
             pstmt.setLong(8, key);
 
             int num = pstmt.executeUpdate();
