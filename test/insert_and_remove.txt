@@ -1,0 +1,15 @@
+show
+info
+insert 1234567
+234567
+34567
+4567
+567
+jazz
+67
+7
+show
+info
+remove_key 1
+remove_key 123
+remove_key 1234567

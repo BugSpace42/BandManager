@@ -49,7 +49,8 @@ public class AuthenticationManager {
                     return true;
                 }
                 else {
-                    throw new AuthenticationException("Возникла проблема с регистрацией нового пользователя.");
+                    throw new AuthenticationException("Возникла проблема с регистрацией нового пользователя: " +
+                            "Пользователь с логином " + authenticationRequest.getUsername() + " уже существует.");
                 }
             } else {
                 throw new AuthenticationException("Неизвестная команда аутентификации.");
