@@ -54,6 +54,11 @@ public class CollectionManager {
         }
     }
 
+    /**
+     * Добавляет информацию о владельце записи в коллекции.
+     * @param key ключ записи
+     * @param owner логин владельца записи
+     */
     public static void addOwnerToCollection(Integer key, String owner) {
         synchronized (musicBandOwners) {
             musicBandOwners.put(key, owner);
@@ -153,7 +158,7 @@ public class CollectionManager {
     public static boolean checkOwner(String owner, Integer key) {
         synchronized (musicBandOwners) {
             if (musicBandOwners.containsKey(key)) {
-                return musicBandOwners.get(key).equals(owner);
+                return owner.equals(musicBandOwners.get(key));
             }
         }
         return false;

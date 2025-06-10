@@ -27,7 +27,7 @@ public class Exit extends ExecutableCommand {
         try {
             report = new Report(ExitCode.EXIT.code, null, null);
         } catch (Exception e) {
-            String errorString = "Непредвиденная ошибка!";
+            String errorString = "Непредвиденная ошибка: " + e.getMessage();
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         }
         return report;

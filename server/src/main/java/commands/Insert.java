@@ -44,7 +44,7 @@ public class Insert extends ExecutableCommand {
             else {
                 DatabaseManager.addMusicBand(key, musicBand, args[3]);
                 CollectionManager.addToCollection(key, musicBand);
-                collectionManager.addOwnerToCollection(key, args[3]);
+                CollectionManager.addOwnerToCollection(key, args[3]);
                 String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
                 report = new Report(ExitCode.OK.code, null, message);
             }
@@ -52,7 +52,7 @@ public class Insert extends ExecutableCommand {
             String errorString = "Ошибка при добавлении элемента в базу данных.";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
-            String errorString = "Непредвиденная ошибка!";
+            String errorString = "Непредвиденная ошибка: " + e.getMessage();
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         }
         return report;

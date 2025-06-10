@@ -42,7 +42,7 @@ public class History extends ExecutableCommand {
             }
             report = new Report(ExitCode.OK.code, null, historyString);
         } catch (Exception e) {
-            String errorString = "Непредвиденная ошибка!";
+            String errorString = "Непредвиденная ошибка: " + e.getMessage();
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         }
         return report;

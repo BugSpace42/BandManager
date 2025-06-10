@@ -82,7 +82,7 @@ public class RemoveGreater extends ExecutableCommand {
             String errorString = "Ошибка при удалении элемента в базе данных.";
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         } catch (Exception e) {
-            String errorString = "Непредвиденная ошибка!";
+            String errorString = "Непредвиденная ошибка: " + e.getMessage();
             report = new Report(ExitCode.ERROR.code, e.getMessage(), errorString);
         }
         return report;
