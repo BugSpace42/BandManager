@@ -4,17 +4,16 @@ import commands.Command;
 import commands.ExecutableCommand;
 import commands.Report;
 import connection.requests.AuthenticationRequest;
-import connection.responses.CompositeResponse;
-import connection.responses.IdListResponse;
-import connection.responses.KeyListResponse;
+import connection.responses.*;
 import exceptions.*;
 import connection.SSHPortForwarding;
 import main.java.connection.TCPClient;
 import connection.requests.CommandRequest;
-import connection.responses.CommandResponse;
 import main.java.exceptions.AskingArgumentsException;
 import main.java.exceptions.CanceledCommandException;
 import main.java.exceptions.ServerIsNotAvailableException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import utility.*;
 import main.java.utility.validators.TypeValidator;
 import main.java.utility.entityaskers.*;
@@ -50,6 +49,8 @@ public class Runner {
     private Selector selector;
     private SelectionKey keyWrite;
     private SelectionKey keyRead;
+
+    private static final Logger logger = LogManager.getLogger(Runner.class);
 
     /**
      * Перечисление режимов работы программы.
@@ -124,9 +125,17 @@ public class Runner {
         }
 
         this.addr = client.getSocketAddress();
-        this.commands = client.getCommandMap();
-        this.keyList = client.getKeyList();
-        this.idList = client.getIdList();
+
+        StartInfoResponse startInfoResponse = client.getResponse();
+        this.commands = startInfoResponse.getCommandMapResponse().getCommandMap();
+        this.keyList = startInfoResponse.getKeyList().getKeyList();
+        this.idList = startInfoResponse.getIdList().getIdList();
+
+
+        // this.commands = client.getCommandMap();
+        // this.keyList = client.getKeyList();
+        // this.idList = client.getIdList();
+
         Long maxId = 0L;
         for (Long id : idList) {
             if (id > maxId) {
@@ -134,6 +143,7 @@ public class Runner {
             }
         }
         MusicBandBuilder.setCurrentId(maxId + 1);
+
         this.running = true;
         this.currentMode = RunningMode.INTERACTIVE;
         this.scripts = new HashSet<>();
@@ -384,6 +394,7 @@ public class Runner {
         try {
             start();
         } catch (IOException | ClassNotFoundException | ServerIsNotAvailableException e) {
+            logger.error("Произошла ошибка во время начала работы с сервером.", e);
             ConsoleManager.printError("Произошла ошибка во время начала работы с сервером.");
             ConsoleManager.printError("Завершение работы приложения.");
             stop();

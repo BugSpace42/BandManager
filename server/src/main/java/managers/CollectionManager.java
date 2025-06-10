@@ -136,6 +136,19 @@ public class CollectionManager {
     }
 
     /**
+     * Обновляет элемент коллекции, id которого равен заданному.
+     * @param key ключ элемента, значение которого нужно обновить
+     * @param musicBand новое значение элемента
+     */
+    public void updateElementByKey(Integer key, MusicBand musicBand) {
+        synchronized (collection) {
+            for (HashMap.Entry<Integer, MusicBand> entry : collection.entrySet()) {
+                if (entry.getKey().equals(key)) collection.put(entry.getKey(), musicBand);
+            }
+        }
+    }
+
+    /**
      * Проверяет наличие элемента с заданным ключом в коллекции
      * @param key ключ элемента, наличие которого нужно проверить
      * @return true, если элемент с заданным ключом содержится в коллекции, false - иначе

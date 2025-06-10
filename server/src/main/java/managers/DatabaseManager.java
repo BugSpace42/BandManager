@@ -96,20 +96,12 @@ public class DatabaseManager {
             pstmt.setString(10, CollectionManager.getMusicBandOwners().get(key));
 
             int num = pstmt.executeUpdate();
-            logger.info("Добавлено {} строк", num);
-
-            logger.info("В базу данных добавлен элемент: {}", musicBand);
-
-            /*
-            String sqlId = "SELECT id FROM music_band WHERE key=?";
-            PreparedStatement pstmtId = connection.prepareStatement(sqlId);
-            pstmtId.setLong(1, key);
-            ResultSet rs = pstmtId.executeQuery();
-            Long generatedId = null;
-            rs.next();
-            generatedId = rs.getLong(1);
-             */
-            //return musicBand.getId();
+            logger.info("В базу данных добавлено {} строк", num);
+            if (num > 0) {
+                logger.info("В базу данных добавлен элемент: {}", musicBand);
+            } else {
+                throw new DatabaseException("Не удалось добавить элемент в базу данных.");
+            }
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при добавлении элемента {}\n Текст ошибки: {}", musicBand, e.getMessage());
             throw new DatabaseException("Произошла ошибка при добавлении элемента " + musicBand);
@@ -132,8 +124,13 @@ public class DatabaseManager {
             else pstmt.setDouble(7, 0);
             pstmt.setLong(8, id);
 
-            pstmt.executeUpdate();
-            logger.info("Значение элемента с id {} обновлено на: {}", id, musicBand);
+            int num = pstmt.executeUpdate();
+            logger.info("В базе данных изменено {} строк", num);
+            if (num > 0) {
+                logger.info("Значение элемента с id {} обновлено на: {}", id, musicBand);
+            } else {
+                throw new DatabaseException("Не удалось изменить значение элемента в базе данных.");
+            }
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при обновлении значения элемента с id {}\n Текст ошибки: {}",
                     id, e.getMessage());
@@ -157,8 +154,13 @@ public class DatabaseManager {
             else pstmt.setDouble(7, 0);
             pstmt.setLong(8, key);
 
-            pstmt.executeUpdate();
-            logger.info("Значение элемента с ключом {} обновлено на: {}", key, musicBand);
+            int num = pstmt.executeUpdate();
+            logger.info("В базе данных изменено {} строк", num);
+            if (num > 0) {
+                logger.info("Значение элемента с ключом {} обновлено на: {}", key, musicBand);
+            } else {
+                throw new DatabaseException("Не удалось изменить значение элемента в базе данных.");
+            }
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при обновлении значения элемента с ключом {}\n Текст ошибки: {}",
                     key, e.getMessage());
@@ -172,8 +174,13 @@ public class DatabaseManager {
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, key);
 
-            pstmt.executeUpdate();
-            logger.info("Удалён элемент с ключом: {}", key);
+            int num = pstmt.executeUpdate();
+            logger.info("В базе данных изменено {} строк", num);
+            if (num > 0) {
+                logger.info("Удалён элемент с ключом: {}", key);
+            } else {
+                throw new DatabaseException("Не удалось удалить элемент из базы данных.");
+            }
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при удалении элемента с ключом {}\n Текст ошибки: {}", key, e.getMessage());
             throw new DatabaseException("Произошла ошибка при удалении элемента с ключом " + key);
@@ -186,8 +193,13 @@ public class DatabaseManager {
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setLong(1, id);
 
-            pstmt.executeUpdate();
-            logger.info("Удалён элемент с id: {}", id);
+            int num = pstmt.executeUpdate();
+            logger.info("В базе данных изменено {} строк", num);
+            if (num > 0) {
+                logger.info("Удалён элемент с id: {}", id);
+            } else {
+                throw new DatabaseException("Не удалось удалить элемент из базы данных.");
+            }
         } catch (SQLException e) {
             logger.warn("Произошла ошибка при удалении элемента с id {}\n Текст ошибки: {}", id, e.getMessage());
             throw new DatabaseException("Произошла ошибка при удалении элемента с id " + id);

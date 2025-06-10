@@ -55,7 +55,7 @@ public class ReplaceIfGreater extends ExecutableCommand {
                 String message;
                 if (newMusicBand.compareTo(currentMusicBand) > 0) {
                     DatabaseManager.updateMusicBandByKey(key, newMusicBand);
-                    collectionManager.addToCollection(key, newMusicBand);
+                    collectionManager.updateElementByKey(key, newMusicBand);
                     message = "Элемент с ключом " + key + " заменён на заданный.";
                 } else {
                     message = "Элемент с ключом " + key + " больше, чем заданный.\n" +

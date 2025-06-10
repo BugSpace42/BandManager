@@ -3,6 +3,7 @@ package main.java.commands;
 import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
+import main.java.managers.DatabaseManager;
 import main.java.utility.Commands;
 import utility.ExitCode;
 import commands.Report;
@@ -41,6 +42,7 @@ public class Clear extends ExecutableCommand {
                         throw new WrongUserException("Невозможно удалить элемент коллекции. " +
                                 "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
                     }
+                    DatabaseManager.removeMusicBandByKey(key);
                     collectionManager.removeByKey(key);
                     counter++;
                 } catch (WrongUserException e) {

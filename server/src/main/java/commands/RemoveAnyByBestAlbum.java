@@ -60,7 +60,7 @@ public class RemoveAnyByBestAlbum extends ExecutableCommand {
                                     "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
                         }
                         DatabaseManager.removeMusicBandByKey(key);
-                        CollectionManager.getCollection().remove(key);
+                        CollectionManager.remove(key);
                         isRemoved = true;
                         message = "Удалён элемент с ключом " + key;
                         report = new Report(ExitCode.OK.code, null, message);

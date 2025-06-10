@@ -49,6 +49,22 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public void sendStartInfo() {
+        try {
+            CommandMapResponse commandsMapResponse = server.formListOfCommandsResponse(CommandManager.getCommands());
+            KeyListResponse keyListResponse = server.formKeyListResponse();
+            IdListResponse idListResponse = server.formIdListResponse();
+
+            StartInfoResponse startInfoResponse = new StartInfoResponse(commandsMapResponse, keyListResponse, idListResponse);
+            byte[] data = server.serializeResponse(startInfoResponse);
+            server.sendData(socket, data);
+            logger.info("Информация, необходимая для начала работы, отправлена клиенту.");
+        } catch (IOException e) {
+            logger.error("Ошибка при отправке клиенту данных.", e);
+            stop();
+        }
+    }
+
     public void sendCompositeResponse(Report report) {
         try {
             CommandResponse commandResponse = server.formCommandResponse(report);
@@ -109,9 +125,7 @@ public class ClientHandler implements Runnable {
         while (! authenticated) {
             authenticated = authenticationManager.doAuthentication();
         }
-        sendCommands();
-        sendKeyList();
-        sendIdList();
+        sendStartInfo();
         logger.info("Произведены действия для начала работы с клиентом.");
     }
 

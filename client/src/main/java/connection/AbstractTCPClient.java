@@ -3,10 +3,7 @@ package main.java.connection;
 import commands.Report;
 import connection.requests.CommandRequest;
 import connection.requests.Request;
-import connection.responses.CompositeResponse;
-import connection.responses.IdListResponse;
-import connection.responses.KeyListResponse;
-import connection.responses.CommandMapResponse;
+import connection.responses.*;
 import main.java.exceptions.ServerIsNotAvailableException;
 import main.java.managers.Runner;
 import org.apache.logging.log4j.LogManager;
@@ -162,6 +159,29 @@ public abstract class AbstractTCPClient {
                     logger.info("Получен список команд от сервера: " + commands.size() + " команд.");
                     keyIterator.remove(); // удаляем обработанный ключ
                     return commands;
+                }
+                keyIterator.remove(); // удаляем обработанный ключ
+            }
+        }
+    }
+
+    public <T extends Response> T getResponse() throws IOException, ClassNotFoundException {
+        // Ждем, пока канал не станет готов к чтению
+        while (true) {
+            int readyChannels = selector.select(); // блокирует до события
+            if (readyChannels == 0) continue; // если ничего не готово, повторяем
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+            while (keyIterator.hasNext()) {
+                SelectionKey selKey = keyIterator.next();
+                if (selKey.isReadable()) {
+                    // Канал готов к чтению
+                    T response = receiveAndDeserialize(channel);
+                    logger.info("Получен ответ от сервера.");
+                    keyIterator.remove(); // удаляем обработанный ключ
+                    return response;
                 }
                 keyIterator.remove(); // удаляем обработанный ключ
             }
