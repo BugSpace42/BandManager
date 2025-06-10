@@ -5,7 +5,7 @@
     <file url="file://$PROJECT_DIR$/server/src/main/resources/create_table.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/server/src/main/resources/db" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/server/src/main/resources/insert_values.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/server/src/main/resources/select_mb.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/server/src/main/resources/select_music_band.sql" dialect="PostgreSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>
 </project>

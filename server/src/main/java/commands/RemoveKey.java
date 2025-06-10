@@ -43,7 +43,7 @@ public class RemoveKey extends ExecutableCommand {
                             "Операцию совершает не владелец элемента. Владелец элемента: " + owner);
                 }
                 DatabaseManager.removeMusicBandByKey(key);
-                CollectionManager.remove(key);
+                CollectionManager.removeByKey(key);
                 message = "Элемент с ключом " + key + " успешно удалён.";
                 report = new Report(ExitCode.OK.code, null, message);
             } else {

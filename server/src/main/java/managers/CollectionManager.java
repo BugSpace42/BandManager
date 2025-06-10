@@ -48,19 +48,13 @@ public class CollectionManager {
      * @param key ключ музыкальной группы
      * @param musicBand добавляемый объект
      */
-    public static void add(Integer key, MusicBand musicBand) {
+    public static void addToCollection(Integer key, MusicBand musicBand) {
         synchronized (collection) {
             collection.put(key, musicBand);
         }
     }
 
-    public void addToCollection(Integer key, MusicBand musicBand) {
-        synchronized (collection) {
-            collection.put(key, musicBand);
-        }
-    }
-
-    public void addOwnerToCollection(Integer key, String owner) {
+    public static void addOwnerToCollection(Integer key, String owner) {
         synchronized (musicBandOwners) {
             musicBandOwners.put(key, owner);
         }
@@ -70,13 +64,7 @@ public class CollectionManager {
      * Удаляет элемент из коллекции по его ключу.
      * @param key ключ элемента, который нужно удалить
      */
-    public static void remove(Integer key) {
-        synchronized (collection) {
-            collection.remove(key);
-        }
-    }
-
-    public void removeByKey(Integer key) {
+    public static void removeByKey(Integer key) {
         synchronized (collection) {
             synchronized (musicBandOwners) {
                 collection.remove(key);
@@ -90,7 +78,10 @@ public class CollectionManager {
      */
     public static void clear() {
         synchronized (collection) {
-            collection.clear();
+            synchronized (musicBandOwners) {
+                collection.clear();
+                musicBandOwners.clear();
+            }
         }
     }
 

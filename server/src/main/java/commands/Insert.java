@@ -2,7 +2,6 @@ package main.java.commands;
 
 import entity.MusicBand;
 import exceptions.DatabaseException;
-import exceptions.WrongUserException;
 import main.java.managers.CollectionManager;
 import commands.ExecutableCommand;
 import main.java.managers.DatabaseManager;
@@ -43,15 +42,8 @@ public class Insert extends ExecutableCommand {
                 report = new Report(ExitCode.ERROR.code, errorString, errorString);
             }
             else {
-                /*
-                Long newId = DatabaseManager.addMusicBand(key, musicBand);
-                MusicBand newMusicBand = new MusicBand(newId, musicBand.getName(), musicBand.getCoordinates(),
-                        musicBand.getCreationDate(), musicBand.getNumberOfParticipants(), musicBand.getGenre(),
-                        musicBand.getBestAlbum());
-                collectionManager.addToCollection(key, newMusicBand);
-                */
-                DatabaseManager.addMusicBand(key, musicBand);
-                CollectionManager.add(key, musicBand);
+                DatabaseManager.addMusicBand(key, musicBand, args[3]);
+                CollectionManager.addToCollection(key, musicBand);
                 collectionManager.addOwnerToCollection(key, args[3]);
                 String message = "Элемент с ключом " + key + " успешно добавлен в коллекцию.";
                 report = new Report(ExitCode.OK.code, null, message);

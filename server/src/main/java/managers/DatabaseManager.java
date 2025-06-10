@@ -77,7 +77,7 @@ public class DatabaseManager {
      * @return id добавленного элемента
      * @throws DatabaseException исключение
      */
-    public static void addMusicBand(Integer key, MusicBand musicBand) throws DatabaseException {
+    public static void addMusicBand(Integer key, MusicBand musicBand, String owner) throws DatabaseException {
         String sql = "INSERT INTO music_band (key, name, coordinates_x, coordinates_y, creation_date, " +
                 "number_of_participants, genre, best_album_name, best_album_sales, owner_username) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -93,7 +93,7 @@ public class DatabaseManager {
             pstmt.setString(8, musicBand.getBestAlbum() != null ? musicBand.getBestAlbum().getName() : null);
             if (musicBand.getBestAlbum() != null) pstmt.setDouble(9, musicBand.getBestAlbum().getSales());
             else pstmt.setDouble(9, 0);
-            pstmt.setString(10, CollectionManager.getMusicBandOwners().get(key));
+            pstmt.setString(10, owner);
 
             int num = pstmt.executeUpdate();
             logger.info("В базу данных добавлено {} строк", num);
