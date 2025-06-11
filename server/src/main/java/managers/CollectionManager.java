@@ -1,11 +1,9 @@
 package main.java.managers;
 
 import entity.MusicBand;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Date;
 
 /**
  * Класс, который оперирует коллекцией.
@@ -155,6 +153,12 @@ public class CollectionManager {
         }
     }
 
+    /**
+     * Проверяет, является ли владельцем записи с ключом key пользователь с логином owner
+     * @param owner логин пользователя
+     * @param key ключ записи в коллекции
+     * @return true - если пользователь является владельцем записи, false - иначе
+     */
     public static boolean checkOwner(String owner, Integer key) {
         synchronized (musicBandOwners) {
             if (musicBandOwners.containsKey(key)) {
@@ -190,7 +194,7 @@ public class CollectionManager {
      */
     public static List<Integer> getKeyList() {
         synchronized (collection) {
-            return collection.keySet().stream().collect(Collectors.toList());
+            return new ArrayList<>(collection.keySet());
         }
     }
 
@@ -204,7 +208,7 @@ public class CollectionManager {
     }
 
     public static void setMusicBandOwners(HashMap<Integer, String> musicBandOwners) {
-        synchronized (musicBandOwners) {
+        synchronized (CollectionManager.musicBandOwners) {
             CollectionManager.musicBandOwners = musicBandOwners;
         }
     }
