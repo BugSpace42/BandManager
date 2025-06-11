@@ -130,15 +130,17 @@ public class ClientHandler implements Runnable {
     public Report getReport(CommandRequest request) {
         Report report = null;
         try {
+            // Создаем асинхронную задачу
             CompletableFuture<Report> future = CompletableFuture.supplyAsync(() -> {
                 try {
                     return server.handleRequest(request);
                 } catch (Exception e) {
-                    logger.error("Error processing request", e);
+                    logger.error("Ошибка при обработке данных клиента", e);
                     return null;
                 }
-            }, threadPoolManager.getRequestProcessorPool());
+            }, threadPoolManager.getRequestProcessorPool()); // Запуск задачи в пуле потоков
 
+            // Получаем результат
             report = future.get();
             logger.info("Данные клиента обработаны.");
         } catch (Exception e) {
@@ -181,7 +183,7 @@ public class ClientHandler implements Runnable {
                     try {
                         return receiveUserRequest();
                     } catch (Exception e) {
-                        logger.error("Error receiving request", e);
+                        logger.error("Ошибка при получении запроса от клиента.", e);
                         return null;
                     }
                 }, threadPoolManager.getRequestReaderPool());
@@ -189,12 +191,7 @@ public class ClientHandler implements Runnable {
                 CommandRequest request = requestFuture.get();
                 if (request != null) {
                     Report report = getReport(request);
-                    //CommandResponse commandResponse = getCommandResponse(report);
-                    //byte[] responseData = serializeResponse(commandResponse);
                     sendCompositeResponse(report);
-                    /*sendData(responseData);
-                    sendKeyList();
-                    sendIdList();*/
                 }
             }
         } catch (Exception e) {
