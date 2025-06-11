@@ -1,25 +1,21 @@
 package main.java.managers;
 
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ThreadPoolManager {
     private static final int FIXED_POOL_SIZE = 10;
     private static final ThreadPoolManager instance = new ThreadPoolManager();
 
+    // Для многопоточного чтения запросов использовать Cached thread pool
     private final ExecutorService requestReaderPool;
+    // Для многопоточной обработки полученного запроса использовать ForkJoinPool
     private final ForkJoinPool requestProcessorPool;
+    // Для многопоточной отправки ответа использовать Fixed thread pool
     private final ExecutorService responseSenderPool;
 
     private ThreadPoolManager() {
-        // Cached thread pool for reading requests
         this.requestReaderPool = Executors.newCachedThreadPool();
-
-        // ForkJoinPool for processing requests
         this.requestProcessorPool = new ForkJoinPool();
-
-        // Fixed thread pool for sending responses
         this.responseSenderPool = Executors.newFixedThreadPool(FIXED_POOL_SIZE);
     }
 

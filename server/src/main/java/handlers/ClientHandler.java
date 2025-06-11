@@ -1,10 +1,8 @@
 package main.java.handlers;
 
-import commands.Command;
 import commands.Report;
 import connection.requests.AuthenticationRequest;
 import connection.requests.CommandRequest;
-import connection.requests.Request;
 import connection.requests.UserRequest;
 import connection.responses.*;
 import main.java.connection.AbstractTCPServer;
@@ -16,16 +14,14 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class ClientHandler implements Runnable {
     private final AbstractTCPServer server;
     private final AuthenticationManager authenticationManager;
     private final Socket socket;
-    private boolean connection = false;
+    private volatile boolean connection = false;
     private static final Logger logger = LogManager.getLogger(ClientHandler.class);
     private final ThreadPoolManager threadPoolManager;
 
@@ -34,19 +30,6 @@ public class ClientHandler implements Runnable {
         this.socket = socket;
         this.authenticationManager = new AuthenticationManager(this);
         this.threadPoolManager = ThreadPoolManager.getInstance();
-    }
-
-    public void sendCommands() {
-        try {
-            HashMap<String, Command> commands = CommandManager.getCommands();
-            CommandMapResponse commandsMapResponse = server.formListOfCommandsResponse(commands);
-            byte[] dataCommands = server.serializeResponse(commandsMapResponse);
-            server.sendData(socket, dataCommands);
-            logger.info("Информация о доступных командах отправлена клиенту.");
-        } catch (IOException e) {
-            logger.error("Ошибка при отправке клиенту данных о доступных командах.", e);
-            stop();
-        }
     }
 
     public void sendStartInfo() {
@@ -66,49 +49,23 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendCompositeResponse(Report report) {
-        try {
-            CommandResponse commandResponse = server.formCommandResponse(report);
-            KeyListResponse keyListResponse = server.formKeyListResponse();
-            IdListResponse idListResponse = server.formIdListResponse();
+        CommandResponse commandResponse = server.formCommandResponse(report);
+        KeyListResponse keyListResponse = server.formKeyListResponse();
+        IdListResponse idListResponse = server.formIdListResponse();
 
-            CompositeResponse compositeResponse = new CompositeResponse(commandResponse, keyListResponse, idListResponse);
-            byte[] data = server.serializeResponse(compositeResponse);
-            server.sendData(socket, data);
-            logger.info("Информация о результате выполнения команды, о ключах элементов " +
-                    "и об id элементов коллекции отправлена клиенту.");
-        } catch (IOException e) {
-            logger.error("Ошибка при отправке клиенту данных.", e);
-            stop();
-        }
-    }
-
-    public void sendKeyList() {
-        try {
-            KeyListResponse keyListResponse = server.formKeyListResponse();
-            byte[] dataKeys = server.serializeResponse(keyListResponse);
-            server.sendData(socket, dataKeys);
-            logger.info("Информация о ключах элементов коллекции отправлена клиенту.");
-        } catch (IOException e) {
-            logger.error("Ошибка при отправке клиенту информации о ключах элементов коллекции.", e);
-            stop();
-        }
-    }
-
-    public void sendIdList() {
-        try {
-            IdListResponse idListResponse = server.formIdListResponse();
-            byte[] dataId = server.serializeResponse(idListResponse);
-            server.sendData(socket, dataId);
-            logger.info("Информация о id элементов коллекции отправлена клиенту.");
-        } catch (IOException e) {
-            logger.error("Ошибка при отправке клиенту информации о id элементов коллекции.", e);
-            stop();
-        }
+        CompositeResponse compositeResponse = new CompositeResponse(commandResponse, keyListResponse, idListResponse);
+        byte[] data = server.serializeResponse(compositeResponse);
+        sendData(data);
+        logger.info("Информация о результате выполнения команды, о ключах элементов " +
+                "и об id элементов коллекции отправлена клиенту.");
     }
 
     public void closeSocket() {
         try {
-            socket.close();
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+                logger.info("Сокет закрыт успешно");
+            }
         } catch (IOException e) {
             logger.error("Ошибка при закрытии сокета.", e);
         }
@@ -189,18 +146,6 @@ public class ClientHandler implements Runnable {
             stop();
         }
         return report;
-    }
-
-    public CommandResponse getCommandResponse(Report report) {
-        CommandResponse commandResponse = null;
-        try {
-            commandResponse = server.formCommandResponse(report);
-            logger.info("Сформирован ответ клиенту");
-        } catch (Exception e) {
-            logger.error("Ошибка при формировании ответа клиенту", e);
-            stop();
-        }
-        return commandResponse;
     }
 
     public byte[] serializeResponse(Response response) {
